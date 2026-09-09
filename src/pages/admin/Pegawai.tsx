@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../contexts/AuthContext";
 import type { Divisi, Profile, Role } from "../../types/database";
 
 export default function Pegawai() {
+  const { profile: profileSaya } = useAuth();
   const [list, setList] = useState<Profile[]>([]);
+  const [menghapusId, setMenghapusId] = useState<string | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +84,24 @@ export default function Pegawai() {
     const { error } = await supabase.from("profiles").update({ aktif: !aktif }).eq("id", id);
     if (error) setError(error.message);
     else await muat();
+  }
+
+  async function hapusPegawai(p: Profile) {
+    const konfirmasi = confirm(
+      `Hapus "${p.nama}" (${p.email}) dari daftar pegawai?\n\n` +
+        `Ini hanya menghapus data pegawai di aplikasi — akun Google-nya di Supabase Auth ` +
+        `harus dihapus terpisah lewat dashboard Supabase kalau memang tidak dipakai lagi.\n\n` +
+        `Seluruh riwayat absensi pegawai ini juga akan ikut terhapus permanen. ` +
+        `Kalau hanya ingin menonaktifkan sementara, gunakan tombol "Aktif/Nonaktif" saja, jangan hapus.`
+    );
+    if (!konfirmasi) return;
+
+    setMenghapusId(p.id);
+    setError(null);
+    const { error } = await supabase.from("profiles").delete().eq("id", p.id);
+    if (error) setError(error.message);
+    else await muat();
+    setMenghapusId(null);
   }
 
   if (loading) return <Loading teks="Memuat pegawai..." />;
@@ -185,6 +206,15 @@ export default function Pegawai() {
                 <option value="user">Pegawai</option>
                 <option value="admin">Admin</option>
               </select>
+              {p.id !== profileSaya?.id && (
+                <button
+                  onClick={() => void hapusPegawai(p)}
+                  disabled={menghapusId === p.id}
+                  className="ml-auto rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 disabled:opacity-60"
+                >
+                  {menghapusId === p.id ? "Menghapus..." : "Hapus"}
+                </button>
+              )}
             </div>
           </div>
         ))}
