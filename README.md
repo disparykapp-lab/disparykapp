@@ -32,13 +32,19 @@ npm run dev
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
    - Login pertama akan ditolak ("belum didaftarkan") — itu wajar, karena `profiles` masih kosong.
-   - Di SQL Editor, cari id-nya lalu jadikan admin:
+   - Di SQL Editor, jadikan admin lewat email (matikan trigger `trg_proteksi_profil`
+     sementara — trigger ini menolak perubahan `role` yang tidak datang dari sesi
+     login, jadi query dari SQL Editor perlu bypass sesaat):
      ```sql
-     select id, email from auth.users where email = 'admin@email-asli.com';
+     alter table profiles disable trigger trg_proteksi_profil;
 
      insert into profiles (id, nama, email, role)
-     values ('<id-dari-atas>', 'Nama Admin', 'admin@email-asli.com', 'admin')
+     select id, 'Nama Admin', email, 'admin'
+     from auth.users
+     where email = 'admin@email-asli.com'
      on conflict (email) do update set id = excluded.id, role = 'admin';
+
+     alter table profiles enable trigger trg_proteksi_profil;
      ```
    - Login ulang di aplikasi — sekarang masuk sebagai admin.
    - Pegawai berikutnya **tidak perlu langkah SQL manual**: admin cukup mendaftarkan email mereka lewat *Kelola → Pegawai*, lalu pegawai tinggal "Masuk dengan Google". (Baris profil yang didaftarkan admin otomatis "diklaim" oleh akun Google yang cocok emailnya saat login pertama — lihat fungsi `klaim_profil()` di `0001_schema.sql`.)
