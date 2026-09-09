@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-masuk: #0e7c66;
+  --color-brand-masuk-dark: #0b6353;
+  --color-brand-pulang: #e4572e;
+  --color-brand-pulang-dark: #c34620;
+  --color-brand-info: #2563eb;
+  --color-brand-bg: #f7f8fa;
+  --color-brand-text: #1f2937;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
