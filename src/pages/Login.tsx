@@ -11,9 +11,11 @@ export default function Login() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-brand-bg px-6">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-masuk/10 text-3xl">
-          📍
-        </div>
+        <img
+          src="/logo-disparyk.png"
+          alt="Logo Dinas Pariwisata Kota Yogyakarta"
+          className="mx-auto mb-4 h-16 w-auto"
+        />
         <h1 className="text-xl font-bold text-brand-text">DisparYK</h1>
         <p className="mt-1 text-sm text-gray-500">
           Absensi &amp; Kalender Konten Dinas Pariwisata Kota Yogyakarta
