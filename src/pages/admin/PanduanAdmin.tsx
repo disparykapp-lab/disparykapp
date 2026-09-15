@@ -80,14 +80,6 @@ export default function PanduanAdmin() {
           status konten yang PIC-nya dirinya sendiri.
         </Langkah>
       </Bagian>
-
-      <Bagian judul="🔑 Bootstrap Admin Pertama (lewat SQL)">
-        <p className="text-sm text-gray-600">
-          Langkah ini hanya dipakai sekali di awal, lewat SQL Editor Supabase — detail lengkapnya
-          ada di file <code className="rounded bg-brand-bg px-1 py-0.5 text-xs">README.md</code>{" "}
-          di kode sumber aplikasi.
-        </p>
-      </Bagian>
     </div>
   );
 }
