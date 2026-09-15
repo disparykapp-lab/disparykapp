@@ -39,6 +39,16 @@ export default function PanduanAdmin() {
       <Bagian judul="🏷️ Kelola Divisi">
         <Langkah no={1}>Buka Kelola → Divisi untuk menambah, mengganti nama, atau menonaktifkan divisi/bidang.</Langkah>
         <Langkah no={2}>Divisi yang dinonaktifkan tidak akan muncul lagi di pilihan divisi pegawai baru.</Langkah>
+        <Langkah no={3}>
+          Tiap divisi punya checklist <strong>"Fitur"</strong> di bagian bawah kartunya — centang{" "}
+          <strong>"Kalender Konten"</strong> untuk mengizinkan semua pegawai di divisi itu memakai
+          menu Kalender Konten. Contoh: centang untuk divisi Pemasaran kalau merekalah yang
+          mengurus media sosial.
+        </Langkah>
+        <Catatan>
+          Admin selalu bisa memakai Kalender Konten apa pun centangan divisinya. Pegawai biasa
+          hanya melihat menu "Kalender" di navigasi bawah kalau divisinya sudah dicentang.
+        </Catatan>
       </Bagian>
 
       <Bagian judul="🏢 Pengaturan Kantor">

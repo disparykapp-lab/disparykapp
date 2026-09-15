@@ -14,6 +14,7 @@ export interface Divisi {
   id: string;
   nama: string;
   aktif: boolean;
+  fitur_kalender_konten: boolean;
   created_at: string;
 }
 

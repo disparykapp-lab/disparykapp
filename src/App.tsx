@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import { RequireAdmin, RequireAuth } from "./components/Guard";
+import { RequireAdmin, RequireAuth, RequireFiturKalender } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Beranda from "./pages/Beranda";
@@ -28,10 +28,15 @@ export default function App() {
               <Route path="/" element={<Beranda />} />
               <Route path="/absen/:jenis" element={<Absen />} />
               <Route path="/rekap" element={<Rekap />} />
-              <Route path="/kalender" element={<Kalender />} />
-              <Route path="/kalender/baru" element={<KontenForm />} />
-              <Route path="/kalender/:id/edit" element={<KontenForm />} />
               <Route path="/panduan" element={<Panduan />} />
+
+              <Route element={<RequireFiturKalender />}>
+                <Route path="/kalender" element={<Kalender />} />
+                <Route path="/kalender/:id/edit" element={<KontenForm />} />
+                <Route element={<RequireAdmin />}>
+                  <Route path="/kalender/baru" element={<KontenForm />} />
+                </Route>
+              </Route>
 
               <Route element={<RequireAdmin />}>
                 <Route path="/kelola" element={<Kelola />} />

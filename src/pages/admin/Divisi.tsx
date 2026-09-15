@@ -4,6 +4,10 @@ import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import type { Divisi as DivisiType } from "../../types/database";
 
+const FITUR_TERSEDIA: { key: keyof DivisiType & string; label: string }[] = [
+  { key: "fitur_kalender_konten", label: "Kalender Konten" },
+];
+
 export default function Divisi() {
   const [list, setList] = useState<DivisiType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +52,12 @@ export default function Divisi() {
     else await muat();
   }
 
+  async function toggleFitur(id: string, key: string, nilaiBaru: boolean) {
+    const { error } = await supabase.from("divisi").update({ [key]: nilaiBaru }).eq("id", id);
+    if (error) setError(error.message);
+    else await muat();
+  }
+
   if (loading) return <Loading teks="Memuat divisi..." />;
 
   return (
@@ -74,24 +84,41 @@ export default function Divisi() {
 
       <div className="flex flex-col gap-2">
         {list.map((d) => (
-          <div key={d.id} className="flex items-center gap-2 rounded-xl bg-white p-3 shadow-sm">
-            <input
-              defaultValue={d.nama}
-              onBlur={(e) => {
-                if (e.target.value.trim() && e.target.value !== d.nama) {
-                  void ubahNama(d.id, e.target.value.trim());
-                }
-              }}
-              className="flex-1 rounded-lg border border-transparent bg-transparent p-2 text-sm focus:border-gray-300"
-            />
-            <button
-              onClick={() => void toggleAktif(d.id, d.aktif)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                d.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {d.aktif ? "Aktif" : "Nonaktif"}
-            </button>
+          <div key={d.id} className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <input
+                defaultValue={d.nama}
+                onBlur={(e) => {
+                  if (e.target.value.trim() && e.target.value !== d.nama) {
+                    void ubahNama(d.id, e.target.value.trim());
+                  }
+                }}
+                className="flex-1 rounded-lg border border-transparent bg-transparent p-2 text-sm focus:border-gray-300"
+              />
+              <button
+                onClick={() => void toggleAktif(d.id, d.aktif)}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  d.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {d.aktif ? "Aktif" : "Nonaktif"}
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-gray-100 px-2 pt-2">
+              <span className="text-xs text-gray-400">Fitur:</span>
+              {FITUR_TERSEDIA.map((f) => (
+                <label key={f.key} className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(d[f.key])}
+                    onChange={(e) => void toggleFitur(d.id, f.key, e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-brand-masuk"
+                  />
+                  {f.label}
+                </label>
+              ))}
+            </div>
           </div>
         ))}
         {list.length === 0 && (

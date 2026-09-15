@@ -2,14 +2,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
-import type { Profile } from "../types/database";
+import type { Divisi, Profile } from "../types/database";
 
 interface AuthState {
   session: Session | null;
   profile: Profile | null;
+  divisi: Divisi | null;
   loading: boolean;
   /** true kalau email sudah login Google tapi belum terdaftar di tabel profiles */
   belumTerdaftar: boolean;
+  /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
+  bisaKalenderKonten: boolean;
   loginGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -17,22 +20,26 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+type ProfileDenganDivisi = Profile & { divisi: Divisi | null };
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [divisi, setDivisi] = useState<Divisi | null>(null);
   const [loading, setLoading] = useState(true);
   const [belumTerdaftar, setBelumTerdaftar] = useState(false);
 
   const muatProfile = useCallback(async (userId: string) => {
     let { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("*, divisi:divisi_id(*)")
       .eq("id", userId)
       .maybeSingle();
 
     if (error) {
       console.error(error);
       setProfile(null);
+      setDivisi(null);
       return;
     }
 
@@ -40,13 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // emailnya lebih dulu (whitelist), coba klaim baris itu.
     if (!data) {
       await supabase.rpc("klaim_profil");
-      const ulang = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+      const ulang = await supabase
+        .from("profiles")
+        .select("*, divisi:divisi_id(*)")
+        .eq("id", userId)
+        .maybeSingle();
       data = ulang.data;
     }
 
     if (!data) {
       setBelumTerdaftar(true);
       setProfile(null);
+      setDivisi(null);
       await supabase.auth.signOut();
       setSession(null);
       return;
@@ -55,13 +67,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!data.aktif) {
       setBelumTerdaftar(true);
       setProfile(null);
+      setDivisi(null);
       await supabase.auth.signOut();
       setSession(null);
       return;
     }
 
+    const { divisi: divisiTerkait, ...profileSaja } = data as ProfileDenganDivisi;
     setBelumTerdaftar(false);
-    setProfile(data as Profile);
+    setProfile(profileSaja);
+    setDivisi(divisiTerkait);
   }, []);
 
   useEffect(() => {
@@ -105,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
+    setDivisi(null);
     setSession(null);
     setBelumTerdaftar(false);
   }, []);
@@ -115,9 +131,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, muatProfile]);
 
+  const bisaKalenderKonten = profile?.role === "admin" || !!divisi?.fitur_kalender_konten;
+
   const value = useMemo(
-    () => ({ session, profile, loading, belumTerdaftar, loginGoogle, logout, refreshProfile }),
-    [session, profile, loading, belumTerdaftar, loginGoogle, logout, refreshProfile]
+    () => ({
+      session,
+      profile,
+      divisi,
+      loading,
+      belumTerdaftar,
+      bisaKalenderKonten,
+      loginGoogle,
+      logout,
+      refreshProfile,
+    }),
+    [session, profile, divisi, loading, belumTerdaftar, bisaKalenderKonten, loginGoogle, logout, refreshProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

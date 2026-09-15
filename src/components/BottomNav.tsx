@@ -8,13 +8,15 @@ interface NavItem {
 }
 
 export default function BottomNav() {
-  const { profile } = useAuth();
+  const { profile, bisaKalenderKonten } = useAuth();
 
-  const items: NavItem[] = [
-    { to: "/", label: "Beranda", icon: "🏠" },
-    { to: "/kalender", label: "Kalender", icon: "📅" },
-    { to: "/rekap", label: "Rekap", icon: "📊" },
-  ];
+  const items: NavItem[] = [{ to: "/", label: "Beranda", icon: "🏠" }];
+
+  if (bisaKalenderKonten) {
+    items.push({ to: "/kalender", label: "Kalender", icon: "📅" });
+  }
+
+  items.push({ to: "/rekap", label: "Rekap", icon: "📊" });
 
   if (profile?.role === "admin") {
     items.push({ to: "/kelola", label: "Kelola", icon: "⚙️" });

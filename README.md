@@ -28,6 +28,7 @@ npm run dev
    1. `0001_schema.sql` — tabel, RLS, fungsi helper, seed divisi & pengaturan
    2. `0002_rpc_absensi.sql` — fungsi `absen_masuk` / `absen_pulang`
    3. `0003_storage.sql` — bucket privat `absensi` + kebijakan akses foto
+   4. `0004_fitur_divisi.sql` — kolom hak akses fitur per divisi (mis. Kalender Konten)
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

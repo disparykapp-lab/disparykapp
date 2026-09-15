@@ -26,3 +26,15 @@ export function RequireAdmin() {
 
   return <Outlet />;
 }
+
+export function RequireFiturKalender() {
+  const { bisaKalenderKonten, loading } = useAuth();
+
+  if (loading) return <Loading teks="Memeriksa akses..." />;
+
+  if (!bisaKalenderKonten) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+}

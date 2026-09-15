@@ -6,9 +6,7 @@ export default function Panduan() {
     <div className="flex flex-col gap-4 pb-6">
       <HeaderHalaman judul="Panduan Penggunaan" kembaliKe="/" />
 
-      <p className="text-sm text-gray-500">
-        Panduan singkat cara memakai aplikasi DisparYK — absensi dan kalender konten.
-      </p>
+      <p className="text-sm text-gray-500">Panduan singkat cara absen di aplikasi DisparYK.</p>
 
       <Bagian judul="🔑 Cara Masuk (Login)">
         <Langkah no={1}>Buka aplikasi, tekan tombol "Masuk dengan Google".</Langkah>
@@ -65,26 +63,6 @@ export default function Panduan() {
           judul='"Kamu sudah absen masuk/pulang hari ini"'
           solusi="Setiap pegawai hanya bisa absen masuk dan pulang masing-masing satu kali per hari."
         />
-      </Bagian>
-
-      <Bagian judul="📊 Melihat Rekap Absensi">
-        <Langkah no={1}>Tekan menu "Rekap" di bagian bawah layar.</Langkah>
-        <Langkah no={2}>Pilih tampilan Mingguan atau Bulanan, geser tanggal pakai tombol ‹ ›.</Langkah>
-        <Langkah no={3}>
-          Kamu hanya bisa melihat rekap milik sendiri. Ada tombol "Ekspor CSV" dan "Cetak" kalau
-          perlu simpan/print.
-        </Langkah>
-      </Bagian>
-
-      <Bagian judul="📅 Kalender Konten">
-        <Langkah no={1}>Tekan menu "Kalender" untuk lihat rencana konten media sosial.</Langkah>
-        <Langkah no={2}>
-          Ada tampilan Bulanan (kalender) dan Daftar — bisa difilter per platform/status.
-        </Langkah>
-        <Langkah no={3}>
-          Kalau kamu ditunjuk sebagai PIC suatu konten, kamu bisa buka konten itu dan mengubah
-          statusnya (misalnya menandai "Tayang" setelah diunggah).
-        </Langkah>
       </Bagian>
 
       <Bagian judul="💡 Tips Supaya Absen Lancar">
