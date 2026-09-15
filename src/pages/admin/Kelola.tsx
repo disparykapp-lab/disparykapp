@@ -5,6 +5,7 @@ const MENU = [
   { to: "/kelola/divisi", label: "Divisi", icon: "🏷️", deskripsi: "Kelola daftar bidang/divisi" },
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", icon: "🏢", deskripsi: "Lokasi, radius & jam kerja" },
   { to: "/kelola/tinjau", label: "Tinjau Absensi", icon: "🔍", deskripsi: "Cek entri mencurigakan" },
+  { to: "/kelola/panduan", label: "Panduan Admin", icon: "📖", deskripsi: "Cara mengelola aplikasi" },
 ];
 
 export default function Kelola() {

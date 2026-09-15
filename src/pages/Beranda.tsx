@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import { ambilAbsensiHariIni } from "../lib/absensi";
@@ -64,7 +64,12 @@ export default function Beranda() {
         </button>
       </header>
 
-      <p className="text-sm text-gray-500">{tanggalHariIni}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500">{tanggalHariIni}</p>
+        <Link to="/panduan" className="text-sm font-medium text-brand-info">
+          📖 Panduan
+        </Link>
+      </div>
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 

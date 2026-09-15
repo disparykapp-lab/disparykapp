@@ -8,11 +8,13 @@ import Absen from "./pages/Absen";
 import Rekap from "./pages/Rekap";
 import Kalender from "./pages/Kalender";
 import KontenForm from "./pages/KontenForm";
+import Panduan from "./pages/Panduan";
 import Kelola from "./pages/admin/Kelola";
 import Pegawai from "./pages/admin/Pegawai";
 import Divisi from "./pages/admin/Divisi";
 import Pengaturan from "./pages/admin/Pengaturan";
 import TinjauAbsensi from "./pages/admin/TinjauAbsensi";
+import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
 export default function App() {
   return (
@@ -29,6 +31,7 @@ export default function App() {
               <Route path="/kalender" element={<Kalender />} />
               <Route path="/kalender/baru" element={<KontenForm />} />
               <Route path="/kalender/:id/edit" element={<KontenForm />} />
+              <Route path="/panduan" element={<Panduan />} />
 
               <Route element={<RequireAdmin />}>
                 <Route path="/kelola" element={<Kelola />} />
@@ -36,6 +39,7 @@ export default function App() {
                 <Route path="/kelola/divisi" element={<Divisi />} />
                 <Route path="/kelola/pengaturan" element={<Pengaturan />} />
                 <Route path="/kelola/tinjau" element={<TinjauAbsensi />} />
+                <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>
           </Route>
