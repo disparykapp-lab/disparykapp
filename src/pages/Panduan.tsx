@@ -6,7 +6,9 @@ export default function Panduan() {
     <div className="flex flex-col gap-4 pb-6">
       <HeaderHalaman judul="Panduan Penggunaan" kembaliKe="/" />
 
-      <p className="text-sm text-gray-500">Panduan singkat cara absen di aplikasi DisparYK.</p>
+      <p className="text-sm text-gray-500">
+        Panduan singkat cara absen dan memakai Kalender Konten di aplikasi DisparYK.
+      </p>
 
       <Bagian judul="🔑 Cara Masuk (Login)">
         <Langkah no={1}>Buka aplikasi, tekan tombol "Masuk dengan Google".</Langkah>
@@ -30,7 +32,9 @@ export default function Panduan() {
         </Langkah>
         <Langkah no={4}>
           Ada juga kolom <strong>"Keterangan (opsional)"</strong> — boleh dikosongkan, atau diisi
-          kalau ada yang mau dicatat (mis. "Telat karena macet parah di jalan").
+          kalau ada yang mau dicatat (mis. "Telat karena macet parah di jalan"). Begitu diisi,
+          muncul kolom <strong>"Link bukti (opsional)"</strong> juga kalau mau lampirkan link
+          (mis. foto/dokumen di Google Drive).
         </Langkah>
         <Langkah no={5}>
           Kamera akan terbuka otomatis. Posisikan wajah kamu, lalu tekan{" "}
@@ -75,6 +79,26 @@ export default function Panduan() {
           masuk, isi alasannya, dan boleh tambahkan link bukti (mis. link foto surat dokter di
           Google Drive). Admin bisa melihat keterangan ini.
         </p>
+      </Bagian>
+
+      <Bagian judul="📅 Kalender Konten">
+        <p className="text-sm text-gray-600">
+          Menu ini cuma muncul kalau divisi kamu diizinkan admin memakainya.
+        </p>
+        <Langkah no={1}>Tekan menu "Kalender" untuk lihat rencana konten media sosial — ada tampilan Bulanan (kalender) dan Daftar.</Langkah>
+        <Langkah no={2}>
+          Tekan "+ Tambah" untuk membuat konten baru: isi judul, deskripsi/caption, platform,
+          tanggal & jam tayang, PIC penanggung jawab, divisi, dan link aset (Canva/Drive).
+        </Langkah>
+        <Langkah no={3}>
+          Kamu bisa mengedit atau menghapus konten yang <strong>kamu buat sendiri</strong> atau
+          yang <strong>kamu jadi PIC-nya</strong>. Konten buatan pegawai lain hanya bisa dilihat,
+          tidak bisa diubah/dihapus.
+        </Langkah>
+        <Langkah no={4}>
+          Kalau kamu ditunjuk sebagai PIC suatu konten, buka konten itu untuk mengubah statusnya
+          (mis. menandai "Tayang" setelah diunggah).
+        </Langkah>
       </Bagian>
 
       <Bagian judul="💡 Tips Supaya Absen Lancar">

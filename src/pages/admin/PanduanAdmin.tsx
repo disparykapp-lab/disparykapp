@@ -111,9 +111,12 @@ export default function PanduanAdmin() {
           difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
         </Langkah>
         <Langkah no={5}>
-          Kalau pegawai sudah mengirim keterangan (mis. alasan sakit) beserta link bukti (mis.
-          surat dokter di Google Drive) lewat halaman Rekap mereka, keterangan itu muncul di
-          kotak biru paling atas detail entri ini — tekan "🔗 Buka link bukti" untuk memeriksanya.
+          Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta link bukti
+          (mis. surat dokter di Google Drive) — lewat tombol "+ Tambah Keterangan" di Beranda,
+          kolom keterangan opsional saat absen, atau tombol "+Keterangan" di Rekap mereka —
+          keterangan itu muncul di kotak biru paling atas detail entri ini. Tekan "🔗 Buka link
+          bukti" untuk memeriksanya, atau kalau link ketercampur di teks keterangan, link itu
+          otomatis jadi bisa diklik juga.
         </Langkah>
       </Bagian>
 
