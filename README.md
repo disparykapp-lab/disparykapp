@@ -35,6 +35,19 @@ npm run dev
       berhasil. Kalau extension ini tidak tersedia di plan/region kamu, jalankan bagian lain
       file ini dulu (skip dua blok `select cron.schedule(...)` di paling bawah) — pembersihan
       otomatis tidak akan jalan, tapi fitur lain (tandai, klarifikasi) tetap berfungsi.
+   6. `0006_klarifikasi_izin.sql` — status "izin" + perbaikan klarifikasi untuk hari tanpa
+      absen sama sekali.
+   7. `0007_hapus_foto_via_storage_api.sql` — perbaikan pembersihan foto (Supabase memblokir
+      penghapusan langsung lewat SQL biasa; versi ini lewat Storage API via `pg_net`).
+      **Setelah menjalankan file ini**, isi dua secret berikut **langsung di SQL Editor**
+      (jangan pernah commit nilai aslinya ke git):
+      ```sql
+      select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+      select vault.create_secret('<SERVICE_ROLE_KEY>', 'service_role_key');
+      ```
+      Project URL & service_role key ada di **Settings → API** (service_role key yang
+      **secret**, bukan anon key). Tanpa dua secret ini, pembersihan foto otomatis
+      diam-diam tidak melakukan apa-apa (tidak error, cuma belum aktif).
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
