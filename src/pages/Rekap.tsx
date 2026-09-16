@@ -4,17 +4,12 @@ import Loading from "../components/Loading";
 import { ambilAbsensiRentang, hitungRingkasan, type BarisAbsensi } from "../lib/rekap";
 import { unduhExcelRekap } from "../lib/excel";
 import { kirimKlarifikasiAbsensi } from "../lib/absensi";
-import { formatTanggal, geserBulan, geserMinggu, rentangBulan, rentangMinggu } from "../lib/tanggal";
+import { formatTanggal, geserBulan, geserMinggu, rentangBulan, rentangMinggu, keYMD } from "../lib/tanggal";
 import { supabase } from "../lib/supabase";
+import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import type { Divisi, Profile } from "../types/database";
 
 type Mode = "mingguan" | "bulanan";
-
-const LABEL_STATUS: Record<string, string> = {
-  hadir: "Hadir",
-  telat: "Telat",
-  dinas_luar: "Dinas Luar",
-};
 
 export default function Rekap() {
   const { profile } = useAuth();
@@ -37,6 +32,13 @@ export default function Rekap() {
   const [formBukti, setFormBukti] = useState("");
   const [mengirimKlarifikasi, setMengirimKlarifikasi] = useState(false);
   const [errorKlarifikasi, setErrorKlarifikasi] = useState<string | null>(null);
+
+  const [showFormBaru, setShowFormBaru] = useState(false);
+  const [tanggalBaru, setTanggalBaru] = useState(keYMD(new Date()));
+  const [catatanBaru, setCatatanBaru] = useState("");
+  const [buktiBaru, setBuktiBaru] = useState("");
+  const [mengirimBaru, setMengirimBaru] = useState(false);
+  const [errorBaru, setErrorBaru] = useState<string | null>(null);
 
   const { dari, sampai } = useMemo(
     () => (mode === "mingguan" ? rentangMinggu(ref) : rentangBulan(ref)),
@@ -111,6 +113,26 @@ export default function Rekap() {
       setErrorKlarifikasi(e instanceof Error ? e.message : "Gagal mengirim keterangan.");
     } finally {
       setMengirimKlarifikasi(false);
+    }
+  }
+
+  async function kirimKlarifikasiBaru() {
+    if (catatanBaru.trim().length < 3) {
+      setErrorBaru("Isi keterangan dulu (minimal 3 huruf).");
+      return;
+    }
+    setMengirimBaru(true);
+    setErrorBaru(null);
+    try {
+      await kirimKlarifikasiAbsensi(tanggalBaru, catatanBaru.trim(), buktiBaru.trim());
+      setShowFormBaru(false);
+      setCatatanBaru("");
+      setBuktiBaru("");
+      await muatUlang();
+    } catch (e) {
+      setErrorBaru(e instanceof Error ? e.message : "Gagal mengirim keterangan.");
+    } finally {
+      setMengirimBaru(false);
     }
   }
 
@@ -199,35 +221,95 @@ export default function Rekap() {
         <Loading teks="Memuat rekap..." />
       ) : (
         <>
-          {!tampilkanPerPegawai && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {isAdmin && !tampilkanPerPegawai && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               <KartuRingkasan label="Hadir" nilai={ringkasan.hadir} warna="text-brand-masuk" />
               <KartuRingkasan label="Telat" nilai={ringkasan.telat} warna="text-brand-pulang" />
               <KartuRingkasan label="Dinas Luar" nilai={ringkasan.dinasLuar} warna="text-brand-info" />
+              <KartuRingkasan label="Izin/Sakit" nilai={ringkasan.izin} warna="text-yellow-600" />
               <KartuRingkasan label="Tidak Absen" nilai={ringkasan.tidakAbsen} warna="text-gray-500" />
             </div>
           )}
-          {!tampilkanPerPegawai && (
+          {isAdmin && !tampilkanPerPegawai && (
             <p className="text-sm text-gray-500">
               Total jam kerja: <strong>{ringkasan.totalJamKerja.toFixed(1)} jam</strong>
             </p>
           )}
 
-          <div className="flex gap-2 print:hidden">
-            <button
-              onClick={() => void eksporExcel()}
-              disabled={mengekspor}
-              className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
-            >
-              {mengekspor ? "Menyiapkan..." : "⬇️ Ekspor Excel"}
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text"
-            >
-              🖨️ Cetak
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2 print:hidden">
+              <button
+                onClick={() => void eksporExcel()}
+                disabled={mengekspor}
+                className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
+              >
+                {mengekspor ? "Menyiapkan..." : "⬇️ Ekspor Excel"}
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text"
+              >
+                🖨️ Cetak
+              </button>
+            </div>
+          )}
+
+          {!isAdmin && (
+            <div className="print:hidden">
+              {!showFormBaru ? (
+                <button
+                  onClick={() => setShowFormBaru(true)}
+                  className="min-h-[44px] w-full rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text"
+                >
+                  + Tambah Keterangan (mis. Sakit/Izin tidak masuk)
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
+                  <label className="text-xs font-medium text-gray-600">Tanggal</label>
+                  <input
+                    type="date"
+                    value={tanggalBaru}
+                    max={keYMD(new Date())}
+                    onChange={(e) => setTanggalBaru(e.target.value)}
+                    className="rounded-lg border border-gray-300 p-2 text-sm"
+                  />
+                  <label className="text-xs font-medium text-gray-600">Keterangan</label>
+                  <textarea
+                    value={catatanBaru}
+                    onChange={(e) => setCatatanBaru(e.target.value)}
+                    rows={2}
+                    placeholder="Contoh: Sakit demam, tidak bisa masuk kerja"
+                    className="rounded-lg border border-gray-300 p-2 text-sm"
+                  />
+                  <label className="text-xs font-medium text-gray-600">
+                    Link bukti (opsional — mis. link Google Drive)
+                  </label>
+                  <input
+                    value={buktiBaru}
+                    onChange={(e) => setBuktiBaru(e.target.value)}
+                    className="rounded-lg border border-gray-300 p-2 text-sm"
+                    placeholder="https://drive.google.com/..."
+                  />
+                  {errorBaru && <p className="text-xs text-red-600">{errorBaru}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowFormBaru(false)}
+                      className="min-h-[40px] flex-1 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-brand-text"
+                    >
+                      Batal
+                    </button>
+                    <button
+                      onClick={() => void kirimKlarifikasiBaru()}
+                      disabled={mengirimBaru}
+                      className="min-h-[40px] flex-1 rounded-lg bg-brand-masuk text-xs font-semibold text-white disabled:opacity-60"
+                    >
+                      {mengirimBaru ? "Menyimpan..." : "Simpan"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
             <table className="w-full min-w-[600px] text-left text-sm">
@@ -250,7 +332,7 @@ export default function Rekap() {
                       <td className="p-3">{r.masuk_at ? formatJam(r.masuk_at) : "-"}</td>
                       <td className="p-3">{r.keluar_at ? formatJam(r.keluar_at) : "-"}</td>
                       <td className="p-3">
-                        {LABEL_STATUS[r.status] ?? r.status}
+                        {LABEL_STATUS_ABSEN[r.status] ?? r.status}
                         {r.ditandai && <span className="ml-1 text-red-500">⚑</span>}
                       </td>
                       <td className="p-3 print:hidden">

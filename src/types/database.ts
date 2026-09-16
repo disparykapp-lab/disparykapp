@@ -1,6 +1,6 @@
 export type Role = "admin" | "user";
 export type ModeAbsen = "kantor" | "luar";
-export type StatusAbsen = "hadir" | "telat" | "dinas_luar";
+export type StatusAbsen = "hadir" | "telat" | "dinas_luar" | "izin";
 export type PlatformKonten =
   | "instagram"
   | "tiktok"

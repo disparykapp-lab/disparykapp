@@ -1,10 +1,5 @@
 import type { BarisAbsensi, Ringkasan } from "./rekap";
-
-const LABEL_STATUS: Record<string, string> = {
-  hadir: "Hadir",
-  telat: "Telat",
-  dinas_luar: "Dinas Luar",
-};
+import { LABEL_STATUS_ABSEN } from "./absensiMeta";
 
 const LABEL_MODE: Record<string, string> = {
   kantor: "Di Kantor",
@@ -63,6 +58,7 @@ export async function unduhExcelRekap(opts: OpsiEksporExcel) {
       ["Hadir", r.hadir],
       ["Telat", r.telat],
       ["Dinas Luar", r.dinasLuar],
+      ["Izin/Sakit", r.izin],
       ["Tidak Absen", r.tidakAbsen],
       ["Total Jam Kerja", `${r.totalJamKerja.toFixed(1)} jam`],
     ];
@@ -122,7 +118,7 @@ export async function unduhExcelRekap(opts: OpsiEksporExcel) {
     setSel(r.keluar_at ? new Date(r.keluar_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-");
     setSel(r.masuk_mode ? (LABEL_MODE[r.masuk_mode] ?? r.masuk_mode) : "-");
     setSel(r.keluar_mode ? (LABEL_MODE[r.keluar_mode] ?? r.keluar_mode) : "-");
-    setSel(LABEL_STATUS[r.status] ?? r.status);
+    setSel(LABEL_STATUS_ABSEN[r.status] ?? r.status);
     setSel(r.ditandai ? "Ya" : "");
     setSel(r.catatan_klarifikasi ?? "");
     baris++;

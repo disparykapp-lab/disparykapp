@@ -31,6 +31,7 @@ export interface Ringkasan {
   hadir: number;
   telat: number;
   dinasLuar: number;
+  izin: number;
   tidakAbsen: number;
   totalJamKerja: number;
 }
@@ -39,12 +40,14 @@ export function hitungRingkasan(rows: BarisAbsensi[], dari: Date, sampai: Date):
   let hadir = 0;
   let telat = 0;
   let dinasLuar = 0;
+  let izin = 0;
   let totalMs = 0;
 
   for (const r of rows) {
     if (r.status === "hadir") hadir++;
     else if (r.status === "telat") telat++;
     else if (r.status === "dinas_luar") dinasLuar++;
+    else if (r.status === "izin") izin++;
 
     if (r.masuk_at && r.keluar_at) {
       totalMs += new Date(r.keluar_at).getTime() - new Date(r.masuk_at).getTime();
@@ -58,6 +61,7 @@ export function hitungRingkasan(rows: BarisAbsensi[], dari: Date, sampai: Date):
     hadir,
     telat,
     dinasLuar,
+    izin,
     tidakAbsen,
     totalJamKerja: totalMs / (1000 * 60 * 60),
   };

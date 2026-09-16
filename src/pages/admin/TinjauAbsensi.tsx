@@ -4,13 +4,8 @@ import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
+import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import type { BarisAbsensi } from "../../lib/rekap";
-
-const LABEL_STATUS: Record<string, string> = {
-  hadir: "Hadir",
-  telat: "Telat",
-  dinas_luar: "Dinas Luar",
-};
 
 export default function TinjauAbsensi() {
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
@@ -92,7 +87,7 @@ export default function TinjauAbsensi() {
                     {r.profiles?.nama ?? "-"} {r.ditandai && <span className="text-red-500">⚑</span>}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {formatTanggal(r.tanggal)} · {LABEL_STATUS[r.status] ?? r.status}
+                    {formatTanggal(r.tanggal)} · {LABEL_STATUS_ABSEN[r.status] ?? r.status}
                   </p>
                 </div>
                 <span className="text-gray-400">{terbuka === r.id ? "▲" : "▼"}</span>

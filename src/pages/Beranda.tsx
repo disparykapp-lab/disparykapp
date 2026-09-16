@@ -3,13 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import { ambilAbsensiHariIni } from "../lib/absensi";
+import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import type { Absensi } from "../types/database";
-
-const LABEL_STATUS: Record<string, string> = {
-  hadir: "Hadir",
-  telat: "Telat",
-  dinas_luar: "Dinas Luar",
-};
 
 export default function Beranda() {
   const { profile, logout } = useAuth();
@@ -85,7 +80,7 @@ export default function Beranda() {
             nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
           />
           {absensi?.status && (
-            <BarisStatus label="Status" nilai={LABEL_STATUS[absensi.status] ?? absensi.status} />
+            <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
           )}
         </div>
       </section>
