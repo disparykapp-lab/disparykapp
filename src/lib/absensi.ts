@@ -91,3 +91,15 @@ export async function kirimKlarifikasiAbsensi(tanggal: string, catatan: string, 
   });
   if (error) throw new Error(error.message);
 }
+
+/** Hapus satu foto absen: file di Storage lewat API resmi, lalu kosongkan referensinya di baris absensi. */
+export async function hapusFotoAbsensi(id: string, jenis: "masuk" | "keluar", fotoPath: string) {
+  const { error: errorStorage } = await supabase.storage.from("absensi").remove([fotoPath]);
+  if (errorStorage) throw new Error("Gagal menghapus file foto: " + errorStorage.message);
+
+  const { error: errorRpc } = await supabase.rpc("hapus_foto_absensi", {
+    p_id: id,
+    p_jenis: jenis,
+  });
+  if (errorRpc) throw new Error(errorRpc.message);
+}

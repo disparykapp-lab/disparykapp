@@ -14,6 +14,7 @@ import Pegawai from "./pages/admin/Pegawai";
 import Divisi from "./pages/admin/Divisi";
 import Pengaturan from "./pages/admin/Pengaturan";
 import TinjauAbsensi from "./pages/admin/TinjauAbsensi";
+import FotoAbsensi from "./pages/admin/FotoAbsensi";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
                 <Route path="/kelola/divisi" element={<Divisi />} />
                 <Route path="/kelola/pengaturan" element={<Pengaturan />} />
                 <Route path="/kelola/tinjau" element={<TinjauAbsensi />} />
+                <Route path="/kelola/foto" element={<FotoAbsensi />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>

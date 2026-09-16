@@ -83,6 +83,21 @@ export default function PanduanAdmin() {
         </Catatan>
       </Bagian>
 
+      <Bagian judul="🖼️ Foto Absensi">
+        <Langkah no={1}>
+          Buka Kelola → Foto Absensi untuk melihat semua foto masuk/pulang pegawai dalam
+          bentuk galeri, difilter berdasarkan rentang tanggal.
+        </Langkah>
+        <Langkah no={2}>
+          Tekan "Hapus" di bawah foto untuk menghapus foto itu secara manual (mis. kalau ada
+          yang perlu dihapus lebih cepat, tidak menunggu retensi otomatis).
+        </Langkah>
+        <Catatan>
+          Foto yang lebih tua dari batas retensi (lihat bagian Retensi Data Otomatis) tidak akan
+          muncul lagi di sini — sudah terhapus otomatis duluan.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="🔍 Tinjau Absensi">
         <Langkah no={1}>Buka Kelola → Tinjau Absensi untuk melihat semua entri absen semua pegawai.</Langkah>
         <Langkah no={2}>Filter berdasarkan rentang tanggal, atau centang "Hanya ditandai" untuk entri mencurigakan.</Langkah>
