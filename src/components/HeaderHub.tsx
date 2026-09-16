@@ -1,35 +1,24 @@
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function HeaderHub() {
   const { profile, logout } = useAuth();
-  const navigate = useNavigate();
   const inisial = profile?.nama?.trim()?.charAt(0)?.toUpperCase() ?? "?";
 
   return (
     <div className="gradasi-brand -mx-4 -mt-4 rounded-b-[2rem] px-5 pb-7 pt-5 text-white shadow-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl leading-none">📍</span>
+          <img src="/logo-disparyk.png" alt="Logo DisparYK" className="h-8 w-auto" />
           <span className="text-lg font-bold tracking-tight">DisparYK</span>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate("/panduan")}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-lg"
-            aria-label="Panduan"
-          >
-            ⚙️
-          </button>
-          <button
-            onClick={() => void logout()}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-base"
-            aria-label="Keluar"
-            title="Keluar"
-          >
-            🚪
-          </button>
-        </div>
+        <button
+          onClick={() => void logout()}
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-base"
+          aria-label="Keluar"
+          title="Keluar"
+        >
+          🚪
+        </button>
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-1 text-center">

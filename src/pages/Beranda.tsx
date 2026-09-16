@@ -74,24 +74,22 @@ export default function Beranda() {
           <div className="grid grid-cols-3 gap-3">
             <IconTile
               to="/absen/masuk"
-              icon="🟢"
+              iconSrc="/icon_absen_masuk.png"
               label="Absen Masuk"
-              warna="bg-brand-masuk"
               disabled={sudahMasuk}
             />
             <IconTile
               to="/absen/pulang"
-              icon="🟠"
+              iconSrc="/icon_absen_keluar.png"
               label="Absen Pulang"
-              warna="bg-brand-pulang"
               disabled={!sudahMasuk || sudahPulang}
             />
-            <IconTile to="/rekap" icon="📊" label="Rekap" warna="bg-brand-info" />
+            <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
             {bisaKalenderKonten && (
-              <IconTile to="/kalender" icon="📅" label="Kalender" warna="bg-purple-500" />
+              <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
             )}
-            {isAdmin && <IconTile to="/kelola" icon="⚙️" label="Kelola" warna="bg-gray-500" />}
-            <IconTile to="/panduan" icon="📖" label="Panduan" warna="bg-teal-500" />
+            {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
+            <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
           </div>
 
           <FormKeteranganAbsen onTersimpan={muatStatus} />

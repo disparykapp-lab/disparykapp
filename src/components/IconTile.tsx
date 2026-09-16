@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 interface IconTileProps {
   to?: string;
   onClick?: () => void;
-  icon: string;
+  icon?: string;
+  iconSrc?: string;
   label: string;
   warna?: string;
   disabled?: boolean;
@@ -14,6 +15,7 @@ export default function IconTile({
   to,
   onClick,
   icon,
+  iconSrc,
   label,
   warna = "bg-brand-masuk",
   disabled = false,
@@ -25,9 +27,13 @@ export default function IconTile({
         disabled ? "opacity-40" : ""
       }`}
     >
-      <span className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl text-white ${warna}`}>
-        {icon}
-      </span>
+      {iconSrc ? (
+        <img src={iconSrc} alt="" className="h-12 w-12 rounded-full object-cover" />
+      ) : (
+        <span className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl text-white ${warna}`}>
+          {icon}
+        </span>
+      )}
       <span className="text-xs font-semibold leading-tight text-brand-text">{label}</span>
       {keterangan && <span className="text-[10px] text-gray-400">{keterangan}</span>}
     </div>
