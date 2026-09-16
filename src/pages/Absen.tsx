@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import KameraLive from "../components/KameraLive";
+import HeaderHalaman from "../components/HeaderHalaman";
 import { ambilPosisi, type Posisi } from "../lib/geolocation";
 import {
   kirimKlarifikasiAbsensi,
@@ -102,16 +103,7 @@ export default function Absen() {
 
   return (
     <div className="flex min-h-[80vh] flex-col">
-      <header className="mb-4 flex items-center gap-3">
-        <button
-          onClick={() => navigate("/")}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-sm"
-          aria-label="Kembali"
-        >
-          ←
-        </button>
-        <h1 className="text-lg font-bold text-brand-text">{LABEL_JENIS[jenis]}</h1>
-      </header>
+      <HeaderHalaman judul={LABEL_JENIS[jenis]} kembaliKe="/" />
 
       {langkah === "mode" && (
         <div className="flex flex-col gap-5">

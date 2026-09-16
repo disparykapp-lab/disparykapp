@@ -113,7 +113,7 @@ export default function Pegawai() {
         aksi={
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="rounded-full bg-brand-masuk px-4 py-2 text-sm font-semibold text-white"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-masuk-dark"
           >
             {showForm ? "Tutup" : "+ Tambah"}
           </button>

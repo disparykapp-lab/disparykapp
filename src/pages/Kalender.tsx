@@ -12,6 +12,7 @@ import {
 } from "date-fns";
 import { id } from "date-fns/locale";
 import Loading from "../components/Loading";
+import HeaderHalaman from "../components/HeaderHalaman";
 import { ambilKonten, type BarisKonten } from "../lib/konten";
 import { geserBulan, keYMD } from "../lib/tanggal";
 import {
@@ -70,15 +71,18 @@ export default function Kalender() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-brand-text">Kalender Konten</h1>
-        <Link
-          to="/kalender/baru"
-          className="rounded-full bg-brand-masuk px-4 py-2 text-sm font-semibold text-white"
-        >
-          + Tambah
-        </Link>
-      </header>
+      <HeaderHalaman
+        judul="Kalender Konten"
+        kembaliKe="/"
+        aksi={
+          <Link
+            to="/kalender/baru"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-masuk-dark"
+          >
+            + Tambah
+          </Link>
+        }
+      />
 
       <div className="flex gap-2">
         <ToggleTampilan label="Bulanan" aktif={tampilan === "bulanan"} onClick={() => setTampilan("bulanan")} />

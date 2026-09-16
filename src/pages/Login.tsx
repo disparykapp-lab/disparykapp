@@ -9,20 +9,24 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-brand-bg px-6">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-sm">
-        <img
-          src="/logo-disparyk.png"
-          alt="Logo Dinas Pariwisata Kota Yogyakarta"
-          className="mx-auto mb-4 h-16 w-auto"
-        />
-        <h1 className="text-xl font-bold text-brand-text">DisparYK</h1>
-        <p className="mt-1 text-sm text-gray-500">
+    <div className="gradasi-brand flex min-h-screen flex-col items-center justify-center px-6">
+      <div className="mb-6 flex flex-col items-center text-white">
+        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 p-3 shadow-lg backdrop-blur">
+          <img
+            src="/logo-disparyk.png"
+            alt="Logo Dinas Pariwisata Kota Yogyakarta"
+            className="h-full w-auto object-contain"
+          />
+        </div>
+        <h1 className="mt-4 text-2xl font-bold">DisparYK</h1>
+        <p className="mt-1 max-w-xs text-center text-sm text-white/85">
           Absensi &amp; Kalender Konten Dinas Pariwisata Kota Yogyakarta
         </p>
+      </div>
 
+      <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl">
         {belumTerdaftar && (
-          <div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
             Akun kamu belum didaftarkan. Hubungi admin.
           </div>
         )}
@@ -30,7 +34,7 @@ export default function Login() {
         <button
           onClick={() => void loginGoogle()}
           disabled={loading}
-          className="mt-6 flex w-full min-h-[52px] items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-base font-semibold text-brand-text shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+          className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-base font-semibold text-brand-text shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
         >
           <GoogleIcon />
           Masuk dengan Google

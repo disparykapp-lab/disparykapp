@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import HeaderHalaman from "../../components/HeaderHalaman";
+import IconTile from "../../components/IconTile";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
-  { to: "/kelola/pegawai", label: "Pegawai", icon: "👥", deskripsi: "Kelola akun & data pegawai" },
-  { to: "/kelola/divisi", label: "Divisi", icon: "🏷️", deskripsi: "Kelola daftar bidang/divisi" },
-  { to: "/kelola/pengaturan", label: "Pengaturan Kantor", icon: "🏢", deskripsi: "Lokasi, radius & jam kerja" },
-  { to: "/kelola/tinjau", label: "Tinjau Absensi", icon: "🔍", deskripsi: "Cek entri mencurigakan" },
-  { to: "/kelola/foto", label: "Foto Absensi", icon: "🖼️", deskripsi: "Lihat & hapus foto absen manual" },
-  { to: "/kelola/panduan", label: "Panduan Admin", icon: "📖", deskripsi: "Cara mengelola aplikasi" },
+  { to: "/kelola/pegawai", label: "Pegawai", icon: "👥", warna: "bg-brand-masuk" },
+  { to: "/kelola/divisi", label: "Divisi", icon: "🏷️", warna: "bg-purple-500" },
+  { to: "/kelola/pengaturan", label: "Pengaturan Kantor", icon: "🏢", warna: "bg-brand-info" },
+  { to: "/kelola/tinjau", label: "Tinjau Absensi", icon: "🔍", warna: "bg-brand-pulang" },
+  { to: "/kelola/foto", label: "Foto Absensi", icon: "🖼️", warna: "bg-teal-500" },
+  { to: "/kelola/panduan", label: "Panduan Admin", icon: "📖", warna: "bg-gray-500" },
 ];
 
 export default function Kelola() {
@@ -20,7 +22,7 @@ export default function Kelola() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-xl font-bold text-brand-text">Kelola</h1>
+      <HeaderHalaman judul="Kelola" kembaliKe="/" />
 
       {retensi && retensi.akanTerhapus > 0 && (
         <Link
@@ -35,21 +37,9 @@ export default function Kelola() {
         </Link>
       )}
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {MENU.map((m) => (
-          <Link
-            key={m.to}
-            to={m.to}
-            className="flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-masuk/10 text-2xl">
-              {m.icon}
-            </span>
-            <div>
-              <p className="font-semibold text-brand-text">{m.label}</p>
-              <p className="text-xs text-gray-500">{m.deskripsi}</p>
-            </div>
-          </Link>
+          <IconTile key={m.to} to={m.to} icon={m.icon} label={m.label} warna={m.warna} />
         ))}
       </div>
     </div>

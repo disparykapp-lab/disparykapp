@@ -7,6 +7,7 @@ import { kirimKlarifikasiAbsensi } from "../lib/absensi";
 import { formatTanggal, geserBulan, geserMinggu, rentangBulan, rentangMinggu } from "../lib/tanggal";
 import { supabase } from "../lib/supabase";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
+import HeaderHalaman from "../components/HeaderHalaman";
 import type { Divisi, Profile } from "../types/database";
 
 type Mode = "mingguan" | "bulanan";
@@ -129,7 +130,10 @@ export default function Rekap() {
 
   return (
     <div className="flex flex-col gap-5 print:gap-3">
-      <h1 className="text-xl font-bold text-brand-text">Rekap Absensi</h1>
+      <div className="print:hidden">
+        <HeaderHalaman judul="Rekap Absensi" kembaliKe="/" />
+      </div>
+      <h1 className="hidden text-xl font-bold text-brand-text print:block">Rekap Absensi</h1>
 
       <div className="flex gap-2 print:hidden">
         <ToggleMode label="Mingguan" aktif={mode === "mingguan"} onClick={() => setMode("mingguan")} />

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
+import HeaderHalaman from "../components/HeaderHalaman";
 import {
   ambilKontenById,
   buatKonten,
@@ -126,18 +127,10 @@ export default function KontenForm() {
 
   return (
     <div className="flex flex-col gap-4 pb-6">
-      <header className="flex items-center gap-3">
-        <button
-          onClick={() => navigate("/kalender")}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-sm"
-          aria-label="Kembali"
-        >
-          ←
-        </button>
-        <h1 className="text-lg font-bold text-brand-text">
-          {isBaru ? "Tambah Konten" : bisaEditPenuh ? "Edit Konten" : "Detail Konten"}
-        </h1>
-      </header>
+      <HeaderHalaman
+        judul={isBaru ? "Tambah Konten" : bisaEditPenuh ? "Edit Konten" : "Detail Konten"}
+        kembaliKe="/kalender"
+      />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 

@@ -20,7 +20,7 @@ export default function Panduan() {
       </Bagian>
 
       <Bagian judul="🟢 Cara Absen Masuk">
-        <Langkah no={1}>Di halaman Beranda, tekan tombol hijau "Absen Masuk".</Langkah>
+        <Langkah no={1}>Di halaman Beranda, tekan ikon "Absen Masuk".</Langkah>
         <Langkah no={2}>
           Pilih posisi kamu sekarang: <strong>"Di Kantor"</strong> kalau sedang di kantor, atau{" "}
           <strong>"Dinas Luar"</strong> kalau sedang tugas di luar (wajib isi keterangan singkat,
@@ -45,8 +45,8 @@ export default function Panduan() {
 
       <Bagian judul="🟠 Cara Absen Pulang">
         <p className="text-sm text-gray-600">
-          Caranya sama seperti Absen Masuk, tinggal tekan tombol oranye "Absen Pulang" di
-          Beranda. Tombol ini baru aktif setelah kamu absen masuk lebih dulu.
+          Caranya sama seperti Absen Masuk, tinggal tekan ikon "Absen Pulang" di Beranda. Ikon
+          ini baru aktif setelah kamu absen masuk lebih dulu.
         </p>
       </Bagian>
 

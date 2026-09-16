@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
+import HeaderHub from "../components/HeaderHub";
+import IconTile from "../components/IconTile";
 import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
-  const { profile, logout } = useAuth();
-  const navigate = useNavigate();
+  const { profile, bisaKalenderKonten } = useAuth();
+  const isAdmin = profile?.role === "admin";
   const [absensi, setAbsensi] = useState<Absensi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +32,6 @@ export default function Beranda() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
-  if (loading) return <Loading teks="Memuat status absen..." />;
-
   const sudahMasuk = !!absensi?.masuk_at;
   const sudahPulang = !!absensi?.keluar_at;
 
@@ -44,64 +43,60 @@ export default function Beranda() {
   });
 
   return (
-    <div className="flex flex-col gap-5">
-      <header className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500">Halo,</p>
-          <h1 className="text-xl font-bold text-brand-text">{profile?.nama}</h1>
-        </div>
-        <button
-          onClick={() => void logout()}
-          className="rounded-full bg-white px-3 py-2 text-xs font-medium text-gray-500 shadow-sm"
-        >
-          Keluar
-        </button>
-      </header>
+    <div className="flex flex-col gap-4">
+      <HeaderHub />
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{tanggalHariIni}</p>
-        <Link to="/panduan" className="text-sm font-medium text-brand-info">
-          📖 Panduan
-        </Link>
-      </div>
+      <p className="text-center text-sm text-gray-500">{tanggalHariIni}</p>
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
-        <div className="flex flex-col gap-2 text-sm">
-          <BarisStatus
-            label="Masuk"
-            nilai={absensi?.masuk_at ? formatJam(absensi.masuk_at) : "Belum absen"}
-          />
-          <BarisStatus
-            label="Pulang"
-            nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
-          />
-          {absensi?.status && (
-            <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
-          )}
-        </div>
-      </section>
+      {loading ? (
+        <Loading teks="Memuat status absen..." />
+      ) : (
+        <>
+          <section className="rounded-2xl bg-white p-5 shadow-sm">
+            <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
+            <div className="flex flex-col gap-2 text-sm">
+              <BarisStatus
+                label="Masuk"
+                nilai={absensi?.masuk_at ? formatJam(absensi.masuk_at) : "Belum absen"}
+              />
+              <BarisStatus
+                label="Pulang"
+                nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
+              />
+              {absensi?.status && (
+                <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
+              )}
+            </div>
+          </section>
 
-      <div className="flex flex-col gap-3">
-        <button
-          disabled={sudahMasuk}
-          onClick={() => navigate("/absen/masuk")}
-          className="flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-brand-masuk text-lg font-bold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-gray-300"
-        >
-          🟢 Absen Masuk
-        </button>
-        <button
-          disabled={!sudahMasuk || sudahPulang}
-          onClick={() => navigate("/absen/pulang")}
-          className="flex min-h-[64px] items-center justify-center gap-2 rounded-2xl bg-brand-pulang text-lg font-bold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-gray-300"
-        >
-          🟠 Absen Pulang
-        </button>
-      </div>
+          <div className="grid grid-cols-3 gap-3">
+            <IconTile
+              to="/absen/masuk"
+              icon="🟢"
+              label="Absen Masuk"
+              warna="bg-brand-masuk"
+              disabled={sudahMasuk}
+            />
+            <IconTile
+              to="/absen/pulang"
+              icon="🟠"
+              label="Absen Pulang"
+              warna="bg-brand-pulang"
+              disabled={!sudahMasuk || sudahPulang}
+            />
+            <IconTile to="/rekap" icon="📊" label="Rekap" warna="bg-brand-info" />
+            {bisaKalenderKonten && (
+              <IconTile to="/kalender" icon="📅" label="Kalender" warna="bg-purple-500" />
+            )}
+            {isAdmin && <IconTile to="/kelola" icon="⚙️" label="Kelola" warna="bg-gray-500" />}
+            <IconTile to="/panduan" icon="📖" label="Panduan" warna="bg-teal-500" />
+          </div>
 
-      <FormKeteranganAbsen onTersimpan={muatStatus} />
+          <FormKeteranganAbsen onTersimpan={muatStatus} />
+        </>
+      )}
     </div>
   );
 }
