@@ -30,6 +30,7 @@ export default function Absen() {
   const [mode, setMode] = useState<ModeAbsen>("kantor");
   const [catatan, setCatatan] = useState("");
   const [keteranganOpsional, setKeteranganOpsional] = useState("");
+  const [buktiOpsional, setBuktiOpsional] = useState("");
   const [posisi, setPosisi] = useState<Posisi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasil, setHasil] = useState<{ jam: string; status: string; jarak: number } | null>(null);
@@ -71,7 +72,11 @@ export default function Absen() {
 
         if (keteranganOpsional.trim().length >= 3) {
           try {
-            await kirimKlarifikasiAbsensi(tanggalHariIniWIB(), keteranganOpsional.trim(), "");
+            await kirimKlarifikasiAbsensi(
+              tanggalHariIniWIB(),
+              keteranganOpsional.trim(),
+              buktiOpsional.trim()
+            );
           } catch {
             // Absen sudah berhasil — keterangan opsional gagal tersimpan tidak menggagalkan absen.
           }
@@ -88,7 +93,7 @@ export default function Absen() {
         setLangkah("gagal");
       }
     },
-    [profile, posisi, jenis, jenisValid, mode, catatan, keteranganOpsional]
+    [profile, posisi, jenis, jenisValid, mode, catatan, keteranganOpsional, buktiOpsional]
   );
 
   if (!jenisValid) {
@@ -162,6 +167,20 @@ export default function Absen() {
               className="w-full rounded-xl border border-gray-300 p-3 text-base"
             />
           </div>
+
+          {keteranganOpsional.trim().length >= 3 && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Link bukti (opsional)
+              </label>
+              <input
+                value={buktiOpsional}
+                onChange={(e) => setBuktiOpsional(e.target.value)}
+                placeholder="https://drive.google.com/..."
+                className="w-full rounded-xl border border-gray-300 p-3 text-base"
+              />
+            </div>
+          )}
 
           {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 

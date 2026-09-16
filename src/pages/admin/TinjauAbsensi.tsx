@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
+import { teksDenganLink } from "../../lib/linkify";
 import type { BarisAbsensi } from "../../lib/rekap";
 
 export default function TinjauAbsensi() {
@@ -134,7 +135,7 @@ function DetailAbsensi({ row, onUbah }: { row: BarisAbsensi; onUbah: () => void 
       {(row.catatan_klarifikasi || row.bukti_url) && (
         <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
           <p className="font-semibold">Keterangan dari pegawai</p>
-          {row.catatan_klarifikasi && <p className="mt-1">{row.catatan_klarifikasi}</p>}
+          {row.catatan_klarifikasi && <p className="mt-1">{teksDenganLink(row.catatan_klarifikasi)}</p>}
           {row.bukti_url && (
             <a
               href={row.bukti_url}
@@ -261,7 +262,7 @@ function SesiAbsensi({
       <p className="text-sm font-semibold text-brand-text">
         {judul} · {new Date(at).toLocaleTimeString("id-ID")} · {mode === "kantor" ? "Di Kantor" : "Dinas Luar"}
       </p>
-      {catatan && <p className="text-xs text-gray-500">Catatan: {catatan}</p>}
+      {catatan && <p className="text-xs text-gray-500">Catatan: {teksDenganLink(catatan)}</p>}
       <p className="text-xs text-gray-500">
         Akurasi GPS: {akurasi != null ? `${Math.round(akurasi)} m` : "-"} · IP: {ip ?? "-"}
       </p>
