@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-masuk: #f2762e;
-  --color-brand-masuk-dark: #d9601e;
-  --color-brand-pulang: #e0432e;
-  --color-brand-pulang-dark: #c43420;
+  --color-brand-masuk: #8e1e3c;
+  --color-brand-masuk-dark: #641429;
+  --color-brand-pulang: #c0334f;
+  --color-brand-pulang-dark: #96263c;
   --color-brand-info: #2563eb;
-  --color-brand-gold: #ffc93c;
+  --color-brand-gold: #b33951;
   --color-brand-bg: #f7f8fa;
   --color-brand-text: #1f2937;
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
