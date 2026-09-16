@@ -29,10 +29,14 @@ export default function Panduan() {
           saat browser bertanya.
         </Langkah>
         <Langkah no={4}>
+          Ada juga kolom <strong>"Keterangan (opsional)"</strong> — boleh dikosongkan, atau diisi
+          kalau ada yang mau dicatat (mis. "Telat karena macet parah di jalan").
+        </Langkah>
+        <Langkah no={5}>
           Kamera akan terbuka otomatis. Posisikan wajah kamu, lalu tekan{" "}
           <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan "Ambil Ulang".
         </Langkah>
-        <Langkah no={5}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
+        <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
       </Bagian>
 
       <Bagian judul="🟠 Cara Absen Pulang">
@@ -63,6 +67,14 @@ export default function Panduan() {
           judul='"Kamu sudah absen masuk/pulang hari ini"'
           solusi="Setiap pegawai hanya bisa absen masuk dan pulang masing-masing satu kali per hari."
         />
+      </Bagian>
+
+      <Bagian judul="🤒 Tidak Masuk Karena Sakit/Izin">
+        <p className="text-sm text-gray-600">
+          Di Beranda ada tombol <strong>"+ Tambah Keterangan"</strong>. Pilih tanggal kamu tidak
+          masuk, isi alasannya, dan boleh tambahkan link bukti (mis. link foto surat dokter di
+          Google Drive). Admin bisa melihat keterangan ini.
+        </p>
       </Bagian>
 
       <Bagian judul="💡 Tips Supaya Absen Lancar">

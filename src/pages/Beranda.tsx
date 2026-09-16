@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
+import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
@@ -13,23 +14,21 @@ export default function Beranda() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function muatStatus() {
+    if (!profile) return;
+    try {
+      const data = await ambilAbsensiHariIni(profile.id);
+      setAbsensi(data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal memuat status absen.");
+    }
+  }
+
   useEffect(() => {
     if (!profile) return;
-    let mounted = true;
     setLoading(true);
-    ambilAbsensiHariIni(profile.id)
-      .then((data) => {
-        if (mounted) setAbsensi(data);
-      })
-      .catch((e) => {
-        if (mounted) setError(e instanceof Error ? e.message : "Gagal memuat status absen.");
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
+    muatStatus().finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
   if (loading) return <Loading teks="Memuat status absen..." />;
@@ -101,6 +100,8 @@ export default function Beranda() {
           🟠 Absen Pulang
         </button>
       </div>
+
+      <FormKeteranganAbsen onTersimpan={muatStatus} />
     </div>
   );
 }

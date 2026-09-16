@@ -3,7 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import KameraLive from "../components/KameraLive";
 import { ambilPosisi, type Posisi } from "../lib/geolocation";
-import { panggilAbsenMasuk, panggilAbsenPulang, unggahFotoAbsen } from "../lib/absensi";
+import {
+  kirimKlarifikasiAbsensi,
+  panggilAbsenMasuk,
+  panggilAbsenPulang,
+  tanggalHariIniWIB,
+  unggahFotoAbsen,
+} from "../lib/absensi";
 import type { ModeAbsen } from "../types/database";
 
 type Langkah = "mode" | "lokasi" | "kamera" | "mengirim" | "sukses" | "gagal";
@@ -23,6 +29,7 @@ export default function Absen() {
   const [langkah, setLangkah] = useState<Langkah>("mode");
   const [mode, setMode] = useState<ModeAbsen>("kantor");
   const [catatan, setCatatan] = useState("");
+  const [keteranganOpsional, setKeteranganOpsional] = useState("");
   const [posisi, setPosisi] = useState<Posisi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasil, setHasil] = useState<{ jam: string; status: string; jarak: number } | null>(null);
@@ -62,6 +69,14 @@ export default function Absen() {
         const respon =
           jenis === "masuk" ? await panggilAbsenMasuk(params) : await panggilAbsenPulang(params);
 
+        if (keteranganOpsional.trim().length >= 3) {
+          try {
+            await kirimKlarifikasiAbsensi(tanggalHariIniWIB(), keteranganOpsional.trim(), "");
+          } catch {
+            // Absen sudah berhasil — keterangan opsional gagal tersimpan tidak menggagalkan absen.
+          }
+        }
+
         setHasil({
           jam: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
           status: respon.status,
@@ -73,7 +88,7 @@ export default function Absen() {
         setLangkah("gagal");
       }
     },
-    [profile, posisi, jenis, jenisValid, mode, catatan]
+    [profile, posisi, jenis, jenisValid, mode, catatan, keteranganOpsional]
   );
 
   if (!jenisValid) {
@@ -134,6 +149,19 @@ export default function Absen() {
               />
             </div>
           )}
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Keterangan (opsional)
+            </label>
+            <textarea
+              value={keteranganOpsional}
+              onChange={(e) => setKeteranganOpsional(e.target.value)}
+              placeholder="Contoh: Telat karena macet parah di jalan"
+              rows={2}
+              className="w-full rounded-xl border border-gray-300 p-3 text-base"
+            />
+          </div>
 
           {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
