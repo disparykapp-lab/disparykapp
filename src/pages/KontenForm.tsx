@@ -39,6 +39,7 @@ export default function KontenForm() {
   const [pegawaiList, setPegawaiList] = useState<Profile[]>([]);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
   const [picAsli, setPicAsli] = useState<string | null>(null);
+  const [pembuatAsli, setPembuatAsli] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -73,6 +74,7 @@ export default function KontenForm() {
           aset_url: data.aset_url ?? "",
         });
         setPicAsli(data.pic_user_id);
+        setPembuatAsli(data.dibuat_oleh);
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Gagal memuat konten."))
       .finally(() => setLoading(false));
@@ -80,7 +82,9 @@ export default function KontenForm() {
 
   const isAdmin = profile?.role === "admin";
   const isPic = !!profile && picAsli === profile.id;
-  const bisaEditPenuh = isBaru ? isAdmin : isAdmin || isPic;
+  const isPembuat = !!profile && pembuatAsli === profile.id;
+  const bisaHapus = !isBaru && (isAdmin || isPic || isPembuat);
+  const bisaEditPenuh = isBaru ? true : isAdmin || isPic || isPembuat;
 
   async function simpan() {
     if (!profile) return;
@@ -257,7 +261,7 @@ export default function KontenForm() {
 
       {(isBaru || bisaEditPenuh) && (
         <div className="flex gap-3">
-          {!isBaru && isAdmin && (
+          {bisaHapus && (
             <button
               onClick={() => void hapus()}
               disabled={menyimpan}

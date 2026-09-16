@@ -33,10 +33,8 @@ export default function App() {
 
               <Route element={<RequireFiturKalender />}>
                 <Route path="/kalender" element={<Kalender />} />
+                <Route path="/kalender/baru" element={<KontenForm />} />
                 <Route path="/kalender/:id/edit" element={<KontenForm />} />
-                <Route element={<RequireAdmin />}>
-                  <Route path="/kalender/baru" element={<KontenForm />} />
-                </Route>
               </Route>
 
               <Route element={<RequireAdmin />}>

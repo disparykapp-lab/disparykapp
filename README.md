@@ -50,6 +50,8 @@ npm run dev
       diam-diam tidak melakukan apa-apa (tidak error, cuma belum aktif).
    8. `0008_kelola_foto_absensi.sql` — policy hapus foto manual (admin) + RPC pendukungnya,
       dipakai menu *Kelola → Foto Absensi*.
+   9. `0009_konten_untuk_user.sql` — pegawai biasa (bukan cuma admin) boleh menambah konten
+      baru, dan boleh mengedit/menghapus konten yang dia buat sendiri atau yang PIC-nya dia.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

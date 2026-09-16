@@ -128,11 +128,16 @@ export default function PanduanAdmin() {
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">
-        <Langkah no={1}>Buka menu Kalender, tekan "+ Tambah" (hanya admin yang bisa menambah konten baru).</Langkah>
+        <Langkah no={1}>
+          Buka menu Kalender, tekan "+ Tambah" — semua pegawai yang divisinya punya akses
+          Kalender Konten (lihat bagian Kelola Divisi) boleh menambah konten baru, bukan cuma
+          admin.
+        </Langkah>
         <Langkah no={2}>Isi judul, deskripsi/caption, platform, tanggal & jam tayang, PIC penanggung jawab, divisi, dan link aset (Canva/Drive).</Langkah>
         <Langkah no={3}>
-          Admin bisa mengedit atau menghapus konten siapa saja. Pegawai biasa hanya bisa mengubah
-          status konten yang PIC-nya dirinya sendiri.
+          Admin bisa mengedit atau menghapus konten siapa saja. Pegawai biasa bisa mengedit
+          penuh dan menghapus konten yang dia buat sendiri atau yang PIC-nya dia — tidak bisa
+          mengubah/menghapus konten milik pegawai lain.
         </Langkah>
       </Bagian>
     </div>

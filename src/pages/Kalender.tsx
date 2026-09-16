@@ -11,7 +11,6 @@ import {
   startOfWeek,
 } from "date-fns";
 import { id } from "date-fns/locale";
-import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import { ambilKonten, type BarisKonten } from "../lib/konten";
 import { geserBulan, keYMD } from "../lib/tanggal";
@@ -26,9 +25,6 @@ import type { PlatformKonten, StatusKonten } from "../types/database";
 type Tampilan = "bulanan" | "daftar";
 
 export default function Kalender() {
-  const { profile } = useAuth();
-  const isAdmin = profile?.role === "admin";
-
   const [tampilan, setTampilan] = useState<Tampilan>("bulanan");
   const [ref, setRef] = useState(new Date());
   const [items, setItems] = useState<BarisKonten[]>([]);
@@ -76,14 +72,12 @@ export default function Kalender() {
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-brand-text">Kalender Konten</h1>
-        {isAdmin && (
-          <Link
-            to="/kalender/baru"
-            className="rounded-full bg-brand-masuk px-4 py-2 text-sm font-semibold text-white"
-          >
-            + Tambah
-          </Link>
-        )}
+        <Link
+          to="/kalender/baru"
+          className="rounded-full bg-brand-masuk px-4 py-2 text-sm font-semibold text-white"
+        >
+          + Tambah
+        </Link>
       </header>
 
       <div className="flex gap-2">
