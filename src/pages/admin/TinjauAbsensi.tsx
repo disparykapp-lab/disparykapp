@@ -3,6 +3,7 @@ import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import { formatTanggal } from "../../lib/tanggal";
+import { tandaiAbsensi } from "../../lib/absensi";
 import type { BarisAbsensi } from "../../lib/rekap";
 
 const LABEL_STATUS: Record<string, string> = {
@@ -20,8 +21,7 @@ export default function TinjauAbsensi() {
   const [sampai, setSampai] = useState(defaultHariIni());
   const [terbuka, setTerbuka] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  async function muat() {
     setLoading(true);
     setError(null);
     let query = supabase
@@ -33,16 +33,15 @@ export default function TinjauAbsensi() {
 
     if (hanyaDitandai) query = query.eq("ditandai", true);
 
-    query.then(({ data, error }) => {
-      if (!mounted) return;
-      if (error) setError(error.message);
-      setRows((data as BarisAbsensi[]) ?? []);
-      setLoading(false);
-    });
+    const { data, error } = await query;
+    if (error) setError(error.message);
+    setRows((data as BarisAbsensi[]) ?? []);
+    setLoading(false);
+  }
 
-    return () => {
-      mounted = false;
-    };
+  useEffect(() => {
+    void muat();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dari, sampai, hanyaDitandai]);
 
   return (
@@ -99,7 +98,7 @@ export default function TinjauAbsensi() {
                 <span className="text-gray-400">{terbuka === r.id ? "▲" : "▼"}</span>
               </button>
 
-              {terbuka === r.id && <DetailAbsensi row={r} />}
+              {terbuka === r.id && <DetailAbsensi row={r} onUbah={muat} />}
             </div>
           ))}
           {rows.length === 0 && (
@@ -113,14 +112,47 @@ export default function TinjauAbsensi() {
   );
 }
 
-function DetailAbsensi({ row }: { row: BarisAbsensi }) {
+function DetailAbsensi({ row, onUbah }: { row: BarisAbsensi; onUbah: () => void }) {
+  const [alasan, setAlasan] = useState(row.alasan_tanda ?? "");
+  const [menyimpan, setMenyimpan] = useState(false);
+  const [errorTanda, setErrorTanda] = useState<string | null>(null);
+
+  async function simpanTanda(ditandai: boolean) {
+    if (ditandai && alasan.trim().length < 3) {
+      setErrorTanda("Isi alasan penandaan dulu (minimal 3 huruf).");
+      return;
+    }
+    setMenyimpan(true);
+    setErrorTanda(null);
+    try {
+      await tandaiAbsensi(row.id, ditandai, alasan.trim());
+      onUbah();
+    } catch (e) {
+      setErrorTanda(e instanceof Error ? e.message : "Gagal menyimpan tanda.");
+    } finally {
+      setMenyimpan(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 border-t border-gray-100 p-4">
-      {row.ditandai && row.alasan_tanda && (
-        <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          Alasan ditandai: {row.alasan_tanda}
-        </p>
+      {(row.catatan_klarifikasi || row.bukti_url) && (
+        <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+          <p className="font-semibold">Keterangan dari pegawai</p>
+          {row.catatan_klarifikasi && <p className="mt-1">{row.catatan_klarifikasi}</p>}
+          {row.bukti_url && (
+            <a
+              href={row.bukti_url}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-block break-all text-blue-700 underline"
+            >
+              🔗 Buka link bukti
+            </a>
+          )}
+        </div>
       )}
+
       <SesiAbsensi
         judul="Masuk"
         at={row.masuk_at}
@@ -143,6 +175,42 @@ function DetailAbsensi({ row }: { row: BarisAbsensi }) {
         fotoPath={row.keluar_foto_path}
         ip={row.keluar_ip}
       />
+
+      <div className="rounded-lg bg-gray-50 p-3">
+        <p className="mb-2 text-sm font-semibold text-brand-text">Tandai untuk Ditinjau</p>
+        {row.ditandai ? (
+          <div className="flex flex-col gap-2">
+            {row.alasan_tanda && (
+              <p className="text-sm text-red-700">Alasan saat ini: {row.alasan_tanda}</p>
+            )}
+            <button
+              onClick={() => void simpanTanda(false)}
+              disabled={menyimpan}
+              className="min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
+            >
+              {menyimpan ? "Menyimpan..." : "Batalkan Tanda"}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <textarea
+              value={alasan}
+              onChange={(e) => setAlasan(e.target.value)}
+              rows={2}
+              placeholder="Alasan ditandai, mis. lokasi mencurigakan / foto tidak jelas"
+              className="rounded-lg border border-gray-300 p-2 text-sm"
+            />
+            {errorTanda && <p className="text-xs text-red-600">{errorTanda}</p>}
+            <button
+              onClick={() => void simpanTanda(true)}
+              disabled={menyimpan}
+              className="min-h-[40px] rounded-lg bg-red-600 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {menyimpan ? "Menyimpan..." : "⚑ Tandai Entri Ini"}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -208,6 +276,9 @@ function SesiAbsensi({
         )}
         {petaUrl && (
           <iframe title={`Peta ${judul}`} src={petaUrl} className="aspect-square w-full rounded-lg border border-gray-200" />
+        )}
+        {!fotoUrl && fotoPath === null && (
+          <p className="col-span-2 text-xs text-gray-400">Foto sudah dihapus otomatis (retensi habis).</p>
         )}
       </div>
     </div>

@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
   { to: "/kelola/pegawai", label: "Pegawai", icon: "👥", deskripsi: "Kelola akun & data pegawai" },
@@ -9,9 +11,29 @@ const MENU = [
 ];
 
 export default function Kelola() {
+  const [retensi, setRetensi] = useState<StatusRetensi | null>(null);
+
+  useEffect(() => {
+    cekRetensiAbsensi().then(setRetensi);
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-bold text-brand-text">Kelola</h1>
+
+      {retensi && retensi.akanTerhapus > 0 && (
+        <Link
+          to="/rekap"
+          className="flex flex-col gap-1 rounded-2xl bg-yellow-50 p-4 text-sm text-yellow-800 shadow-sm"
+        >
+          <span className="font-semibold">⚠️ {retensi.akanTerhapus} data absensi akan terhapus otomatis dalam 7 hari</span>
+          <span>
+            Data absensi disimpan {retensi.retensiBulan} bulan, lalu terhapus otomatis. Ekspor
+            dulu lewat menu Rekap kalau masih dibutuhkan. Ketuk untuk buka Rekap.
+          </span>
+        </Link>
+      )}
+
       <div className="grid grid-cols-1 gap-3">
         {MENU.map((m) => (
           <Link

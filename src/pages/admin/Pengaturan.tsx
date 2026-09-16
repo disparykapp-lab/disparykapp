@@ -58,6 +58,8 @@ export default function Pengaturan() {
         akurasi_maks_meter: form.akurasi_maks_meter,
         jam_masuk: form.jam_masuk,
         jam_pulang: form.jam_pulang,
+        retensi_foto_hari: form.retensi_foto_hari,
+        retensi_absensi_bulan: form.retensi_absensi_bulan,
       })
       .eq("id", 1);
     if (error) setError(error.message);
@@ -163,6 +165,38 @@ export default function Pengaturan() {
             />
           </Field>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm">
+        <p className="text-sm font-semibold text-brand-text">🗑️ Retensi Data Otomatis</p>
+        <p className="-mt-2 text-xs text-gray-500">
+          Data lama dihapus otomatis tiap hari lewat penjadwal database, supaya penyimpanan
+          gratis tidak penuh. Pastikan ekspor rekap secara berkala sebelum data terhapus.
+        </p>
+
+        <Field label="Hapus foto absen setelah (hari)">
+          <input
+            type="number"
+            min={1}
+            value={form.retensi_foto_hari}
+            onChange={(e) => setForm({ ...form, retensi_foto_hari: Number(e.target.value) })}
+            className="w-full rounded-xl border border-gray-300 p-3 text-base"
+          />
+        </Field>
+
+        <Field label="Hapus data absensi setelah (bulan)">
+          <input
+            type="number"
+            min={1}
+            value={form.retensi_absensi_bulan}
+            onChange={(e) => setForm({ ...form, retensi_absensi_bulan: Number(e.target.value) })}
+            className="w-full rounded-xl border border-gray-300 p-3 text-base"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Aplikasi menampilkan peringatan di menu Kelola mulai 7 hari sebelum data pertama
+            kena hapus, supaya sempat diekspor dulu.
+          </p>
+        </Field>
       </div>
 
       <button

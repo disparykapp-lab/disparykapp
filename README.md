@@ -29,6 +29,12 @@ npm run dev
    2. `0002_rpc_absensi.sql` — fungsi `absen_masuk` / `absen_pulang`
    3. `0003_storage.sql` — bucket privat `absensi` + kebijakan akses foto
    4. `0004_fitur_divisi.sql` — kolom hak akses fitur per divisi (mis. Kalender Konten)
+   5. `0005_retensi_dan_klarifikasi.sql` — retensi data otomatis, RPC tandai absensi &
+      klarifikasi pegawai. **Butuh extension `pg_cron`** (Database → Extensions → cari
+      "pg_cron" → Enable, kalau belum aktif) supaya `create extension pg_cron` di file ini
+      berhasil. Kalau extension ini tidak tersedia di plan/region kamu, jalankan bagian lain
+      file ini dulu (skip dua blok `select cron.schedule(...)` di paling bawah) — pembersihan
+      otomatis tidak akan jalan, tapi fitur lain (tandai, klarifikasi) tetap berfungsi.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
@@ -86,6 +92,19 @@ Aplikasi ini **mempersulit dan mendeteksi** kecurangan absen, bukan mencegahnya 
 - IP pemanggil dicatat untuk jejak audit; admin bisa meninjau lewat *Kelola → Tinjau Absensi*.
 
 Namun aplikasi **web** tetap bisa diakali lewat DevTools browser, ekstensi fake-GPS, atau HP yang di-root — ini keterbatasan yang melekat pada platform web dan **tidak bisa dijanjikan "anti-palsu total"**. Untuk jaminan lebih tinggi, dibutuhkan aplikasi native (Android) dengan deteksi mock-location & device attestation — di luar cakupan versi ini.
+
+## Catatan penting: retensi data otomatis
+
+Supaya penyimpanan gratis tidak penuh, data lama **dihapus otomatis dan permanen** lewat
+penjadwal database (`pg_cron`, lihat `0005_retensi_dan_klarifikasi.sql`):
+
+- **Foto absen**: dihapus setelah `retensi_foto_hari` hari (default 3 hari).
+- **Data absensi** (baris lengkap): dihapus setelah `retensi_absensi_bulan` bulan (default 3
+  bulan). Aplikasi menampilkan peringatan di halaman Kelola mulai 7 hari sebelum data pertama
+  kena hapus — ekspor Excel dari menu Rekap sebelum itu kalau datanya masih dibutuhkan.
+
+Kedua angka ini bisa diubah admin lewat *Kelola → Pengaturan Kantor*. **Penghapusan tidak bisa
+dibatalkan** — tidak ada cadangan otomatis di luar aplikasi.
 
 ## Kriteria diterima
 

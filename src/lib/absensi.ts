@@ -73,3 +73,21 @@ export async function panggilAbsenPulang(p: ParamAbsen) {
   if (error) throw new Error(error.message);
   return data as { ok: boolean; jarak_m: number; status: string };
 }
+
+export async function tandaiAbsensi(id: string, ditandai: boolean, alasan: string | null) {
+  const { error } = await supabase.rpc("tandai_absensi", {
+    p_id: id,
+    p_ditandai: ditandai,
+    p_alasan: alasan,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function kirimKlarifikasiAbsensi(tanggal: string, catatan: string, buktiUrl: string) {
+  const { error } = await supabase.rpc("kirim_klarifikasi_absensi", {
+    p_tanggal: tanggal,
+    p_catatan: catatan,
+    p_bukti_url: buktiUrl || null,
+  });
+  if (error) throw new Error(error.message);
+}

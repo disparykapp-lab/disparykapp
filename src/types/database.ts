@@ -39,6 +39,8 @@ export interface Pengaturan {
   jam_masuk: string;
   jam_pulang: string;
   timezone: string;
+  retensi_foto_hari: number;
+  retensi_absensi_bulan: number;
 }
 
 export interface Absensi {
@@ -66,6 +68,8 @@ export interface Absensi {
   status: StatusAbsen;
   ditandai: boolean;
   alasan_tanda: string | null;
+  catatan_klarifikasi: string | null;
+  bukti_url: string | null;
   created_at: string;
   updated_at: string;
 }

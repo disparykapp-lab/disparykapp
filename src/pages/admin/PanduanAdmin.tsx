@@ -67,6 +67,22 @@ export default function PanduanAdmin() {
         <Langkah no={4}>Atur jam masuk & jam pulang kantor — dipakai untuk menentukan status "Telat".</Langkah>
       </Bagian>
 
+      <Bagian judul="🗑️ Retensi Data Otomatis">
+        <Langkah no={1}>
+          Masih di Kelola → Pengaturan Kantor, ada bagian "Retensi Data Otomatis" untuk atur
+          berapa lama foto absen dan data absensi disimpan sebelum terhapus otomatis (default:
+          foto 3 hari, data absensi 3 bulan).
+        </Langkah>
+        <Langkah no={2}>
+          Aplikasi menampilkan peringatan kuning di halaman Kelola begitu ada data absensi yang
+          akan terhapus dalam 7 hari — buka Rekap dan ekspor Excel dulu kalau masih dibutuhkan.
+        </Langkah>
+        <Catatan>
+          Penghapusan berjalan otomatis tiap hari lewat penjadwal database (pg_cron), bukan
+          manual. Setelah terhapus, data tidak bisa dikembalikan.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="🔍 Tinjau Absensi">
         <Langkah no={1}>Buka Kelola → Tinjau Absensi untuk melihat semua entri absen semua pegawai.</Langkah>
         <Langkah no={2}>Filter berdasarkan rentang tanggal, atau centang "Hanya ditandai" untuk entri mencurigakan.</Langkah>
@@ -74,12 +90,26 @@ export default function PanduanAdmin() {
           Tekan salah satu baris untuk membuka detail: foto absen, peta lokasi, akurasi GPS, dan
           alamat IP — dipakai untuk mengecek kewajaran absen.
         </Langkah>
+        <Langkah no={4}>
+          Kalau ada yang mencurigakan, isi alasan lalu tekan <strong>"⚑ Tandai Entri Ini"</strong>{" "}
+          di bagian bawah detail. Entri yang ditandai tampil dengan garis merah dan bisa
+          difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
+        </Langkah>
+        <Langkah no={5}>
+          Kalau pegawai sudah mengirim keterangan (mis. alasan sakit) beserta link bukti (mis.
+          surat dokter di Google Drive) lewat halaman Rekap mereka, keterangan itu muncul di
+          kotak biru paling atas detail entri ini — tekan "🔗 Buka link bukti" untuk memeriksanya.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📊 Rekap Semua Pegawai">
         <Langkah no={1}>Buka menu Rekap — sebagai admin kamu bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
         <Langkah no={2}>Pilih "Semua Pegawai" untuk lihat ringkasan semua orang sekaligus.</Langkah>
-        <Langkah no={3}>Tombol "Ekspor CSV" dan "Cetak" tersedia untuk laporan ke atasan.</Langkah>
+        <Langkah no={3}>
+          Tombol "Ekspor Excel" mengunduh file .xlsx rapi (judul, periode, ringkasan, tabel
+          berwarna) siap dipakai untuk laporan ke atasan. Ada juga tombol "Cetak" untuk print
+          langsung.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

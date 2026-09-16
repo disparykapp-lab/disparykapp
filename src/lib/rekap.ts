@@ -63,38 +63,3 @@ export function hitungRingkasan(rows: BarisAbsensi[], dari: Date, sampai: Date):
   };
 }
 
-export function unduhCsv(nama: string, rows: BarisAbsensi[]) {
-  const header = [
-    "Nama",
-    "Tanggal",
-    "Jam Masuk",
-    "Jam Pulang",
-    "Mode Masuk",
-    "Mode Pulang",
-    "Status",
-    "Ditandai",
-  ];
-
-  const baris = rows.map((r) => [
-    r.profiles?.nama ?? "",
-    r.tanggal,
-    r.masuk_at ? new Date(r.masuk_at).toLocaleTimeString("id-ID") : "",
-    r.keluar_at ? new Date(r.keluar_at).toLocaleTimeString("id-ID") : "",
-    r.masuk_mode ?? "",
-    r.keluar_mode ?? "",
-    r.status,
-    r.ditandai ? "Ya" : "",
-  ]);
-
-  const csv = [header, ...baris]
-    .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
-
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${nama}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
