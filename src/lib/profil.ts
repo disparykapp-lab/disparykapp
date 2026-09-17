@@ -5,7 +5,6 @@ export async function unggahFotoProfil(userId: string, file: Blob): Promise<stri
 
   const { error } = await supabase.storage.from("avatar").upload(path, file, {
     contentType: "image/jpeg",
-    upsert: true,
   });
   if (error) throw new Error("Gagal mengunggah foto: " + error.message);
 
