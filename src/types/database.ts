@@ -27,6 +27,10 @@ export interface Profile {
   jabatan: string | null;
   foto_url: string | null;
   aktif: boolean;
+  tanggal_lahir: string | null;
+  asal_sekolah: string | null;
+  tanggal_mulai_magang: string | null;
+  tanggal_selesai_magang: string | null;
   created_at: string;
 }
 

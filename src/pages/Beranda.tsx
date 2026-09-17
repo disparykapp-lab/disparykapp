@@ -6,6 +6,7 @@ import IconTile from "../components/IconTile";
 import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
+import { hitungProgressMagang } from "../lib/profil";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
@@ -35,6 +36,11 @@ export default function Beranda() {
   const sudahMasuk = !!absensi?.masuk_at;
   const sudahPulang = !!absensi?.keluar_at;
 
+  const magang =
+    profile?.tanggal_mulai_magang && profile?.tanggal_selesai_magang
+      ? hitungProgressMagang(profile.tanggal_mulai_magang, profile.tanggal_selesai_magang)
+      : null;
+
   const tanggalHariIni = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -54,6 +60,24 @@ export default function Beranda() {
         <Loading teks="Memuat status absen..." />
       ) : (
         <>
+          {magang && (
+            <section className="rounded-2xl bg-white p-5 shadow-sm">
+              <div className="mb-2 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-gray-500">Progress Magang</h2>
+                <span className="text-sm font-bold text-brand-masuk">{magang.persen}%</span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full bg-brand-masuk transition-all"
+                  style={{ width: `${magang.persen}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                {magang.selesai ? "Masa magang sudah selesai" : magang.teksSisa}
+              </p>
+            </section>
+          )}
+
           <section className="rounded-2xl bg-white p-5 shadow-sm">
             <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
             <div className="flex flex-col gap-2 text-sm">

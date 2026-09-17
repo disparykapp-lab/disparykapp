@@ -10,6 +10,20 @@ export default function Panduan() {
         Panduan singkat cara absen dan memakai Kalender Konten di aplikasi DisparYK.
       </p>
 
+      <Bagian judul="🙋 Profil Saya">
+        <Langkah no={1}>
+          Tekan foto/avatar bulat di header Beranda untuk buka halaman <strong>Profil Saya</strong>.
+        </Langkah>
+        <Langkah no={2}>
+          Di sana kamu bisa ganti foto profil (tekan fotonya), ubah nama, isi tanggal lahir, dan
+          asal sekolah/kampus. Tekan "Simpan Profil" setelah selesai.
+        </Langkah>
+        <Langkah no={3}>
+          Kalau kamu sedang magang, tanggal mulai & selesai magang diatur oleh admin — akan
+          muncul progress bar persentase magang di halaman ini dan di Beranda.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="🔑 Cara Masuk (Login)">
         <Langkah no={1}>Buka aplikasi, tekan tombol "Masuk dengan Google".</Langkah>
         <Langkah no={2}>Pilih akun Google kamu (email harus sudah didaftarkan admin).</Langkah>

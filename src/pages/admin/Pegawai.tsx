@@ -3,6 +3,8 @@ import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+import { simpanMasaMagang, hitungProgressMagang } from "../../lib/profil";
+import { formatTanggal } from "../../lib/tanggal";
 import type { Divisi, Profile, Role } from "../../types/database";
 
 export default function Pegawai() {
@@ -14,6 +16,7 @@ export default function Pegawai() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [menyimpan, setMenyimpan] = useState(false);
+  const [terbuka, setTerbuka] = useState<string | null>(null);
 
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
@@ -171,20 +174,32 @@ export default function Pegawai() {
       <div className="flex flex-col gap-2">
         {list.map((p) => (
           <div key={p.id} className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="font-semibold text-brand-text">{p.nama}</p>
-                <p className="text-xs text-gray-500">{p.email}</p>
+            <button
+              onClick={() => setTerbuka(terbuka === p.id ? null : p.id)}
+              className="flex items-start justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
+                  {p.foto_url ? (
+                    <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    p.nama.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-brand-text">{p.nama}</p>
+                  <p className="text-xs text-gray-500">{p.email}</p>
+                </div>
               </div>
-              <button
-                onClick={() => void toggleAktif(p.id, p.aktif)}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
                   p.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
                 }`}
               >
                 {p.aktif ? "Aktif" : "Nonaktif"}
-              </button>
-            </div>
+              </span>
+            </button>
+
             <div className="flex flex-wrap gap-2">
               <select
                 value={p.divisi_id ?? ""}
@@ -206,6 +221,12 @@ export default function Pegawai() {
                 <option value="user">Pegawai</option>
                 <option value="admin">Admin</option>
               </select>
+              <button
+                onClick={() => void toggleAktif(p.id, p.aktif)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-brand-text"
+              >
+                {p.aktif ? "Nonaktifkan" : "Aktifkan"}
+              </button>
               {p.id !== profileSaya?.id && (
                 <button
                   onClick={() => void hapusPegawai(p)}
@@ -216,6 +237,8 @@ export default function Pegawai() {
                 </button>
               )}
             </div>
+
+            {terbuka === p.id && <ProfilKaryawan pegawai={p} onUbah={muat} />}
           </div>
         ))}
         {list.length === 0 && (
@@ -223,6 +246,93 @@ export default function Pegawai() {
             Belum ada pegawai terdaftar.
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ProfilKaryawan({ pegawai, onUbah }: { pegawai: Profile; onUbah: () => void }) {
+  const [mulai, setMulai] = useState(pegawai.tanggal_mulai_magang ?? "");
+  const [selesai, setSelesai] = useState(pegawai.tanggal_selesai_magang ?? "");
+  const [menyimpan, setMenyimpan] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const magang = mulai && selesai ? hitungProgressMagang(mulai, selesai) : null;
+
+  async function simpan() {
+    setMenyimpan(true);
+    setError(null);
+    try {
+      await simpanMasaMagang(pegawai.id, mulai || null, selesai || null);
+      onUbah();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal menyimpan masa magang.");
+    } finally {
+      setMenyimpan(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-gray-100 pt-3">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <p className="text-xs text-gray-400">Tanggal Lahir</p>
+          <p className="text-brand-text">
+            {pegawai.tanggal_lahir ? formatTanggal(pegawai.tanggal_lahir) : "- Belum diisi -"}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-400">Asal Sekolah/Kampus</p>
+          <p className="text-brand-text">{pegawai.asal_sekolah || "- Belum diisi -"}</p>
+        </div>
+      </div>
+      <p className="text-[11px] text-gray-400">
+        Data ini diisi pegawai sendiri lewat halaman Profil Saya.
+      </p>
+
+      <div className="rounded-lg bg-gray-50 p-3">
+        <p className="mb-2 text-sm font-semibold text-brand-text">Masa Magang</p>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-gray-500">Mulai</span>
+            <input
+              type="date"
+              value={mulai}
+              onChange={(e) => setMulai(e.target.value)}
+              className="rounded-lg border border-gray-300 p-2 text-sm"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-gray-500">Selesai</span>
+            <input
+              type="date"
+              value={selesai}
+              onChange={(e) => setSelesai(e.target.value)}
+              className="rounded-lg border border-gray-300 p-2 text-sm"
+            />
+          </label>
+        </div>
+
+        {magang && (
+          <div className="mt-2">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-white">
+              <div className="h-full rounded-full bg-brand-masuk" style={{ width: `${magang.persen}%` }} />
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              {magang.persen}% berjalan · {magang.teksSisa}
+            </p>
+          </div>
+        )}
+
+        {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+
+        <button
+          onClick={() => void simpan()}
+          disabled={menyimpan}
+          className="mt-3 min-h-[40px] w-full rounded-lg bg-brand-masuk text-xs font-semibold text-white disabled:opacity-60"
+        >
+          {menyimpan ? "Menyimpan..." : "Simpan Masa Magang"}
+        </button>
       </div>
     </div>
   );

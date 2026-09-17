@@ -52,6 +52,8 @@ npm run dev
       dipakai menu *Kelola → Foto Absensi*.
    9. `0009_konten_untuk_user.sql` — pegawai biasa (bukan cuma admin) boleh menambah konten
       baru, dan boleh mengedit/menghapus konten yang dia buat sendiri atau yang PIC-nya dia.
+   10. `0010_profil_karyawan.sql` — kolom profil (tanggal lahir, asal sekolah, masa magang) +
+       bucket Storage publik `avatar` untuk foto profil.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

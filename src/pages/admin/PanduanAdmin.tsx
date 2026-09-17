@@ -22,12 +22,22 @@ export default function PanduanAdmin() {
           Tiap pegawai bisa diubah divisi dan perannya (Pegawai/Admin) langsung dari daftar.
         </Langkah>
         <Langkah no={4}>
-          Tombol "Aktif/Nonaktif" untuk menonaktifkan sementara (pegawai nonaktif tidak bisa
-          absen atau login, tapi datanya tetap tersimpan).
+          Tombol "Aktifkan/Nonaktifkan" untuk menonaktifkan sementara (pegawai nonaktif tidak
+          bisa absen atau login, tapi datanya tetap tersimpan).
         </Langkah>
         <Langkah no={5}>
+          Tekan kartu pegawai untuk buka detail profilnya: foto, tanggal lahir, dan asal
+          sekolah/kampus (diisi pegawai sendiri lewat Profil Saya, jadi di sini hanya tampil,
+          tidak bisa diedit admin).
+        </Langkah>
+        <Langkah no={6}>
+          Di bagian yang sama, admin bisa atur <strong>Masa Magang</strong> (tanggal mulai &amp;
+          selesai) untuk pegawai yang berstatus magang/PKL. Setelah disimpan, pegawai itu akan
+          melihat progress bar persentase magangnya sendiri di Beranda &amp; Profil Saya.
+        </Langkah>
+        <Langkah no={7}>
           Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
-          absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktif" saja.
+          absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>
         <Catatan>
           Menghapus akun di Supabase Auth (dashboard Supabase) <strong>tidak</strong> otomatis

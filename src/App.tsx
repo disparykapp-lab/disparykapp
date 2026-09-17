@@ -9,6 +9,7 @@ import Rekap from "./pages/Rekap";
 import Kalender from "./pages/Kalender";
 import KontenForm from "./pages/KontenForm";
 import Panduan from "./pages/Panduan";
+import Profil from "./pages/Profil";
 import Kelola from "./pages/admin/Kelola";
 import Pegawai from "./pages/admin/Pegawai";
 import Divisi from "./pages/admin/Divisi";
@@ -30,6 +31,7 @@ export default function App() {
               <Route path="/absen/:jenis" element={<Absen />} />
               <Route path="/rekap" element={<Rekap />} />
               <Route path="/panduan" element={<Panduan />} />
+              <Route path="/profil" element={<Profil />} />
 
               <Route element={<RequireFiturKalender />}>
                 <Route path="/kalender" element={<Kalender />} />

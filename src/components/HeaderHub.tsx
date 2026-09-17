@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function HeaderHub() {
@@ -36,9 +37,20 @@ export default function HeaderHub() {
       </div>
 
       <div className="mt-4 flex flex-col items-center gap-1 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl font-bold text-brand-masuk shadow">
-          {inisial}
-        </div>
+        <Link
+          to="/profil"
+          className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-white text-2xl font-bold text-brand-masuk shadow"
+          aria-label="Profil saya"
+        >
+          {profile?.foto_url ? (
+            <img src={profile.foto_url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            inisial
+          )}
+          <span className="absolute bottom-0 flex w-full items-center justify-center bg-black/40 py-0.5 text-[9px] text-white">
+            Profil
+          </span>
+        </Link>
         <p className="mt-1 font-semibold">{profile?.nama}</p>
         <p className="text-xs text-white/80">Dinas Pariwisata Kota Yogyakarta</p>
         <span className="mt-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-masuk-dark">
