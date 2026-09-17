@@ -71,7 +71,7 @@ export default function Beranda() {
             </div>
           </section>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <IconTile
               to="/absen/masuk"
               iconSrc="/icon_absen_masuk.png"

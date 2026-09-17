@@ -5,12 +5,12 @@ import IconTile from "../../components/IconTile";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
-  { to: "/kelola/pegawai", label: "Pegawai", icon: "👥", warna: "bg-brand-masuk" },
-  { to: "/kelola/divisi", label: "Divisi", icon: "🏷️", warna: "bg-purple-500" },
-  { to: "/kelola/pengaturan", label: "Pengaturan Kantor", icon: "🏢", warna: "bg-brand-info" },
-  { to: "/kelola/tinjau", label: "Tinjau Absensi", icon: "🔍", warna: "bg-brand-pulang" },
-  { to: "/kelola/foto", label: "Foto Absensi", icon: "🖼️", warna: "bg-teal-500" },
-  { to: "/kelola/panduan", label: "Panduan Admin", icon: "📖", warna: "bg-gray-500" },
+  { to: "/kelola/pegawai", label: "Pegawai", iconSrc: "/kelola/icon_pegawai.png" },
+  { to: "/kelola/divisi", label: "Divisi", iconSrc: "/kelola/icon_divisi.png" },
+  { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },
+  { to: "/kelola/tinjau", label: "Tinjau Absensi", iconSrc: "/kelola/icon_tinjau.png" },
+  { to: "/kelola/foto", label: "Foto Absensi", iconSrc: "/kelola/icon_album.png" },
+  { to: "/kelola/panduan", label: "Panduan Admin", iconSrc: "/kelola/icon_panduan.png" },
 ];
 
 export default function Kelola() {
@@ -37,9 +37,9 @@ export default function Kelola() {
         </Link>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {MENU.map((m) => (
-          <IconTile key={m.to} to={m.to} icon={m.icon} label={m.label} warna={m.warna} />
+          <IconTile key={m.to} to={m.to} iconSrc={m.iconSrc} label={m.label} />
         ))}
       </div>
     </div>
