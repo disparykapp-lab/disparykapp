@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { sedangModeDaftar, useAuth } from "../contexts/AuthContext";
 import Loading from "./Loading";
 
 export function RequireAuth() {
@@ -7,6 +7,10 @@ export function RequireAuth() {
   const location = useLocation();
 
   if (loading) return <Loading teks="Memeriksa sesi login..." />;
+
+  if (session && !profile && sedangModeDaftar()) {
+    return <Navigate to="/daftar" replace />;
+  }
 
   if (!session || !profile) {
     return <Navigate to="/login" state={{ from: location }} replace />;

@@ -78,3 +78,26 @@ export function hitungProgressMagang(mulai: string, selesai: string): ProgressMa
     teksSisa,
   };
 }
+
+export interface PendaftaranInput {
+  nama: string;
+  tanggalLahir: string;
+  asalSekolah: string;
+  tanggalMulaiMagang: string;
+  tanggalSelesaiMagang: string;
+  divisiId: string;
+  fotoUrl: string;
+}
+
+export async function daftarMandiri(input: PendaftaranInput) {
+  const { error } = await supabase.rpc("daftar_mandiri", {
+    p_nama: input.nama,
+    p_tanggal_lahir: input.tanggalLahir,
+    p_asal_sekolah: input.asalSekolah,
+    p_tanggal_mulai_magang: input.tanggalMulaiMagang,
+    p_tanggal_selesai_magang: input.tanggalSelesaiMagang,
+    p_divisi_id: input.divisiId,
+    p_foto_url: input.fotoUrl,
+  });
+  if (error) throw new Error(error.message);
+}

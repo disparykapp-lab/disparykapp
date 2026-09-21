@@ -3,6 +3,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { RequireAdmin, RequireAuth, RequireFiturKalender } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
+import Daftar from "./pages/Daftar";
 import Beranda from "./pages/Beranda";
 import Absen from "./pages/Absen";
 import Rekap from "./pages/Rekap";
@@ -24,6 +25,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/daftar" element={<Daftar />} />
 
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>

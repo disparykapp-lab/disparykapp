@@ -14,11 +14,32 @@ interface AuthState {
   /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
   bisaKalenderKonten: boolean;
   loginGoogle: () => Promise<void>;
+  /** Login Google untuk mengisi form pendaftaran (/daftar); sesi tanpa profil tidak di-logout otomatis */
+  daftarGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+
+export const KUNCI_MODE_DAFTAR = "disparyk_mode_daftar";
+
+export function sedangModeDaftar(): boolean {
+  try {
+    return sessionStorage.getItem(KUNCI_MODE_DAFTAR) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setModeDaftar(aktif: boolean) {
+  try {
+    if (aktif) sessionStorage.setItem(KUNCI_MODE_DAFTAR, "1");
+    else sessionStorage.removeItem(KUNCI_MODE_DAFTAR);
+  } catch {
+    // sessionStorage bisa tidak tersedia (mode privat); abaikan
+  }
+}
 
 type ProfileDenganDivisi = Profile & { divisi: Divisi | null };
 
@@ -53,6 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", userId)
         .maybeSingle();
       data = ulang.data;
+    }
+
+    if (!data && sedangModeDaftar()) {
+      setBelumTerdaftar(false);
+      setProfile(null);
+      setDivisi(null);
+      return;
     }
 
     if (!data) {
@@ -109,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [muatProfile]);
 
   const loginGoogle = useCallback(async () => {
+    setModeDaftar(false);
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -117,7 +146,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const daftarGoogle = useCallback(async () => {
+    setModeDaftar(true);
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { prompt: "select_account" },
+      },
+    });
+  }, []);
+
   const logout = useCallback(async () => {
+    setModeDaftar(false);
     await supabase.auth.signOut();
     setProfile(null);
     setDivisi(null);
@@ -142,10 +183,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       belumTerdaftar,
       bisaKalenderKonten,
       loginGoogle,
+      daftarGoogle,
       logout,
       refreshProfile,
     }),
-    [session, profile, divisi, loading, belumTerdaftar, bisaKalenderKonten, loginGoogle, logout, refreshProfile]
+    [
+      session,
+      profile,
+      divisi,
+      loading,
+      belumTerdaftar,
+      bisaKalenderKonten,
+      loginGoogle,
+      daftarGoogle,
+      logout,
+      refreshProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -46,6 +46,26 @@ export default function PanduanAdmin() {
         </Catatan>
       </Bagian>
 
+      <Bagian judul="📝 Pendaftaran Mandiri (/daftar)">
+        <Langkah no={1}>
+          Ada halaman pendaftaran tersembunyi di alamat{" "}
+          <strong>[alamat-aplikasi]/daftar</strong> — tidak ada tombol/tautan ke sana dari halaman
+          login. Bagikan alamat itu langsung ke calon pegawai/peserta magang yang perlu mendaftar.
+        </Langkah>
+        <Langkah no={2}>
+          Pendaftar masuk dengan akun Google, lalu mengisi foto, nama, tanggal lahir, asal
+          sekolah/kampus, masa magang (dari–sampai), dan memilih divisi.
+        </Langkah>
+        <Langkah no={3}>
+          Akun hasil pendaftaran berstatus <strong>Nonaktif</strong> sampai kamu menyetujuinya:
+          buka Kelola → Pegawai, cari namanya, lalu tekan <strong>"Aktifkan"</strong>. Sebelum itu
+          dia belum bisa login/absen.
+        </Langkah>
+        <Catatan>
+          Kalau ada pendaftar yang tidak dikenal, tekan "Hapus" di kartunya — jangan diaktifkan.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="🏷️ Kelola Divisi">
         <Langkah no={1}>Buka Kelola → Divisi untuk menambah, mengganti nama, atau menonaktifkan divisi/bidang.</Langkah>
         <Langkah no={2}>Divisi yang dinonaktifkan tidak akan muncul lagi di pilihan divisi pegawai baru.</Langkah>
