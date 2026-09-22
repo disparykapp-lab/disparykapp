@@ -131,23 +131,25 @@ export default function Absen() {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setMode("kantor")}
-              className={`min-h-[72px] rounded-2xl border-2 p-4 text-left font-semibold ${
+              className={`flex min-h-[72px] items-center gap-3 rounded-2xl border-2 p-4 text-left font-semibold ${
                 mode === "kantor"
                   ? "border-brand-masuk bg-brand-masuk/10 text-brand-masuk"
                   : "border-gray-200 bg-white text-gray-600"
               }`}
             >
-              🏢 Di Kantor
+              <img src="/icon_absen_dikantor.png" alt="" className="h-10 w-10 object-contain" />
+              Di Kantor
             </button>
             <button
               onClick={() => setMode("luar")}
-              className={`min-h-[72px] rounded-2xl border-2 p-4 text-left font-semibold ${
+              className={`flex min-h-[72px] items-center gap-3 rounded-2xl border-2 p-4 text-left font-semibold ${
                 mode === "luar"
                   ? "border-brand-pulang bg-brand-pulang/10 text-brand-pulang"
                   : "border-gray-200 bg-white text-gray-600"
               }`}
             >
-              🚗 Dinas Luar
+              <img src="/icon_absen_dinas.png" alt="" className="h-10 w-10 object-contain" />
+              Dinas Luar
             </button>
           </div>
 
@@ -214,7 +216,7 @@ export default function Absen() {
       {langkah === "kamera" && posisi && profile && (
         <div className="flex flex-1 flex-col gap-3">
           <p className="text-center text-sm text-gray-600">
-            Ambil foto wajah kamu sekarang (langsung dari kamera, bukan dari galeri)
+            Ambil foto wajah kamu sekarang
           </p>
           <KameraLive
             nama={profile.nama}
