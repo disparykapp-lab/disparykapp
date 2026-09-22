@@ -151,7 +151,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
           <img
             src={hasilUrl}
             alt="Pratinjau foto absen"
-            className="aspect-[3/4] w-full -scale-x-100 object-cover"
+            className="aspect-[3/4] w-full object-cover"
           />
         )}
       </div>
