@@ -169,9 +169,10 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
           <button
             onClick={ambilFoto}
             disabled={!siap}
-            className="min-h-[48px] flex-1 rounded-xl bg-brand-masuk font-semibold text-white disabled:opacity-50"
+            className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-brand-masuk font-semibold text-white disabled:opacity-50"
           >
-            📸 Ambil Foto
+            <img src="/icon_kamera.png" alt="" className="h-6 w-6 object-contain" />
+            Ambil Foto
           </button>
         </div>
       ) : (

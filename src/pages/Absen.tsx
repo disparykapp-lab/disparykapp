@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import KameraLive from "../components/KameraLive";
@@ -35,6 +35,15 @@ export default function Absen() {
   const [posisi, setPosisi] = useState<Posisi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasil, setHasil] = useState<{ jam: string; status: string; jarak: number } | null>(null);
+
+  useEffect(() => {
+    if (langkah !== "sukses") return;
+    const audio = new Audio("/iphone_sfx.mp3");
+    audio.play().catch(() => {
+      // Sebagian browser tetap memblokir autoplay meski dipicu dari interaksi
+      // pengguna sebelumnya — abaikan saja, animasi tetap jalan tanpa suara.
+    });
+  }, [langkah]);
 
   const lanjutDariMode = useCallback(async () => {
     if (mode === "luar" && catatan.trim().length < 5) {
@@ -208,17 +217,23 @@ export default function Absen() {
       )}
 
       {langkah === "mengirim" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-masuk/30 border-t-brand-masuk" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-hidden">
+          <img
+            src="/icon_pesawat.png"
+            alt=""
+            className="animasi-pesawat h-16 w-16 object-contain"
+          />
           <p className="text-gray-600">Mengirim data absen...</p>
         </div>
       )}
 
       {langkah === "sukses" && hasil && (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-masuk/10 text-4xl">
-            ✅
-          </div>
+          <img
+            src="/icon_checklist.png"
+            alt="Berhasil"
+            className="animasi-checklist h-20 w-20 object-contain"
+          />
           <h2 className="text-xl font-bold text-brand-text">
             {LABEL_JENIS[jenis]} berhasil pukul {hasil.jam}
           </h2>
