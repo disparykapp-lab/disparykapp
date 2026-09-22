@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../components/HeaderHalaman";
 import Loading from "../components/Loading";
 import { useAuth } from "../contexts/AuthContext";
-import { teksDenganLink } from "../lib/linkify";
 import {
   ambilTugasSaya,
   hitungRingkasanUndangan,
-  perbaruiStatusUndangan,
+  perbaruiTugasUndangan,
   LABEL_KATEGORI,
   LABEL_STATUS_UNDANGAN,
   type StatusUndangan,
@@ -113,6 +112,10 @@ export default function TugasUndangan() {
                     {r.lokasi_parkir && (
                       <p className="text-xs text-gray-400">Parkir: {r.lokasi_parkir}</p>
                     )}
+                    {r.lokasi_pengantaran && (
+                      <p className="text-xs text-gray-400">Lokasi: {r.lokasi_pengantaran}</p>
+                    )}
+                    {r.catatan && <p className="text-xs text-gray-400">Kontak: {r.catatan}</p>}
                   </div>
                   <BadgeStatus status={r.status} />
                 </button>
@@ -134,7 +137,7 @@ export default function TugasUndangan() {
 function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => void }) {
   const [status, setStatus] = useState<StatusUndangan>(row.status);
   const [catatan, setCatatan] = useState(row.catatan ?? "");
-  const [bukti, setBukti] = useState(row.bukti_url ?? "");
+  const [lokasi, setLokasi] = useState(row.lokasi_pengantaran ?? "");
   const [menyimpan, setMenyimpan] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -142,7 +145,11 @@ function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => voi
     setMenyimpan(true);
     setError(null);
     try {
-      await perbaruiStatusUndangan(row.id, status, catatan.trim() || null, bukti.trim() || null);
+      await perbaruiTugasUndangan(row.id, {
+        status,
+        catatan: catatan.trim() || null,
+        lokasi_pengantaran: lokasi.trim() || null,
+      });
       onTersimpan();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Gagal menyimpan.");
@@ -153,12 +160,6 @@ function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => voi
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-100 p-4">
-      {row.catatan && status === row.status && (
-        <p className="text-xs text-gray-500">
-          Catatan sebelumnya: {teksDenganLink(row.catatan)}
-        </p>
-      )}
-
       <div className="flex gap-2">
         {(["belum", "selesai", "kendala"] as StatusUndangan[]).map((s) => (
           <button
@@ -175,19 +176,27 @@ function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => voi
         ))}
       </div>
 
-      <textarea
-        value={catatan}
-        onChange={(e) => setCatatan(e.target.value)}
-        rows={2}
-        placeholder="Catatan (opsional), mis. sudah diterima langsung / dititipkan resepsionis"
-        className="rounded-lg border border-gray-300 p-2 text-sm"
-      />
-      <input
-        value={bukti}
-        onChange={(e) => setBukti(e.target.value)}
-        placeholder="Link bukti (opsional), mis. foto/WA"
-        className="rounded-lg border border-gray-300 p-2 text-sm"
-      />
+      <label className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500">
+          Nomor HP tamu undangan (untuk pengingat H-2)
+        </span>
+        <input
+          value={catatan}
+          onChange={(e) => setCatatan(e.target.value)}
+          placeholder="mis. 0812xxxxxxx — diisi setelah surat diserahkan"
+          className="rounded-lg border border-gray-300 p-2 text-sm"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500">Lokasi Pengantaran</span>
+        <input
+          value={lokasi}
+          onChange={(e) => setLokasi(e.target.value)}
+          placeholder="mis. Kantor Kelurahan Baciro"
+          className="rounded-lg border border-gray-300 p-2 text-sm"
+        />
+      </label>
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 

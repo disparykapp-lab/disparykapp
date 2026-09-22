@@ -23,10 +23,10 @@ export interface Undangan {
   nomor: number | null;
   nama: string;
   lokasi_parkir: string | null;
+  lokasi_pengantaran: string | null;
   status: StatusUndangan;
   pic_user_id: string | null;
   catatan: string | null;
-  bukti_url: string | null;
   diperbarui_oleh: string | null;
   diperbarui_at: string | null;
   created_at: string;
@@ -62,15 +62,18 @@ export async function tugaskanUndangan(ids: string[], picUserId: string | null) 
   if (error) throw new Error(error.message);
 }
 
-export async function perbaruiStatusUndangan(
+export async function perbaruiTugasUndangan(
   id: string,
-  status: StatusUndangan,
-  catatan: string | null,
-  buktiUrl: string | null
+  data: { status: StatusUndangan; catatan: string | null; lokasi_pengantaran: string | null }
 ) {
+  const { error } = await supabase.from("undangan").update(data).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function perbaruiLokasiPengantaran(id: string, lokasiPengantaran: string | null) {
   const { error } = await supabase
     .from("undangan")
-    .update({ status, catatan, bukti_url: buktiUrl })
+    .update({ lokasi_pengantaran: lokasiPengantaran })
     .eq("id", id);
   if (error) throw new Error(error.message);
 }

@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import {
   ambilSemuaUndangan,
   hitungRingkasanUndangan,
+  perbaruiLokasiPengantaran,
   tugaskanUndangan,
   LABEL_KATEGORI,
   LABEL_STATUS_UNDANGAN,
@@ -28,6 +29,7 @@ export default function DistribusiUndangan() {
   const [terpilih, setTerpilih] = useState<Set<string>>(new Set());
   const [picTugas, setPicTugas] = useState("");
   const [menugaskan, setMenugaskan] = useState(false);
+  const [terbuka, setTerbuka] = useState<string | null>(null);
 
   async function muat() {
     setLoading(true);
@@ -248,28 +250,31 @@ export default function DistribusiUndangan() {
 
           <div className="flex flex-col gap-2">
             {rowsTersaring.map((r) => (
-              <label
-                key={r.id}
-                className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm"
-              >
-                <input
-                  type="checkbox"
-                  checked={terpilih.has(r.id)}
-                  onChange={() => toggleSatu(r.id)}
-                  className="h-5 w-5 shrink-0"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-brand-text">{r.nama}</p>
-                  <p className="truncate text-xs text-gray-500">
-                    {LABEL_KATEGORI[r.kategori]}
-                    {r.sub_kelompok ? ` · ${r.sub_kelompok}` : ""}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    PIC: {r.pic?.nama ?? "belum ditugaskan"}
-                  </p>
+              <div key={r.id} className="rounded-xl bg-white shadow-sm">
+                <div className="flex items-center gap-3 p-3">
+                  <input
+                    type="checkbox"
+                    checked={terpilih.has(r.id)}
+                    onChange={() => toggleSatu(r.id)}
+                    className="h-5 w-5 shrink-0"
+                  />
+                  <button
+                    onClick={() => setTerbuka(terbuka === r.id ? null : r.id)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="truncate text-sm font-semibold text-brand-text">{r.nama}</p>
+                    <p className="truncate text-xs text-gray-500">
+                      {LABEL_KATEGORI[r.kategori]}
+                      {r.sub_kelompok ? ` · ${r.sub_kelompok}` : ""}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      PIC: {r.pic?.nama ?? "belum ditugaskan"}
+                    </p>
+                  </button>
+                  <BadgeStatus status={r.status} />
                 </div>
-                <BadgeStatus status={r.status} />
-              </label>
+                {terbuka === r.id && <DetailUndangan row={r} onUbah={muat} />}
+              </div>
             ))}
             {rowsTersaring.length === 0 && (
               <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
@@ -279,6 +284,60 @@ export default function DistribusiUndangan() {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function DetailUndangan({
+  row,
+  onUbah,
+}: {
+  row: UndanganDenganPic;
+  onUbah: () => void;
+}) {
+  const [lokasi, setLokasi] = useState(row.lokasi_pengantaran ?? "");
+  const [menyimpan, setMenyimpan] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function simpan() {
+    setMenyimpan(true);
+    setError(null);
+    try {
+      await perbaruiLokasiPengantaran(row.id, lokasi.trim() || null);
+      onUbah();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal menyimpan lokasi.");
+    } finally {
+      setMenyimpan(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-gray-100 p-4">
+      {row.lokasi_parkir && (
+        <p className="text-xs text-gray-500">Lokasi parkir (hari-H): {row.lokasi_parkir}</p>
+      )}
+      {row.catatan && <p className="text-xs text-gray-500">Kontak (dari petugas): {row.catatan}</p>}
+
+      <label className="flex flex-col gap-1">
+        <span className="text-xs font-medium text-gray-500">Lokasi Pengantaran</span>
+        <input
+          value={lokasi}
+          onChange={(e) => setLokasi(e.target.value)}
+          placeholder="mis. Kantor Kelurahan Baciro"
+          className="rounded-lg border border-gray-300 p-2 text-sm"
+        />
+      </label>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+
+      <button
+        onClick={() => void simpan()}
+        disabled={menyimpan}
+        className="min-h-[40px] rounded-lg bg-brand-masuk text-sm font-semibold text-white disabled:opacity-60"
+      >
+        {menyimpan ? "Menyimpan..." : "Simpan Lokasi"}
+      </button>
     </div>
   );
 }

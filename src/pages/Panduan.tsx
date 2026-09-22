@@ -104,7 +104,11 @@ export default function Panduan() {
         <Langkah no={2}>
           Pilih status <strong>Selesai</strong> kalau sudah diantar, atau{" "}
           <strong>Kendala</strong> kalau ada masalah (mis. alamat salah/tidak ketemu orangnya).
-          Boleh tambahkan catatan dan link bukti (opsional), lalu tekan Simpan.
+        </Langkah>
+        <Langkah no={3}>
+          Setelah surat diserahkan, isi <strong>nomor HP tamu undangan</strong> — ini dipakai
+          untuk mengingatkan tamu saat H-2 sebelum acara. Isi juga{" "}
+          <strong>Lokasi Pengantaran</strong> kalau belum ada, lalu tekan Simpan.
         </Langkah>
       </Bagian>
 

@@ -179,8 +179,14 @@ export default function PanduanAdmin() {
         </Langkah>
         <Langkah no={4}>
           Pegawai menandai sendiri undangan yang jadi tanggung jawabnya lewat menu "Tugas
-          Undangan" di Beranda mereka (Selesai/Kendala + catatan). Progresnya otomatis muncul
-          di halaman ini.
+          Undangan" di Beranda mereka (Selesai/Kendala + nomor HP tamu untuk pengingat H-2).
+          Progresnya otomatis muncul di halaman ini.
+        </Langkah>
+        <Langkah no={5}>
+          Tekan salah satu undangan untuk buka detail dan isi/ubah{" "}
+          <strong>Lokasi Pengantaran</strong> — kolom ini juga bisa diisi/diubah pegawai yang
+          jadi PIC-nya (berbeda dari "Lokasi Parkir" yang memang khusus untuk hari-H, hanya
+          admin yang bisa ubah).
         </Langkah>
       </Bagian>
 
