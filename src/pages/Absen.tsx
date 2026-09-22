@@ -242,7 +242,7 @@ export default function Absen() {
           <img
             src="/icon_checklist.png"
             alt="Berhasil"
-            className="animasi-checklist h-auto w-56 max-w-[70vw]"
+            className="animasi-checklist h-auto w-96 max-w-[88vw]"
           />
           <h2 className="text-xl font-bold text-brand-text">
             {LABEL_JENIS[jenis]} berhasil pukul {hasil.jam}
