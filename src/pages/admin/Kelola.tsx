@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import IconTile from "../../components/IconTile";
+import { supabase } from "../../lib/supabase";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
@@ -10,15 +11,20 @@ const MENU = [
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },
   { to: "/kelola/tinjau", label: "Tinjau Absensi", iconSrc: "/kelola/icon_tinjau.png" },
   { to: "/kelola/foto", label: "Foto Absensi", iconSrc: "/kelola/icon_album.png" },
-  { to: "/kelola/undangan", label: "Distribusi Undangan", icon: "✉️", warna: "bg-brand-info" },
   { to: "/kelola/panduan", label: "Panduan Admin", iconSrc: "/kelola/icon_panduan.png" },
 ];
 
 export default function Kelola() {
   const [retensi, setRetensi] = useState<StatusRetensi | null>(null);
+  const [undanganBelum, setUndanganBelum] = useState(0);
 
   useEffect(() => {
     cekRetensiAbsensi().then(setRetensi);
+    supabase
+      .from("undangan")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "belum")
+      .then(({ count }) => setUndanganBelum(count ?? 0));
   }, []);
 
   return (
@@ -39,15 +45,15 @@ export default function Kelola() {
       )}
 
       <div className="grid grid-cols-2 gap-3">
+        <IconTile
+          to="/kelola/undangan"
+          iconSrc="/icon_mail.png"
+          label={undanganBelum > 0 ? `Distribusi Undangan (${undanganBelum} belum)` : "Distribusi Undangan"}
+          penuh
+          animasi={undanganBelum > 0}
+        />
         {MENU.map((m) => (
-          <IconTile
-            key={m.to}
-            to={m.to}
-            iconSrc={"iconSrc" in m ? m.iconSrc : undefined}
-            icon={"icon" in m ? m.icon : undefined}
-            warna={"warna" in m ? m.warna : undefined}
-            label={m.label}
-          />
+          <IconTile key={m.to} to={m.to} iconSrc={m.iconSrc} label={m.label} />
         ))}
       </div>
     </div>

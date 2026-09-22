@@ -7,6 +7,7 @@ import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
 import { hitungProgressMagang } from "../lib/profil";
+import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
@@ -15,6 +16,7 @@ export default function Beranda() {
   const [absensi, setAbsensi] = useState<Absensi | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tugasBelum, setTugasBelum] = useState(0);
 
   async function muatStatus() {
     if (!profile) return;
@@ -30,6 +32,9 @@ export default function Beranda() {
     if (!profile) return;
     setLoading(true);
     muatStatus().finally(() => setLoading(false));
+    ambilTugasSaya(profile.id)
+      .then((rows) => setTugasBelum(hitungRingkasanUndangan(rows).belum))
+      .catch(() => setTugasBelum(0));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
@@ -97,6 +102,13 @@ export default function Beranda() {
 
           <div className="grid grid-cols-2 gap-3">
             <IconTile
+              to="/tugas-undangan"
+              iconSrc="/icon_mail.png"
+              label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
+              penuh
+              animasi={tugasBelum > 0}
+            />
+            <IconTile
               to="/absen/masuk"
               iconSrc="/icon_absen_masuk.png"
               label="Absen Masuk"
@@ -109,7 +121,6 @@ export default function Beranda() {
               disabled={!sudahMasuk || sudahPulang}
             />
             <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
-            <IconTile to="/tugas-undangan" icon="✉️" warna="bg-brand-info" label="Tugas Undangan" />
             {bisaKalenderKonten && (
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
             )}
