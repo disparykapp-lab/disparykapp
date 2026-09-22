@@ -20,6 +20,10 @@ const LABEL_JENIS: Record<"masuk" | "pulang", string> = {
   pulang: "Absen Pulang",
 };
 
+/** Jeda minimum layar "mengirim" supaya animasi pesawat sempat terlihat,
+ * meski request ke server sebenarnya sangat cepat. */
+const ANIMASI_KIRIM_MIN_MS = 2600;
+
 export default function Absen() {
   const { jenis } = useParams<{ jenis: "masuk" | "pulang" }>();
   const navigate = useNavigate();
@@ -67,6 +71,7 @@ export default function Absen() {
       if (!profile || !posisi || !jenisValid) return;
       setLangkah("mengirim");
       setError(null);
+      const mulaiKirim = Date.now();
       try {
         const fotoPath = await unggahFotoAbsen(profile.id, jenis === "masuk" ? "masuk" : "keluar", blob);
         const params = {
@@ -90,6 +95,11 @@ export default function Absen() {
           } catch {
             // Absen sudah berhasil — keterangan opsional gagal tersimpan tidak menggagalkan absen.
           }
+        }
+
+        const sisaAnimasi = ANIMASI_KIRIM_MIN_MS - (Date.now() - mulaiKirim);
+        if (sisaAnimasi > 0) {
+          await new Promise((resolve) => setTimeout(resolve, sisaAnimasi));
         }
 
         setHasil({
@@ -232,7 +242,7 @@ export default function Absen() {
           <img
             src="/icon_checklist.png"
             alt="Berhasil"
-            className="animasi-checklist h-20 w-20 object-contain"
+            className="animasi-checklist h-auto w-56 max-w-[70vw]"
           />
           <h2 className="text-xl font-bold text-brand-text">
             {LABEL_JENIS[jenis]} berhasil pukul {hasil.jam}
