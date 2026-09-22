@@ -104,8 +104,8 @@ export default function TugasUndangan() {
                   className="flex w-full items-center justify-between gap-3 p-4 text-left"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-brand-text">{r.nama}</p>
-                    <p className="truncate text-xs text-gray-500">
+                    <p className="text-sm font-semibold leading-snug text-brand-text">{r.nama}</p>
+                    <p className="text-xs text-gray-500">
                       {LABEL_KATEGORI[r.kategori]}
                       {r.sub_kelompok ? ` · ${r.sub_kelompok}` : ""}
                     </p>

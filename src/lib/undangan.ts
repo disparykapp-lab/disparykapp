@@ -78,6 +78,28 @@ export async function perbaruiLokasiPengantaran(id: string, lokasiPengantaran: s
   if (error) throw new Error(error.message);
 }
 
+export interface UndanganInput {
+  kategori: KategoriUndangan;
+  sub_kelompok: string | null;
+  nama: string;
+  lokasi_parkir: string | null;
+}
+
+export async function tambahUndangan(input: UndanganInput) {
+  const { error } = await supabase.from("undangan").insert(input);
+  if (error) throw new Error(error.message);
+}
+
+export async function perbaruiUndangan(id: string, input: UndanganInput) {
+  const { error } = await supabase.from("undangan").update(input).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function hapusUndangan(id: string) {
+  const { error } = await supabase.from("undangan").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 export interface RingkasanUndangan {
   total: number;
   selesai: number;

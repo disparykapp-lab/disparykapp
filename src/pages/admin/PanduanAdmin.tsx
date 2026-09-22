@@ -165,28 +165,37 @@ export default function PanduanAdmin() {
 
       <Bagian judul="✉️ Distribusi Undangan">
         <Langkah no={1}>
-          Buka Kelola → Distribusi Undangan untuk lihat semua daftar undangan (sudah diisi dari
-          daftar undangan WJNC), lengkap dengan progres keseluruhan dan progres per pegawai di
-          bagian atas.
+          Buka Kelola → Distribusi Undangan. Halaman ini dibagi jadi{" "}
+          <strong>folder per kategori</strong> (VVIP, VIP OPD & Mitra, Wilayah & Ormas,
+          Lansia/Disabilitas/Anak) supaya tidak perlu scroll ratusan baris sekaligus — tekan
+          salah satu folder untuk masuk ke isinya.
         </Langkah>
         <Langkah no={2}>
-          Filter dulu (kategori/status/PIC/cari nama) supaya lebih gampang, lalu centang
-          undangan yang mau dibagikan — bisa banyak sekaligus.
+          Di dalam folder, undangan otomatis dikelompokkan lagi jadi "sub-folder" (accordion)
+          berdasarkan kolom <strong>Folder/Sub-kelompok</strong> tiap undangan — teks ini bebas
+          diubah admin (lewat Edit), jadi kelompoknya bisa diatur ulang sesuai kebutuhan
+          (misalnya berdasarkan lokasi, jenis tamu, dll), tidak harus ikut kategori Excel asli.
         </Langkah>
         <Langkah no={3}>
-          Pilih pegawai di dropdown "Tugaskan ke..." lalu tekan <strong>"Tugaskan"</strong>.
-          Undangan yang dipilih langsung berpindah PIC-nya ke pegawai itu.
+          Filter (status/PIC/cari nama), lalu centang undangan yang mau dibagikan — bisa banyak
+          sekaligus, pilih pegawai di dropdown "Tugaskan ke..." lalu tekan{" "}
+          <strong>"Tugaskan"</strong>. Tombol <strong>"Batalkan Penugasan"</strong> mengembalikan
+          jadi "belum ditugaskan" tanpa harus pindah ke pegawai lain dulu.
         </Langkah>
         <Langkah no={4}>
+          Tekan <strong>"+ Tambah Undangan di Kategori Ini"</strong> untuk menambah undangan baru
+          secara manual (di luar 451 data awal dari Excel WJNC).
+        </Langkah>
+        <Langkah no={5}>
+          Tekan salah satu undangan untuk buka detail — bisa <strong>Edit</strong> (nama,
+          kategori, folder/sub-kelompok, lokasi parkir) atau <strong>Hapus</strong> permanen. Di
+          situ juga bisa isi/ubah <strong>Lokasi Pengantaran</strong> (beda dari "Lokasi Parkir"
+          yang khusus hari-H) — kolom ini juga bisa diisi/diubah pegawai yang jadi PIC-nya.
+        </Langkah>
+        <Langkah no={6}>
           Pegawai menandai sendiri undangan yang jadi tanggung jawabnya lewat menu "Tugas
           Undangan" di Beranda mereka (Selesai/Kendala + nomor HP tamu untuk pengingat H-2).
           Progresnya otomatis muncul di halaman ini.
-        </Langkah>
-        <Langkah no={5}>
-          Tekan salah satu undangan untuk buka detail dan isi/ubah{" "}
-          <strong>Lokasi Pengantaran</strong> — kolom ini juga bisa diisi/diubah pegawai yang
-          jadi PIC-nya (berbeda dari "Lokasi Parkir" yang memang khusus untuk hari-H, hanya
-          admin yang bisa ubah).
         </Langkah>
       </Bagian>
 
