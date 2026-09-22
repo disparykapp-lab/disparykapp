@@ -120,6 +120,22 @@ export default function DistribusiUndangan() {
     }
   }
 
+  async function batalkanPenugasanTerpilih() {
+    if (terpilih.size === 0) return;
+    setMenugaskan(true);
+    setError(null);
+    try {
+      await tugaskanUndangan(Array.from(terpilih), null);
+      setTerpilih(new Set());
+      setPicTugas("");
+      await muat();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal membatalkan penugasan.");
+    } finally {
+      setMenugaskan(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Distribusi Undangan" />
@@ -245,6 +261,13 @@ export default function DistribusiUndangan() {
               className="min-h-[40px] rounded-lg bg-brand-masuk px-4 text-sm font-semibold text-white disabled:opacity-50"
             >
               {menugaskan ? "Menugaskan..." : "Tugaskan"}
+            </button>
+            <button
+              onClick={() => void batalkanPenugasanTerpilih()}
+              disabled={terpilih.size === 0 || menugaskan}
+              className="min-h-[40px] rounded-lg border border-red-300 px-4 text-sm font-semibold text-red-600 disabled:opacity-50"
+            >
+              Batalkan Penugasan
             </button>
           </div>
 
