@@ -102,13 +102,6 @@ export default function Beranda() {
 
           <div className="grid grid-cols-2 gap-3">
             <IconTile
-              to="/tugas-undangan"
-              iconSrc="/icon_mail.png"
-              label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
-              penuh
-              animasi={tugasBelum > 0}
-            />
-            <IconTile
               to="/absen/masuk"
               iconSrc="/icon_absen_masuk.png"
               label="Absen Masuk"
@@ -119,6 +112,13 @@ export default function Beranda() {
               iconSrc="/icon_absen_keluar.png"
               label="Absen Pulang"
               disabled={!sudahMasuk || sudahPulang}
+            />
+            <IconTile
+              to="/tugas-undangan"
+              iconSrc="/icon_mail.png"
+              label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
+              penuh
+              animasi={tugasBelum > 0}
             />
             <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
             {bisaKalenderKonten && (
