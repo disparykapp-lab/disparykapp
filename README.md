@@ -61,6 +61,9 @@ npm run dev
    13. `0013_perbaikan_endpoint_hapus_foto.sql` — perbaiki endpoint Storage API yang salah
        bentuk di `bersihkan_foto_lama()` (0007) sehingga pembersihan foto otomatis gagal
        terus dengan "Bucket not found".
+   14. `0014_distribusi_undangan.sql` — tabel `undangan` untuk fitur pembagian tugas
+       penyebaran undangan (menu Kelola → Distribusi Undangan / pegawai → Tugas Undangan),
+       sudah berisi 451 baris seed data dari daftar undangan WJNC.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

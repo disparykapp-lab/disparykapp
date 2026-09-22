@@ -163,6 +163,27 @@ export default function PanduanAdmin() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="✉️ Distribusi Undangan">
+        <Langkah no={1}>
+          Buka Kelola → Distribusi Undangan untuk lihat semua daftar undangan (sudah diisi dari
+          daftar undangan WJNC), lengkap dengan progres keseluruhan dan progres per pegawai di
+          bagian atas.
+        </Langkah>
+        <Langkah no={2}>
+          Filter dulu (kategori/status/PIC/cari nama) supaya lebih gampang, lalu centang
+          undangan yang mau dibagikan — bisa banyak sekaligus.
+        </Langkah>
+        <Langkah no={3}>
+          Pilih pegawai di dropdown "Tugaskan ke..." lalu tekan <strong>"Tugaskan"</strong>.
+          Undangan yang dipilih langsung berpindah PIC-nya ke pegawai itu.
+        </Langkah>
+        <Langkah no={4}>
+          Pegawai menandai sendiri undangan yang jadi tanggung jawabnya lewat menu "Tugas
+          Undangan" di Beranda mereka (Selesai/Kendala + catatan). Progresnya otomatis muncul
+          di halaman ini.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="📅 Kelola Kalender Konten">
         <Langkah no={1}>
           Buka menu Kalender, tekan "+ Tambah" — semua pegawai yang divisinya punya akses

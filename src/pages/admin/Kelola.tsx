@@ -10,6 +10,7 @@ const MENU = [
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },
   { to: "/kelola/tinjau", label: "Tinjau Absensi", iconSrc: "/kelola/icon_tinjau.png" },
   { to: "/kelola/foto", label: "Foto Absensi", iconSrc: "/kelola/icon_album.png" },
+  { to: "/kelola/undangan", label: "Distribusi Undangan", icon: "✉️", warna: "bg-brand-info" },
   { to: "/kelola/panduan", label: "Panduan Admin", iconSrc: "/kelola/icon_panduan.png" },
 ];
 
@@ -39,7 +40,14 @@ export default function Kelola() {
 
       <div className="grid grid-cols-2 gap-3">
         {MENU.map((m) => (
-          <IconTile key={m.to} to={m.to} iconSrc={m.iconSrc} label={m.label} />
+          <IconTile
+            key={m.to}
+            to={m.to}
+            iconSrc={"iconSrc" in m ? m.iconSrc : undefined}
+            icon={"icon" in m ? m.icon : undefined}
+            warna={"warna" in m ? m.warna : undefined}
+            label={m.label}
+          />
         ))}
       </div>
     </div>

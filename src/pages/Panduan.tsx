@@ -95,6 +95,19 @@ export default function Panduan() {
         </p>
       </Bagian>
 
+      <Bagian judul="✉️ Tugas Undangan">
+        <p className="text-sm text-gray-600">
+          Kalau admin menugaskan kamu untuk mengantar undangan, menu "Tugas Undangan" di Beranda
+          akan menampilkan daftarnya.
+        </p>
+        <Langkah no={1}>Tekan salah satu undangan untuk membuka detailnya.</Langkah>
+        <Langkah no={2}>
+          Pilih status <strong>Selesai</strong> kalau sudah diantar, atau{" "}
+          <strong>Kendala</strong> kalau ada masalah (mis. alamat salah/tidak ketemu orangnya).
+          Boleh tambahkan catatan dan link bukti (opsional), lalu tekan Simpan.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="📅 Kalender Konten">
         <p className="text-sm text-gray-600">
           Menu ini cuma muncul kalau divisi kamu diizinkan admin memakainya.

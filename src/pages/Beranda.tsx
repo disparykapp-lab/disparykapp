@@ -109,6 +109,7 @@ export default function Beranda() {
               disabled={!sudahMasuk || sudahPulang}
             />
             <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
+            <IconTile to="/tugas-undangan" icon="✉️" warna="bg-brand-info" label="Tugas Undangan" />
             {bisaKalenderKonten && (
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
             )}

@@ -11,12 +11,14 @@ import Kalender from "./pages/Kalender";
 import KontenForm from "./pages/KontenForm";
 import Panduan from "./pages/Panduan";
 import Profil from "./pages/Profil";
+import TugasUndangan from "./pages/TugasUndangan";
 import Kelola from "./pages/admin/Kelola";
 import Pegawai from "./pages/admin/Pegawai";
 import Divisi from "./pages/admin/Divisi";
 import Pengaturan from "./pages/admin/Pengaturan";
 import TinjauAbsensi from "./pages/admin/TinjauAbsensi";
 import FotoAbsensi from "./pages/admin/FotoAbsensi";
+import DistribusiUndangan from "./pages/admin/DistribusiUndangan";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
               <Route path="/rekap" element={<Rekap />} />
               <Route path="/panduan" element={<Panduan />} />
               <Route path="/profil" element={<Profil />} />
+              <Route path="/tugas-undangan" element={<TugasUndangan />} />
 
               <Route element={<RequireFiturKalender />}>
                 <Route path="/kalender" element={<Kalender />} />
@@ -48,6 +51,7 @@ export default function App() {
                 <Route path="/kelola/pengaturan" element={<Pengaturan />} />
                 <Route path="/kelola/tinjau" element={<TinjauAbsensi />} />
                 <Route path="/kelola/foto" element={<FotoAbsensi />} />
+                <Route path="/kelola/undangan" element={<DistribusiUndangan />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>
