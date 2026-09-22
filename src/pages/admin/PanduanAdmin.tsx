@@ -116,7 +116,7 @@ export default function PanduanAdmin() {
       <Bagian judul="🖼️ Foto Absensi">
         <Langkah no={1}>
           Buka Kelola → Foto Absensi untuk melihat semua foto masuk/pulang pegawai dalam
-          bentuk galeri, difilter berdasarkan rentang tanggal.
+          bentuk galeri, difilter berdasarkan rentang tanggal dan divisi.
         </Langkah>
         <Langkah no={2}>
           Tekan "Hapus" di bawah foto untuk menghapus foto itu secara manual (mis. kalau ada
@@ -130,7 +130,10 @@ export default function PanduanAdmin() {
 
       <Bagian judul="🔍 Tinjau Absensi">
         <Langkah no={1}>Buka Kelola → Tinjau Absensi untuk melihat semua entri absen semua pegawai.</Langkah>
-        <Langkah no={2}>Filter berdasarkan rentang tanggal, atau centang "Hanya ditandai" untuk entri mencurigakan.</Langkah>
+        <Langkah no={2}>
+          Filter berdasarkan rentang tanggal, divisi, atau centang "Hanya ditandai" untuk entri
+          mencurigakan.
+        </Langkah>
         <Langkah no={3}>
           Tekan salah satu baris untuk membuka detail: foto absen, peta lokasi, akurasi GPS, dan
           alamat IP — dipakai untuk mengecek kewajaran absen.

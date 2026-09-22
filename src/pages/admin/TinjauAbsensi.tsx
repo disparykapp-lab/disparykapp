@@ -7,6 +7,7 @@ import { tandaiAbsensi } from "../../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import { teksDenganLink } from "../../lib/linkify";
 import type { BarisAbsensi } from "../../lib/rekap";
+import type { Divisi } from "../../types/database";
 
 export default function TinjauAbsensi() {
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
@@ -16,13 +17,24 @@ export default function TinjauAbsensi() {
   const [dari, setDari] = useState(defaultDari());
   const [sampai, setSampai] = useState(defaultHariIni());
   const [terbuka, setTerbuka] = useState<string | null>(null);
+  const [divisiList, setDivisiList] = useState<Divisi[]>([]);
+  const [divisiId, setDivisiId] = useState<string>("semua");
+
+  useEffect(() => {
+    supabase
+      .from("divisi")
+      .select("*")
+      .eq("aktif", true)
+      .order("nama")
+      .then(({ data }) => setDivisiList((data as Divisi[]) ?? []));
+  }, []);
 
   async function muat() {
     setLoading(true);
     setError(null);
     let query = supabase
       .from("absensi")
-      .select("*, profiles(nama)")
+      .select("*, profiles(nama, divisi_id)")
       .gte("tanggal", dari)
       .lte("tanggal", sampai)
       .order("tanggal", { ascending: false });
@@ -39,6 +51,9 @@ export default function TinjauAbsensi() {
     void muat();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dari, sampai, hanyaDitandai]);
+
+  const rowsTersaring =
+    divisiId === "semua" ? rows : rows.filter((r) => r.profiles?.divisi_id === divisiId);
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,6 +73,18 @@ export default function TinjauAbsensi() {
           onChange={(e) => setSampai(e.target.value)}
           className="rounded-lg border border-gray-300 p-2 text-sm"
         />
+        <select
+          value={divisiId}
+          onChange={(e) => setDivisiId(e.target.value)}
+          className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
+        >
+          <option value="semua">Semua Divisi</option>
+          {divisiList.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.nama}
+            </option>
+          ))}
+        </select>
         <label className="ml-auto flex items-center gap-2 text-sm text-gray-600">
           <input
             type="checkbox"
@@ -74,7 +101,7 @@ export default function TinjauAbsensi() {
         <Loading teks="Memuat data absensi..." />
       ) : (
         <div className="flex flex-col gap-2">
-          {rows.map((r) => (
+          {rowsTersaring.map((r) => (
             <div
               key={r.id}
               className={`rounded-xl bg-white shadow-sm ${r.ditandai ? "ring-2 ring-red-300" : ""}`}
@@ -97,7 +124,7 @@ export default function TinjauAbsensi() {
               {terbuka === r.id && <DetailAbsensi row={r} onUbah={muat} />}
             </div>
           ))}
-          {rows.length === 0 && (
+          {rowsTersaring.length === 0 && (
             <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
               Tidak ada data pada rentang ini.
             </p>

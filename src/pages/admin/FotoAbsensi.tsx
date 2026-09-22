@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { ambilAbsensiRentang, type BarisAbsensi } from "../../lib/rekap";
 import { hapusFotoAbsensi } from "../../lib/absensi";
 import { formatTanggal } from "../../lib/tanggal";
+import type { Divisi } from "../../types/database";
 
 interface FotoEntri {
   absensiId: string;
@@ -13,12 +14,14 @@ interface FotoEntri {
   tanggal: string;
   waktu: string | null;
   namaPegawai: string;
+  divisiId: string | null;
 }
 
 function jadikanEntriFoto(rows: BarisAbsensi[]): FotoEntri[] {
   const hasil: FotoEntri[] = [];
   for (const r of rows) {
     const nama = r.profiles?.nama ?? "-";
+    const divisiId = r.profiles?.divisi_id ?? null;
     if (r.masuk_foto_path) {
       hasil.push({
         absensiId: r.id,
@@ -27,6 +30,7 @@ function jadikanEntriFoto(rows: BarisAbsensi[]): FotoEntri[] {
         tanggal: r.tanggal,
         waktu: r.masuk_at,
         namaPegawai: nama,
+        divisiId,
       });
     }
     if (r.keluar_foto_path) {
@@ -37,6 +41,7 @@ function jadikanEntriFoto(rows: BarisAbsensi[]): FotoEntri[] {
         tanggal: r.tanggal,
         waktu: r.keluar_at,
         namaPegawai: nama,
+        divisiId,
       });
     }
   }
@@ -51,6 +56,17 @@ export default function FotoAbsensi() {
   const [dari, setDari] = useState(defaultDari());
   const [sampai, setSampai] = useState(defaultHariIni());
   const [menghapus, setMenghapus] = useState<string | null>(null);
+  const [divisiList, setDivisiList] = useState<Divisi[]>([]);
+  const [divisiId, setDivisiId] = useState<string>("semua");
+
+  useEffect(() => {
+    supabase
+      .from("divisi")
+      .select("*")
+      .eq("aktif", true)
+      .order("nama")
+      .then(({ data }) => setDivisiList((data as Divisi[]) ?? []));
+  }, []);
 
   async function muat() {
     setLoading(true);
@@ -69,6 +85,9 @@ export default function FotoAbsensi() {
     void muat();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dari, sampai]);
+
+  const fotoTersaring =
+    divisiId === "semua" ? foto : foto.filter((f) => f.divisiId === divisiId);
 
   useEffect(() => {
     supabase
@@ -122,19 +141,31 @@ export default function FotoAbsensi() {
           onChange={(e) => setSampai(e.target.value)}
           className="rounded-lg border border-gray-300 p-2 text-sm"
         />
+        <select
+          value={divisiId}
+          onChange={(e) => setDivisiId(e.target.value)}
+          className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
+        >
+          <option value="semua">Semua Divisi</option>
+          {divisiList.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.nama}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
       {loading ? (
         <Loading teks="Memuat foto absensi..." />
-      ) : foto.length === 0 ? (
+      ) : fotoTersaring.length === 0 ? (
         <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
           Tidak ada foto pada rentang ini.
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {foto.map((f) => (
+          {fotoTersaring.map((f) => (
             <KartuFoto
               key={`${f.absensiId}-${f.jenis}`}
               entri={f}

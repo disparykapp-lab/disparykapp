@@ -3,7 +3,7 @@ import type { Absensi } from "../types/database";
 import { jumlahHariKerja, keYMD } from "./tanggal";
 
 export interface BarisAbsensi extends Absensi {
-  profiles?: { nama: string } | null;
+  profiles?: { nama: string; divisi_id: string | null } | null;
 }
 
 export async function ambilAbsensiRentang(opts: {
@@ -13,7 +13,7 @@ export async function ambilAbsensiRentang(opts: {
 }): Promise<BarisAbsensi[]> {
   let query = supabase
     .from("absensi")
-    .select("*, profiles(nama)")
+    .select("*, profiles(nama, divisi_id)")
     .gte("tanggal", keYMD(opts.dari))
     .lte("tanggal", keYMD(opts.sampai))
     .order("tanggal", { ascending: true });
