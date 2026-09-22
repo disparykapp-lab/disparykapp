@@ -139,11 +139,15 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
             ref={videoRef}
             playsInline
             muted
-            className="aspect-[3/4] w-full object-cover"
+            className="aspect-[3/4] w-full -scale-x-100 object-cover"
           />
         )}
         {hasilUrl && (
-          <img src={hasilUrl} alt="Pratinjau foto absen" className="aspect-[3/4] w-full object-cover" />
+          <img
+            src={hasilUrl}
+            alt="Pratinjau foto absen"
+            className="aspect-[3/4] w-full -scale-x-100 object-cover"
+          />
         )}
       </div>
 
