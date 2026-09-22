@@ -58,8 +58,13 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Batasi resolusi maksimal supaya ukuran file tidak besar (kamera HP
+    // modern bisa >3000px sisi terpanjang) — 900px cukup jelas untuk
+    // verifikasi wajah/lokasi tapi jauh lebih hemat penyimpanan.
+    const RESOLUSI_MAKS = 900;
+    const skala = Math.min(1, RESOLUSI_MAKS / Math.max(video.videoWidth, video.videoHeight));
+    canvas.width = Math.round(video.videoWidth * skala);
+    canvas.height = Math.round(video.videoHeight * skala);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -85,7 +90,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
       ctx.fillText(teks, 12, canvas.height - tinggiOverlay + 8 + i * tinggiBaris);
     });
 
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
     setHasilUrl(dataUrl);
 
     canvas.toBlob(
@@ -93,7 +98,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
         if (blob) setHasilBlob(blob);
       },
       "image/jpeg",
-      0.85
+      0.7
     );
 
     streamRef.current?.getTracks().forEach((t) => t.stop());
