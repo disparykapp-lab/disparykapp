@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
+import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import { simpanMasaMagang, hitungProgressMagang } from "../../lib/profil";
@@ -201,12 +202,7 @@ export default function Pegawai() {
         </div>
       )}
 
-      <input
-        value={cari}
-        onChange={(e) => setCari(e.target.value)}
-        placeholder="Cari nama, email, atau jabatan..."
-        className="rounded-xl border border-gray-300 bg-white p-3 text-sm shadow-sm"
-      />
+      <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama, email, atau jabatan..." />
 
       <div className="flex flex-col gap-3">
         {kelompokDivisi.map(([namaDivisi, anggota]) => (

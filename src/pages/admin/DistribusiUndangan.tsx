@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
+import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
 import {
   ambilSemuaUndangan,
@@ -298,12 +299,7 @@ export default function DistribusiUndangan() {
                 ))}
               </select>
             </div>
-            <input
-              value={cari}
-              onChange={(e) => setCari(e.target.value)}
-              placeholder="Cari nama..."
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
+            <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama..." />
           </div>
 
           <div className="flex flex-wrap items-center gap-2 rounded-xl bg-brand-bg p-3">
