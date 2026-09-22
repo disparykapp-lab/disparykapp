@@ -221,7 +221,7 @@ export default function Absen() {
           <img
             src="/icon_pesawat.png"
             alt=""
-            className="animasi-pesawat h-16 w-16 object-contain"
+            className="animasi-pesawat h-auto w-72 max-w-[80vw]"
           />
           <p className="text-gray-600">Mengirim data absen...</p>
         </div>
