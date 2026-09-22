@@ -20,7 +20,7 @@ export default function Login() {
         </div>
         <h1 className="mt-4 text-2xl font-bold">DisparYK</h1>
         <p className="mt-1 max-w-xs text-center text-sm text-white/85">
-          Absensi &amp; Kalender Konten Dinas Pariwisata Kota Yogyakarta
+          Presensi Dinas Pariwisata Kota Yogyakarta
         </p>
       </div>
 
