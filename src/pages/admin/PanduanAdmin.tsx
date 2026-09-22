@@ -22,20 +22,24 @@ export default function PanduanAdmin() {
           Tiap pegawai bisa diubah divisi dan perannya (Pegawai/Admin) langsung dari daftar.
         </Langkah>
         <Langkah no={4}>
+          Daftar pegawai dikelompokkan otomatis per divisi (accordion, tekan untuk buka/tutup),
+          dan ada kolom pencarian di atas untuk mencari nama/email/jabatan dengan cepat.
+        </Langkah>
+        <Langkah no={5}>
           Tombol "Aktifkan/Nonaktifkan" untuk menonaktifkan sementara (pegawai nonaktif tidak
           bisa absen atau login, tapi datanya tetap tersimpan).
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={6}>
           Tekan kartu pegawai untuk buka detail profilnya: foto, tanggal lahir, dan asal
           sekolah/kampus (diisi pegawai sendiri lewat Profil Saya, jadi di sini hanya tampil,
           tidak bisa diedit admin).
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={7}>
           Di bagian yang sama, admin bisa atur <strong>Masa Magang</strong> (tanggal mulai &amp;
           selesai) untuk pegawai yang berstatus magang/PKL. Setelah disimpan, pegawai itu akan
           melihat progress bar persentase magangnya sendiri di Beranda &amp; Profil Saya.
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={8}>
           Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
           absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>

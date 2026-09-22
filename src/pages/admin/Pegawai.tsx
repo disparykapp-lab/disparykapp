@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
@@ -6,6 +6,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { simpanMasaMagang, hitungProgressMagang } from "../../lib/profil";
 import { formatTanggal } from "../../lib/tanggal";
 import type { Divisi, Profile, Role } from "../../types/database";
+
+const TANPA_DIVISI = "— Belum Ada Divisi —";
 
 export default function Pegawai() {
   const { profile: profileSaya } = useAuth();
@@ -17,6 +19,7 @@ export default function Pegawai() {
   const [showForm, setShowForm] = useState(false);
   const [menyimpan, setMenyimpan] = useState(false);
   const [terbuka, setTerbuka] = useState<string | null>(null);
+  const [cari, setCari] = useState("");
 
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
@@ -107,6 +110,33 @@ export default function Pegawai() {
     setMenghapusId(null);
   }
 
+  const listTersaring = useMemo(() => {
+    const q = cari.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (p) =>
+        p.nama.toLowerCase().includes(q) ||
+        p.email.toLowerCase().includes(q) ||
+        (p.jabatan ?? "").toLowerCase().includes(q)
+    );
+  }, [list, cari]);
+
+  const kelompokDivisi = useMemo(() => {
+    const namaDivisi = new Map(divisiList.map((d) => [d.id, d.nama]));
+    const peta = new Map<string, Profile[]>();
+    for (const p of listTersaring) {
+      const key = (p.divisi_id && namaDivisi.get(p.divisi_id)) || TANPA_DIVISI;
+      const arr = peta.get(key) ?? [];
+      arr.push(p);
+      peta.set(key, arr);
+    }
+    return Array.from(peta.entries()).sort(([a], [b]) => {
+      if (a === TANPA_DIVISI) return 1;
+      if (b === TANPA_DIVISI) return -1;
+      return a.localeCompare(b);
+    });
+  }, [listTersaring, divisiList]);
+
   if (loading) return <Loading teks="Memuat pegawai..." />;
 
   return (
@@ -171,79 +201,102 @@ export default function Pegawai() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        {list.map((p) => (
-          <div key={p.id} className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
-            <button
-              onClick={() => setTerbuka(terbuka === p.id ? null : p.id)}
-              className="flex items-start justify-between text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
-                  {p.foto_url ? (
-                    <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    p.nama.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold text-brand-text">{p.nama}</p>
-                  <p className="text-xs text-gray-500">{p.email}</p>
-                </div>
-              </div>
-              <span
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-                  p.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {p.aktif ? "Aktif" : "Nonaktif"}
+      <input
+        value={cari}
+        onChange={(e) => setCari(e.target.value)}
+        placeholder="Cari nama, email, atau jabatan..."
+        className="rounded-xl border border-gray-300 bg-white p-3 text-sm shadow-sm"
+      />
+
+      <div className="flex flex-col gap-3">
+        {kelompokDivisi.map(([namaDivisi, anggota]) => (
+          <details
+            key={namaDivisi}
+            className="group rounded-xl bg-white shadow-sm"
+            open={kelompokDivisi.length <= 3 || cari.trim().length > 0}
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-sm font-semibold text-brand-text marker:content-none">
+              <span>
+                📁 {namaDivisi} ({anggota.length})
               </span>
-            </button>
+              <span className="text-gray-400 transition group-open:rotate-180">▾</span>
+            </summary>
+            <div className="flex flex-col gap-2 border-t border-gray-100 p-2">
+              {anggota.map((p) => (
+                <div key={p.id} className="flex flex-col gap-2 rounded-lg border border-gray-100 p-3">
+                  <button
+                    onClick={() => setTerbuka(terbuka === p.id ? null : p.id)}
+                    className="flex items-start justify-between text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
+                        {p.foto_url ? (
+                          <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          p.nama.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-brand-text">{p.nama}</p>
+                        <p className="text-xs text-gray-500">{p.email}</p>
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+                        p.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {p.aktif ? "Aktif" : "Nonaktif"}
+                    </span>
+                  </button>
 
-            <div className="flex flex-wrap gap-2">
-              <select
-                value={p.divisi_id ?? ""}
-                onChange={(e) => void ubahDivisi(p.id, e.target.value)}
-                className="rounded-lg border border-gray-300 p-2 text-xs"
-              >
-                <option value="">- Divisi -</option>
-                {divisiList.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.nama}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={p.role}
-                onChange={(e) => void ubahRole(p.id, e.target.value as Role)}
-                className="rounded-lg border border-gray-300 p-2 text-xs"
-              >
-                <option value="user">Pegawai</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button
-                onClick={() => void toggleAktif(p.id, p.aktif)}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-brand-text"
-              >
-                {p.aktif ? "Nonaktifkan" : "Aktifkan"}
-              </button>
-              {p.id !== profileSaya?.id && (
-                <button
-                  onClick={() => void hapusPegawai(p)}
-                  disabled={menghapusId === p.id}
-                  className="ml-auto rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 disabled:opacity-60"
-                >
-                  {menghapusId === p.id ? "Menghapus..." : "Hapus"}
-                </button>
-              )}
+                  <div className="flex flex-wrap gap-2">
+                    <select
+                      value={p.divisi_id ?? ""}
+                      onChange={(e) => void ubahDivisi(p.id, e.target.value)}
+                      className="rounded-lg border border-gray-300 p-2 text-xs"
+                    >
+                      <option value="">- Divisi -</option>
+                      {divisiList.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.nama}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={p.role}
+                      onChange={(e) => void ubahRole(p.id, e.target.value as Role)}
+                      className="rounded-lg border border-gray-300 p-2 text-xs"
+                    >
+                      <option value="user">Pegawai</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <button
+                      onClick={() => void toggleAktif(p.id, p.aktif)}
+                      className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-brand-text"
+                    >
+                      {p.aktif ? "Nonaktifkan" : "Aktifkan"}
+                    </button>
+                    {p.id !== profileSaya?.id && (
+                      <button
+                        onClick={() => void hapusPegawai(p)}
+                        disabled={menghapusId === p.id}
+                        className="ml-auto rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 disabled:opacity-60"
+                      >
+                        {menghapusId === p.id ? "Menghapus..." : "Hapus"}
+                      </button>
+                    )}
+                  </div>
+
+                  {terbuka === p.id && <ProfilKaryawan pegawai={p} onUbah={muat} />}
+                </div>
+              ))}
             </div>
-
-            {terbuka === p.id && <ProfilKaryawan pegawai={p} onUbah={muat} />}
-          </div>
+          </details>
         ))}
-        {list.length === 0 && (
+        {listTersaring.length === 0 && (
           <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
-            Belum ada pegawai terdaftar.
+            {list.length === 0 ? "Belum ada pegawai terdaftar." : "Tidak ada pegawai yang cocok dengan pencarian."}
           </p>
         )}
       </div>
