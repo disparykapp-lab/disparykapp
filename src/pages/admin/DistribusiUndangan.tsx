@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
+import LihatTandaTangan from "../../components/LihatTandaTangan";
 import { supabase } from "../../lib/supabase";
 import {
   ambilSemuaUndangan,
@@ -639,6 +640,15 @@ function DetailUndangan({
         <p className="text-xs text-gray-500">Lokasi parkir (hari-H): {row.lokasi_parkir}</p>
       )}
       {row.catatan && <p className="text-xs text-gray-500">Kontak (dari petugas): {row.catatan}</p>}
+
+      {row.tanda_tangan_url && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500">
+            Bukti penerimaan (tanda tangan)
+          </span>
+          <LihatTandaTangan path={row.tanda_tangan_url} />
+        </div>
+      )}
 
       <label className="flex flex-col gap-1">
         <span className="text-xs font-medium text-gray-500">Lokasi Pengantaran</span>

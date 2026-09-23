@@ -76,6 +76,12 @@ export async function perbaruiTugasUndangan(
   if (error) throw new Error(error.message);
 }
 
+/** Ambil URL sementara (5 menit) untuk menampilkan gambar tanda tangan privat. */
+export async function ambilUrlTandaTangan(path: string): Promise<string | null> {
+  const { data } = await supabase.storage.from("tanda_tangan").createSignedUrl(path, 300);
+  return data?.signedUrl ?? null;
+}
+
 /**
  * Unggah gambar tanda tangan penerima (bukti penerimaan surat) ke storage.
  * Path pakai {userId}/{undanganId}.png dengan upsert supaya petugas bisa

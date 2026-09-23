@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import HeaderHalaman from "../components/HeaderHalaman";
 import Loading from "../components/Loading";
 import TandaTanganPad, { type TandaTanganPadHandle } from "../components/TandaTanganPad";
+import LihatTandaTangan from "../components/LihatTandaTangan";
 import { useAuth } from "../contexts/AuthContext";
 import {
   ambilTugasSaya,
@@ -248,9 +249,12 @@ function FormTugas({
             Tanda tangan penerima (bukti penerimaan surat)
           </span>
           {row.tanda_tangan_url && (
-            <p className="text-xs text-green-600">
-              ✓ Sudah ada tanda tangan tersimpan. Gambar lagi di bawah kalau mau ganti.
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-green-600">
+                ✓ Sudah ada tanda tangan tersimpan. Gambar lagi di bawah kalau mau ganti.
+              </p>
+              <LihatTandaTangan path={row.tanda_tangan_url} />
+            </div>
           )}
           <TandaTanganPad ref={ttdRef} />
         </div>

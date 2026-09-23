@@ -201,6 +201,12 @@ export default function PanduanAdmin() {
           Undangan" di Beranda mereka (Selesai/Kendala + nomor HP tamu untuk pengingat H-2).
           Progresnya otomatis muncul di halaman ini.
         </Langkah>
+        <Langkah no={7}>
+          Kalau petugas sudah menandai <strong>Selesai</strong>, buka detail undangannya — akan
+          muncul thumbnail <strong>tanda tangan tamu undangan</strong> (bukti penerimaan surat)
+          yang diambil petugas langsung dari layar HP. Tekan gambarnya untuk melihat ukuran
+          penuh di tab baru.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

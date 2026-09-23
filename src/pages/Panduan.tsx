@@ -113,8 +113,8 @@ export default function Panduan() {
         <Langkah no={4}>
           Kalau statusnya <strong>Selesai</strong>, minta tamu undangan tanda tangan langsung di
           layar HP kamu (di kolom tanda tangan yang muncul) sebagai bukti surat sudah diterima,
-          baru tekan Simpan. Tanda tangan ini cuma tersimpan sebagai bukti buat kamu — admin cuma
-          lihat progres selesai/belum, bukan gambar tanda tangannya.
+          baru tekan Simpan. Tanda tangan ini tersimpan sebagai bukti penerimaan dan bisa dilihat
+          lagi kapan saja di tugas yang sama, juga oleh admin untuk verifikasi.
         </Langkah>
       </Bagian>
 

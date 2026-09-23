@@ -1,7 +1,7 @@
 -- Bukti penerimaan berupa tanda tangan tamu undangan saat petugas menandai
--- tugas "Selesai". Gambar tanda tangan disimpan di storage tapi SENGAJA
--- tidak ditampilkan di halaman admin — admin cukup lihat progres
--- (selesai/belum/kendala) yang sudah ada, bukan gambar tanda tangannya.
+-- tugas "Selesai". Gambar tanda tangan disimpan di storage privat, dan bisa
+-- dilihat baik oleh petugas yang mengambilnya maupun admin (lewat signed URL
+-- sementara) — policy select di bawah sudah mengizinkan keduanya.
 
 alter table undangan add column if not exists tanda_tangan_url text;
 
