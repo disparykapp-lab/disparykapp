@@ -68,7 +68,15 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Sebagian perangkat mengirim frame kamera depan yang sudah mirror dari
+    // sumbernya (bukan cuma soal CSS) — balik lagi di sini supaya wajah di
+    // foto yang benar-benar tersimpan tidak terbalik. Teks watermark di
+    // bawah digambar normal (di luar transform ini) supaya tetap terbaca.
+    ctx.save();
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
 
     const waktu = new Date().toLocaleString("id-ID", {
       dateStyle: "medium",
