@@ -108,7 +108,13 @@ export default function Panduan() {
         <Langkah no={3}>
           Setelah surat diserahkan, isi <strong>nomor HP tamu undangan</strong> — ini dipakai
           untuk mengingatkan tamu saat H-2 sebelum acara. Isi juga{" "}
-          <strong>Lokasi Pengantaran</strong> kalau belum ada, lalu tekan Simpan.
+          <strong>Lokasi Pengantaran</strong> kalau belum ada.
+        </Langkah>
+        <Langkah no={4}>
+          Kalau statusnya <strong>Selesai</strong>, minta tamu undangan tanda tangan langsung di
+          layar HP kamu (di kolom tanda tangan yang muncul) sebagai bukti surat sudah diterima,
+          baru tekan Simpan. Tanda tangan ini cuma tersimpan sebagai bukti buat kamu — admin cuma
+          lihat progres selesai/belum, bukan gambar tanda tangannya.
         </Langkah>
       </Bagian>
 

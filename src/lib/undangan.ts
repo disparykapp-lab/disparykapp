@@ -27,6 +27,7 @@ export interface Undangan {
   status: StatusUndangan;
   pic_user_id: string | null;
   catatan: string | null;
+  tanda_tangan_url: string | null;
   diperbarui_oleh: string | null;
   diperbarui_at: string | null;
   created_at: string;
@@ -64,10 +65,34 @@ export async function tugaskanUndangan(ids: string[], picUserId: string | null) 
 
 export async function perbaruiTugasUndangan(
   id: string,
-  data: { status: StatusUndangan; catatan: string | null; lokasi_pengantaran: string | null }
+  data: {
+    status: StatusUndangan;
+    catatan: string | null;
+    lokasi_pengantaran: string | null;
+    tanda_tangan_url?: string;
+  }
 ) {
   const { error } = await supabase.from("undangan").update(data).eq("id", id);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Unggah gambar tanda tangan penerima (bukti penerimaan surat) ke storage.
+ * Path pakai {userId}/{undanganId}.png dengan upsert supaya petugas bisa
+ * menggambar ulang kalau salah, tanpa perlu kebijakan hapus terpisah.
+ */
+export async function unggahTandaTanganUndangan(
+  undanganId: string,
+  userId: string,
+  blob: Blob
+): Promise<string> {
+  const path = `${userId}/${undanganId}.png`;
+  const { error } = await supabase.storage.from("tanda_tangan").upload(path, blob, {
+    contentType: "image/png",
+    upsert: true,
+  });
+  if (error) throw new Error("Gagal menyimpan tanda tangan. Periksa koneksi internet kamu.");
+  return path;
 }
 
 export async function perbaruiLokasiPengantaran(id: string, lokasiPengantaran: string | null) {

@@ -67,6 +67,10 @@ npm run dev
    15. `0015_perbaikan_tugas_undangan.sql` — hapus kolom `bukti_url` (tidak dipakai) dan
        tambah kolom `lokasi_pengantaran` yang boleh diisi admin maupun pegawai (PIC), beda
        dari `lokasi_parkir` yang tetap khusus admin.
+   16. `0016_tanda_tangan_undangan.sql` — kolom `tanda_tangan_url` di `undangan` + bucket
+       storage privat `tanda_tangan`, dipakai sebagai bukti penerimaan (tanda tangan tamu
+       undangan) saat petugas menandai tugas "Selesai"; tidak ditampilkan di halaman admin,
+       admin cuma lihat progresnya.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

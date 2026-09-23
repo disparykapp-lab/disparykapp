@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import HeaderHalaman from "../components/HeaderHalaman";
 import Loading from "../components/Loading";
+import TandaTanganPad, { type TandaTanganPadHandle } from "../components/TandaTanganPad";
 import { useAuth } from "../contexts/AuthContext";
 import {
   ambilTugasSaya,
   hitungRingkasanUndangan,
   perbaruiTugasUndangan,
+  unggahTandaTanganUndangan,
   LABEL_KATEGORI,
   LABEL_STATUS_UNDANGAN,
   type StatusUndangan,
@@ -116,10 +118,15 @@ export default function TugasUndangan() {
                       <p className="text-xs text-gray-400">Lokasi: {r.lokasi_pengantaran}</p>
                     )}
                     {r.catatan && <p className="text-xs text-gray-400">Kontak: {r.catatan}</p>}
+                    {r.tanda_tangan_url && (
+                      <p className="text-xs text-green-600">✓ Ada tanda tangan penerima</p>
+                    )}
                   </div>
                   <BadgeStatus status={r.status} />
                 </button>
-                {terbuka === r.id && <FormTugas row={r} onTersimpan={muat} />}
+                {terbuka === r.id && profile && (
+                  <FormTugas row={r} userId={profile.id} onTersimpan={muat} />
+                )}
               </div>
             ))}
             {rowsTersaring.length === 0 && (
@@ -134,21 +141,58 @@ export default function TugasUndangan() {
   );
 }
 
-function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => void }) {
+function FormTugas({
+  row,
+  userId,
+  onTersimpan,
+}: {
+  row: Undangan;
+  userId: string;
+  onTersimpan: () => void;
+}) {
   const [status, setStatus] = useState<StatusUndangan>(row.status);
   const [catatan, setCatatan] = useState(row.catatan ?? "");
   const [lokasi, setLokasi] = useState(row.lokasi_pengantaran ?? "");
   const [menyimpan, setMenyimpan] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const ttdRef = useRef<TandaTanganPadHandle>(null);
 
   async function simpan() {
-    setMenyimpan(true);
     setError(null);
+
+    let tandaTanganUrl: string | undefined;
+    if (status === "selesai") {
+      const pad = ttdRef.current;
+      const belumPernahTtd = !row.tanda_tangan_url;
+      if (pad && !pad.kosong()) {
+        // Petugas menggambar tanda tangan baru (baik pertama kali maupun ganti ulang).
+        setMenyimpan(true);
+        const blob = await pad.ambilBlob();
+        if (!blob) {
+          setError("Gagal mengambil tanda tangan, coba gambar ulang.");
+          setMenyimpan(false);
+          return;
+        }
+        try {
+          tandaTanganUrl = await unggahTandaTanganUndangan(row.id, userId, blob);
+        } catch (e) {
+          setError(e instanceof Error ? e.message : "Gagal menyimpan tanda tangan.");
+          setMenyimpan(false);
+          return;
+        }
+      } else if (belumPernahTtd) {
+        setError("Minta tamu undangan tanda tangan dulu sebagai bukti penerimaan surat.");
+        return;
+      }
+    }
+
+    setMenyimpan(true);
     try {
       await perbaruiTugasUndangan(row.id, {
         status,
         catatan: catatan.trim() || null,
         lokasi_pengantaran: lokasi.trim() || null,
+        ...(tandaTanganUrl ? { tanda_tangan_url: tandaTanganUrl } : {}),
       });
       onTersimpan();
     } catch (e) {
@@ -197,6 +241,20 @@ function FormTugas({ row, onTersimpan }: { row: Undangan; onTersimpan: () => voi
           className="rounded-lg border border-gray-300 p-2 text-sm"
         />
       </label>
+
+      {status === "selesai" && (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-gray-500">
+            Tanda tangan penerima (bukti penerimaan surat)
+          </span>
+          {row.tanda_tangan_url && (
+            <p className="text-xs text-green-600">
+              ✓ Sudah ada tanda tangan tersimpan. Gambar lagi di bawah kalau mau ganti.
+            </p>
+          )}
+          <TandaTanganPad ref={ttdRef} />
+        </div>
+      )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 
