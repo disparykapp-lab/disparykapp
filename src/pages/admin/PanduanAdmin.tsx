@@ -133,21 +133,37 @@ export default function PanduanAdmin() {
       </Bagian>
 
       <Bagian judul="🔍 Tinjau Absensi">
-        <Langkah no={1}>Buka Kelola → Tinjau Absensi untuk melihat semua entri absen semua pegawai.</Langkah>
+        <Langkah no={1}>
+          Buka Kelola → Tinjau Absensi. Secara default halaman ini menampilkan data{" "}
+          <strong>hari ini saja</strong>.
+        </Langkah>
         <Langkah no={2}>
-          Filter berdasarkan rentang tanggal, divisi, atau centang "Hanya ditandai" untuk entri
-          mencurigakan.
+          Ganti tanggal "dari" dan "sampai" untuk lihat rentang lain, lalu tekan tombol{" "}
+          <strong>"Terapkan"</strong> (tombolnya berubah warna kalau ada tanggal yang belum
+          diterapkan) — supaya data tidak ikut berubah-ubah sambil kamu masih mengetik
+          tanggalnya. Filter divisi, "Hanya ditandai", dan pencarian nama langsung aktif tanpa
+          perlu menekan Terapkan.
         </Langkah>
         <Langkah no={3}>
-          Tekan salah satu baris untuk membuka detail: foto absen, peta lokasi, akurasi GPS, dan
-          alamat IP — dipakai untuk mengecek kewajaran absen.
+          Kartu ringkasan menampilkan total entri beserta jumlah Hadir/Telat/Dinas Luar/Izin
+          sesuai filter yang aktif.
         </Langkah>
         <Langkah no={4}>
+          Kartu <strong>"Rekap per Pegawai"</strong> menampilkan tiap pegawai beserta jumlah
+          kejadiannya di rentang yang diterapkan — mis. "Telat 2x", "Izin 2x", atau{" "}
+          <strong>"Tidak Absen"</strong> untuk hari kerja yang sama sekali tidak ada entrinya.
+          Pegawai dengan masalah (tidak absen/telat/izin) otomatis muncul di urutan atas.
+        </Langkah>
+        <Langkah no={5}>
+          Tekan salah satu baris di daftar bawah untuk membuka detail: foto absen, peta lokasi,
+          akurasi GPS, dan alamat IP — dipakai untuk mengecek kewajaran absen.
+        </Langkah>
+        <Langkah no={6}>
           Kalau ada yang mencurigakan, isi alasan lalu tekan <strong>"⚑ Tandai Entri Ini"</strong>{" "}
           di bagian bawah detail. Entri yang ditandai tampil dengan garis merah dan bisa
           difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={7}>
           Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta link bukti
           (mis. surat dokter di Google Drive) — lewat tombol "+ Tambah Keterangan" di Beranda,
           kolom keterangan opsional saat absen, atau tombol "+Keterangan" di Rekap mereka —

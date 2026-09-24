@@ -7,7 +7,7 @@ import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import { teksDenganLink } from "../../lib/linkify";
-import type { BarisAbsensi } from "../../lib/rekap";
+import { hitungRingkasan, type BarisAbsensi } from "../../lib/rekap";
 import type { Divisi } from "../../types/database";
 
 interface PegawaiRingkas {
@@ -21,17 +21,22 @@ export default function TinjauAbsensi() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hanyaDitandai, setHanyaDitandai] = useState(false);
-  const [dari, setDari] = useState(defaultDari());
+
+  // dariInput/sampaiInput = nilai yang sedang diketik di form (belum tentu
+  // sudah aktif); dari/sampai = rentang yang BENAR-BENAR dipakai buat query,
+  // baru berubah saat tombol "Terapkan" ditekan supaya tidak fetch berkali-
+  // kali sambil pengguna masih mengetik tanggal.
+  const [dariInput, setDariInput] = useState(defaultHariIni());
+  const [sampaiInput, setSampaiInput] = useState(defaultHariIni());
+  const [dari, setDari] = useState(defaultHariIni());
   const [sampai, setSampai] = useState(defaultHariIni());
+
   const [terbuka, setTerbuka] = useState<string | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
   const [divisiId, setDivisiId] = useState<string>("semua");
   const [cari, setCari] = useState("");
 
   const [pegawaiAktif, setPegawaiAktif] = useState<PegawaiRingkas[]>([]);
-  const [tanggalCek, setTanggalCek] = useState(defaultHariIni());
-  const [userIdHadirCek, setUserIdHadirCek] = useState<Set<string>>(new Set());
-  const [loadingCek, setLoadingCek] = useState(true);
 
   useEffect(() => {
     supabase
@@ -72,18 +77,12 @@ export default function TinjauAbsensi() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dari, sampai, hanyaDitandai]);
 
-  useEffect(() => {
-    setLoadingCek(true);
-    supabase
-      .from("absensi")
-      .select("user_id")
-      .eq("tanggal", tanggalCek)
-      .then(({ data }) => {
-        setUserIdHadirCek(new Set((data ?? []).map((r) => r.user_id as string)));
-        setLoadingCek(false);
-      });
-  }, [tanggalCek]);
+  function terapkanFilter() {
+    setDari(dariInput);
+    setSampai(sampaiInput);
+  }
 
+  const adaPerubahanBelumDiterapkan = dariInput !== dari || sampaiInput !== sampai;
   const cariNormal = cari.trim().toLowerCase();
 
   const rowsTersaring = rows.filter((r) => {
@@ -103,52 +102,101 @@ export default function TinjauAbsensi() {
     return hasil;
   }, [rowsTersaring]);
 
-  const belumAbsen = pegawaiAktif.filter((p) => {
-    if (divisiId !== "semua" && p.divisi_id !== divisiId) return false;
-    if (cariNormal && !p.nama.toLowerCase().includes(cariNormal)) return false;
-    return !userIdHadirCek.has(p.id);
-  });
+  // Rekap per pegawai untuk rentang yang sedang diterapkan — dipakai untuk
+  // memperlihatkan "siapa yang tidak masuk" beserta angkanya (izin 2x,
+  // telat 2x, dst) alih-alih cuma daftar nama untuk 1 hari saja.
+  const rekapPegawai = useMemo(() => {
+    const dariTgl = ambilTanggal(dari);
+    const sampaiTgl = ambilTanggal(sampai);
+    const perUser = new Map<string, BarisAbsensi[]>();
+    for (const r of rows) {
+      const arr = perUser.get(r.user_id) ?? [];
+      arr.push(r);
+      perUser.set(r.user_id, arr);
+    }
+    return pegawaiAktif
+      .filter((p) => divisiId === "semua" || p.divisi_id === divisiId)
+      .filter((p) => !cariNormal || p.nama.toLowerCase().includes(cariNormal))
+      .map((p) => {
+        const rk = hitungRingkasan(perUser.get(p.id) ?? [], dariTgl, sampaiTgl);
+        return { id: p.id, nama: p.nama, ...rk };
+      })
+      .filter((p) => p.hadir + p.telat + p.dinasLuar + p.izin + p.tidakAbsen > 0)
+      .sort((a, b) => {
+        const masalahA = a.tidakAbsen + a.telat + a.izin;
+        const masalahB = b.tidakAbsen + b.telat + b.izin;
+        if (masalahA !== masalahB) return masalahB - masalahA;
+        return a.nama.localeCompare(b.nama, "id");
+      });
+  }, [rows, pegawaiAktif, divisiId, cariNormal, dari, sampai]);
 
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Tinjau Absensi" />
 
-      <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-3 shadow-sm">
-        <input
-          type="date"
-          value={dari}
-          onChange={(e) => setDari(e.target.value)}
-          className="rounded-lg border border-gray-300 p-2 text-sm"
-        />
-        <span className="text-gray-400">–</span>
-        <input
-          type="date"
-          value={sampai}
-          onChange={(e) => setSampai(e.target.value)}
-          className="rounded-lg border border-gray-300 p-2 text-sm"
-        />
-        <select
-          value={divisiId}
-          onChange={(e) => setDivisiId(e.target.value)}
-          className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
-        >
-          <option value="semua">Semua Divisi</option>
-          {divisiList.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.nama}
-            </option>
-          ))}
-        </select>
-        <label className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
           <input
-            type="checkbox"
-            checked={hanyaDitandai}
-            onChange={(e) => setHanyaDitandai(e.target.checked)}
+            type="date"
+            value={dariInput}
+            onChange={(e) => setDariInput(e.target.value)}
+            className="rounded-lg border border-gray-300 p-2 text-sm"
           />
-          Hanya ditandai
-        </label>
-        <div className="ml-auto w-full max-w-[220px]">
-          <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama pegawai..." />
+          <span className="text-gray-400">–</span>
+          <input
+            type="date"
+            value={sampaiInput}
+            onChange={(e) => setSampaiInput(e.target.value)}
+            className="rounded-lg border border-gray-300 p-2 text-sm"
+          />
+          <button
+            onClick={terapkanFilter}
+            className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
+              adaPerubahanBelumDiterapkan
+                ? "bg-brand-masuk text-white"
+                : "border border-gray-300 bg-white text-gray-400"
+            }`}
+          >
+            Terapkan
+          </button>
+        </div>
+        <p className="text-xs text-gray-400">
+          Menampilkan: <strong className="text-gray-600">{formatTanggal(ambilTanggal(dari), "d MMM yyyy")}</strong>
+          {dari !== sampai && (
+            <>
+              {" "}
+              – <strong className="text-gray-600">{formatTanggal(ambilTanggal(sampai), "d MMM yyyy")}</strong>
+            </>
+          )}
+          {adaPerubahanBelumDiterapkan && (
+            <span className="ml-1 text-amber-600">(ada perubahan tanggal, tekan Terapkan)</span>
+          )}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
+          <select
+            value={divisiId}
+            onChange={(e) => setDivisiId(e.target.value)}
+            className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
+          >
+            <option value="semua">Semua Divisi</option>
+            {divisiList.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.nama}
+              </option>
+            ))}
+          </select>
+          <label className="flex items-center gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              checked={hanyaDitandai}
+              onChange={(e) => setHanyaDitandai(e.target.checked)}
+            />
+            Hanya ditandai
+          </label>
+          <div className="ml-auto w-full max-w-[220px]">
+            <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama pegawai..." />
+          </div>
         </div>
       </div>
 
@@ -165,32 +213,31 @@ export default function TinjauAbsensi() {
       )}
 
       <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-brand-text">
-            🚫 Belum Absen ({belumAbsen.length})
-          </p>
-          <input
-            type="date"
-            value={tanggalCek}
-            onChange={(e) => setTanggalCek(e.target.value)}
-            className="ml-auto rounded-lg border border-gray-300 p-1.5 text-xs"
-          />
-        </div>
-        {loadingCek ? (
+        <p className="mb-2 text-sm font-semibold text-brand-text">👤 Rekap per Pegawai</p>
+        {loading ? (
           <p className="text-xs text-gray-400">Memuat...</p>
-        ) : belumAbsen.length === 0 ? (
+        ) : rekapPegawai.length === 0 ? (
           <p className="text-xs text-gray-400">
-            Semua pegawai {divisiId !== "semua" ? "di divisi ini " : ""}sudah absen tanggal ini.
+            Tidak ada pegawai yang cocok dengan filter ini, atau rentang tanggal ini bukan hari
+            kerja.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-1.5">
-            {belumAbsen.map((p) => (
-              <span
-                key={p.id}
-                className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700"
-              >
-                {p.nama}
-              </span>
+          <div className="flex flex-col divide-y divide-gray-50">
+            {rekapPegawai.map((p) => (
+              <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <span className="text-sm font-medium text-brand-text">{p.nama}</span>
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {p.hadir > 0 && <Lencana label={`Hadir ${p.hadir}x`} warna="bg-green-50 text-green-700" />}
+                  {p.telat > 0 && <Lencana label={`Telat ${p.telat}x`} warna="bg-amber-50 text-amber-700" />}
+                  {p.dinasLuar > 0 && (
+                    <Lencana label={`Dinas Luar ${p.dinasLuar}x`} warna="bg-blue-50 text-blue-700" />
+                  )}
+                  {p.izin > 0 && <Lencana label={`Izin ${p.izin}x`} warna="bg-gray-100 text-gray-600" />}
+                  {p.tidakAbsen > 0 && (
+                    <Lencana label={`Tidak Absen ${p.tidakAbsen}x`} warna="bg-red-50 text-red-700" />
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -416,12 +463,19 @@ function Ringkas({ label, nilai, warna }: { label: string; nilai: number; warna?
   );
 }
 
-function defaultDari() {
-  const d = new Date();
-  d.setDate(d.getDate() - 7);
-  return d.toISOString().slice(0, 10);
+function Lencana({ label, warna }: { label: string; warna: string }) {
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${warna}`}>{label}</span>
+  );
 }
 
 function defaultHariIni() {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Ubah string "yyyy-MM-dd" jadi Date di tengah malam waktu lokal (bukan UTC)
+ * supaya tanggalnya tidak meleset dibanding yang diketik pengguna. */
+function ambilTanggal(ymd: string): Date {
+  const [tahun, bulan, tanggal] = ymd.split("-").map(Number);
+  return new Date(tahun, bulan - 1, tanggal);
 }
