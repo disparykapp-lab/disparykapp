@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
+import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
 import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
@@ -8,6 +9,12 @@ import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import { teksDenganLink } from "../../lib/linkify";
 import type { BarisAbsensi } from "../../lib/rekap";
 import type { Divisi } from "../../types/database";
+
+interface PegawaiRingkas {
+  id: string;
+  nama: string;
+  divisi_id: string | null;
+}
 
 export default function TinjauAbsensi() {
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
@@ -19,6 +26,12 @@ export default function TinjauAbsensi() {
   const [terbuka, setTerbuka] = useState<string | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
   const [divisiId, setDivisiId] = useState<string>("semua");
+  const [cari, setCari] = useState("");
+
+  const [pegawaiAktif, setPegawaiAktif] = useState<PegawaiRingkas[]>([]);
+  const [tanggalCek, setTanggalCek] = useState(defaultHariIni());
+  const [userIdHadirCek, setUserIdHadirCek] = useState<Set<string>>(new Set());
+  const [loadingCek, setLoadingCek] = useState(true);
 
   useEffect(() => {
     supabase
@@ -27,6 +40,13 @@ export default function TinjauAbsensi() {
       .eq("aktif", true)
       .order("nama")
       .then(({ data }) => setDivisiList((data as Divisi[]) ?? []));
+
+    supabase
+      .from("profiles")
+      .select("id, nama, divisi_id")
+      .eq("aktif", true)
+      .order("nama")
+      .then(({ data }) => setPegawaiAktif((data as PegawaiRingkas[]) ?? []));
   }, []);
 
   async function muat() {
@@ -52,8 +72,42 @@ export default function TinjauAbsensi() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dari, sampai, hanyaDitandai]);
 
-  const rowsTersaring =
-    divisiId === "semua" ? rows : rows.filter((r) => r.profiles?.divisi_id === divisiId);
+  useEffect(() => {
+    setLoadingCek(true);
+    supabase
+      .from("absensi")
+      .select("user_id")
+      .eq("tanggal", tanggalCek)
+      .then(({ data }) => {
+        setUserIdHadirCek(new Set((data ?? []).map((r) => r.user_id as string)));
+        setLoadingCek(false);
+      });
+  }, [tanggalCek]);
+
+  const cariNormal = cari.trim().toLowerCase();
+
+  const rowsTersaring = rows.filter((r) => {
+    if (divisiId !== "semua" && r.profiles?.divisi_id !== divisiId) return false;
+    if (cariNormal && !(r.profiles?.nama ?? "").toLowerCase().includes(cariNormal)) return false;
+    return true;
+  });
+
+  const ringkasan = useMemo(() => {
+    const hasil = { total: rowsTersaring.length, hadir: 0, telat: 0, dinas_luar: 0, izin: 0 };
+    for (const r of rowsTersaring) {
+      if (r.status === "hadir") hasil.hadir++;
+      else if (r.status === "telat") hasil.telat++;
+      else if (r.status === "dinas_luar") hasil.dinas_luar++;
+      else if (r.status === "izin") hasil.izin++;
+    }
+    return hasil;
+  }, [rowsTersaring]);
+
+  const belumAbsen = pegawaiAktif.filter((p) => {
+    if (divisiId !== "semua" && p.divisi_id !== divisiId) return false;
+    if (cariNormal && !p.nama.toLowerCase().includes(cariNormal)) return false;
+    return !userIdHadirCek.has(p.id);
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -85,7 +139,7 @@ export default function TinjauAbsensi() {
             </option>
           ))}
         </select>
-        <label className="ml-auto flex items-center gap-2 text-sm text-gray-600">
+        <label className="flex items-center gap-2 text-sm text-gray-600">
           <input
             type="checkbox"
             checked={hanyaDitandai}
@@ -93,9 +147,54 @@ export default function TinjauAbsensi() {
           />
           Hanya ditandai
         </label>
+        <div className="ml-auto w-full max-w-[220px]">
+          <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama pegawai..." />
+        </div>
       </div>
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+
+      {!loading && (
+        <div className="grid grid-cols-5 gap-2 rounded-xl bg-white p-3 shadow-sm text-center">
+          <Ringkas label="Total" nilai={ringkasan.total} />
+          <Ringkas label="Hadir" nilai={ringkasan.hadir} warna="text-green-600" />
+          <Ringkas label="Telat" nilai={ringkasan.telat} warna="text-amber-600" />
+          <Ringkas label="Dinas Luar" nilai={ringkasan.dinas_luar} warna="text-blue-600" />
+          <Ringkas label="Izin" nilai={ringkasan.izin} warna="text-gray-500" />
+        </div>
+      )}
+
+      <div className="rounded-xl bg-white p-3 shadow-sm">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <p className="text-sm font-semibold text-brand-text">
+            🚫 Belum Absen ({belumAbsen.length})
+          </p>
+          <input
+            type="date"
+            value={tanggalCek}
+            onChange={(e) => setTanggalCek(e.target.value)}
+            className="ml-auto rounded-lg border border-gray-300 p-1.5 text-xs"
+          />
+        </div>
+        {loadingCek ? (
+          <p className="text-xs text-gray-400">Memuat...</p>
+        ) : belumAbsen.length === 0 ? (
+          <p className="text-xs text-gray-400">
+            Semua pegawai {divisiId !== "semua" ? "di divisi ini " : ""}sudah absen tanggal ini.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {belumAbsen.map((p) => (
+              <span
+                key={p.id}
+                className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700"
+              >
+                {p.nama}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
 
       {loading ? (
         <Loading teks="Memuat data absensi..." />
@@ -304,6 +403,15 @@ function SesiAbsensi({
           <p className="col-span-2 text-xs text-gray-400">Foto sudah dihapus otomatis (retensi habis).</p>
         )}
       </div>
+    </div>
+  );
+}
+
+function Ringkas({ label, nilai, warna }: { label: string; nilai: number; warna?: string }) {
+  return (
+    <div>
+      <p className={`text-lg font-bold ${warna ?? "text-brand-text"}`}>{nilai}</p>
+      <p className="text-[11px] text-gray-500">{label}</p>
     </div>
   );
 }
