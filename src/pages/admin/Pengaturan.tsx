@@ -151,7 +151,8 @@ export default function Pengaturan() {
           <Field label="Jam Masuk">
             <input
               type="time"
-              value={form.jam_masuk.slice(0, 5)}
+              step={1}
+              value={form.jam_masuk.slice(0, 8)}
               onChange={(e) => setForm({ ...form, jam_masuk: e.target.value })}
               className="w-full rounded-xl border border-gray-300 p-3 text-base"
             />
@@ -159,12 +160,16 @@ export default function Pengaturan() {
           <Field label="Jam Pulang">
             <input
               type="time"
-              value={form.jam_pulang.slice(0, 5)}
+              step={1}
+              value={form.jam_pulang.slice(0, 8)}
               onChange={(e) => setForm({ ...form, jam_pulang: e.target.value })}
               className="w-full rounded-xl border border-gray-300 p-3 text-base"
             />
           </Field>
         </div>
+        <p className="-mt-2 text-xs text-gray-400">
+          Batas jam masuk/pulang sekarang bisa diatur sampai ke detik (mis. 08:00:30).
+        </p>
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm">
