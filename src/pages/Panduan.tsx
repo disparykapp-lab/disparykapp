@@ -51,8 +51,9 @@ export default function Panduan() {
           (mis. foto/dokumen di Google Drive).
         </Langkah>
         <Langkah no={5}>
-          Kamera akan terbuka otomatis. Posisikan wajah kamu, lalu tekan{" "}
-          <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan "Ambil Ulang".
+          Kamera akan terbuka otomatis dengan bingkai "Jogja Istimewa" — posisikan wajah kamu di
+          dalam bingkainya, lalu tekan <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan
+          "Ambil Ulang".
         </Langkah>
         <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
       </Bagian>

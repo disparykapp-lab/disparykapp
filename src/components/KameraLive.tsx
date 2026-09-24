@@ -8,6 +8,12 @@ interface KameraLiveProps {
   onBatal: () => void;
 }
 
+// Batas area transparan (lubang foto) pada bingkai twibbon.png, dalam
+// persentase lebar/tinggi gambar bingkainya sendiri — dipakai supaya
+// watermark teks digambar di dalam lubang, tidak ketutupan bingkai emas
+// yang solid di pinggir (diukur langsung dari file twibbon.png).
+const BINGKAI_LUBANG = { kiri: 0.19, kanan: 0.8, atas: 0.19, bawah: 0.86 };
+
 /**
  * Kamera langsung dari getUserMedia — sengaja TIDAK memakai <input type="file">
  * supaya foto tidak bisa diambil dari galeri (lihat spesifikasi 7.1).
@@ -16,10 +22,19 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const bingkaiRef = useRef<HTMLImageElement | null>(null);
   const [siap, setSiap] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasilUrl, setHasilUrl] = useState<string | null>(null);
   const [hasilBlob, setHasilBlob] = useState<Blob | null>(null);
+
+  useEffect(() => {
+    // Preload bingkai twibbon dari awal (paralel sama izin kamera) supaya
+    // pas tombol "Ambil Foto" ditekan, gambarnya sudah pasti siap dipakai.
+    const img = new Image();
+    img.src = "/twibbon.png";
+    bingkaiRef.current = img;
+  }, []);
 
   useEffect(() => {
     let batal = false;
@@ -78,24 +93,39 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
+    // Bingkai twibbon (punya lubang transparan di tengah) digambar di atas
+    // foto, memenuhi seluruh kanvas — bagian tengah foto tetap kelihatan
+    // lewat lubangnya, cuma pinggirnya yang ketutupan bingkai emas.
+    const bingkai = bingkaiRef.current;
+    if (bingkai && bingkai.complete && bingkai.naturalWidth > 0) {
+      ctx.drawImage(bingkai, 0, 0, canvas.width, canvas.height);
+    }
+
     const waktu = new Date().toLocaleString("id-ID", {
       dateStyle: "medium",
       timeStyle: "medium",
     });
     const baris = [nama, waktu, `${lat.toFixed(5)}, ${lng.toFixed(5)}`];
 
-    const ukuranFont = Math.max(14, Math.round(canvas.width / 32));
-    const tinggiBaris = ukuranFont * 1.4;
-    const tinggiOverlay = tinggiBaris * baris.length + 16;
+    // Watermark digambar di DALAM lubang bingkai (bukan mepet tepi kanvas)
+    // supaya tidak ketutupan bingkai emas yang solid.
+    const batasKiri = canvas.width * BINGKAI_LUBANG.kiri;
+    const batasKanan = canvas.width * BINGKAI_LUBANG.kanan;
+    const batasBawah = canvas.height * BINGKAI_LUBANG.bawah;
+    const lebarLubang = batasKanan - batasKiri;
+
+    const ukuranFont = Math.max(12, Math.round(lebarLubang / 26));
+    const tinggiBaris = ukuranFont * 1.35;
+    const tinggiOverlay = tinggiBaris * baris.length + 14;
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, canvas.height - tinggiOverlay, canvas.width, tinggiOverlay);
+    ctx.fillRect(batasKiri, batasBawah - tinggiOverlay, lebarLubang, tinggiOverlay);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = `600 ${ukuranFont}px sans-serif`;
     ctx.textBaseline = "top";
     baris.forEach((teks, i) => {
-      ctx.fillText(teks, 12, canvas.height - tinggiOverlay + 8 + i * tinggiBaris);
+      ctx.fillText(teks, batasKiri + 8, batasBawah - tinggiOverlay + 6 + i * tinggiBaris);
     });
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
@@ -148,12 +178,21 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
 
       <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-black">
         {!hasilUrl && (
-          <video
-            ref={videoRef}
-            playsInline
-            muted
-            className="aspect-[3/4] w-full -scale-x-100 object-cover"
-          />
+          <>
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              className="aspect-[3/4] w-full -scale-x-100 object-cover"
+            />
+            {/* Preview bingkai supaya wajah bisa diposisikan pas sebelum jepret
+                — hasil akhirnya sudah pasti kebingkai juga (digambar di kanvas). */}
+            <img
+              src="/twibbon.png"
+              alt=""
+              className="pointer-events-none absolute inset-0 h-full w-full object-fill"
+            />
+          </>
         )}
         {hasilUrl && (
           <img
