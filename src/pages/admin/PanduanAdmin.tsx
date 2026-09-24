@@ -149,10 +149,11 @@ export default function PanduanAdmin() {
           sesuai filter yang aktif.
         </Langkah>
         <Langkah no={4}>
-          Kartu <strong>"Rekap per Pegawai"</strong> menampilkan tiap pegawai beserta jumlah
-          kejadiannya di rentang yang diterapkan — mis. "Telat 2x", "Izin 2x", atau{" "}
-          <strong>"Tidak Absen"</strong> untuk hari kerja yang sama sekali tidak ada entrinya.
-          Pegawai dengan masalah (tidak absen/telat/izin) otomatis muncul di urutan atas.
+          Kartu <strong>"🚩 Telat & Izin/Sakit"</strong> cuma menyorot dua hal itu saja (hadir
+          normal tidak perlu ditampilkan lagi di sini). Kalau rentangnya 1 hari, nama pegawai
+          langsung tampil dengan warna latar merah (telat) atau hitam (izin/sakit). Kalau
+          rentangnya lebih dari 1 hari, nama pegawai tampil netral diikuti dua lingkaran angka:
+          merah = jumlah telat, hitam = jumlah izin/sakit di rentang itu.
         </Langkah>
         <Langkah no={5}>
           Tekan salah satu baris di daftar bawah untuk membuka detail: foto absen, peta lokasi,

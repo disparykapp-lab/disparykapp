@@ -7,14 +7,8 @@ import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import { teksDenganLink } from "../../lib/linkify";
-import { hitungRingkasan, type BarisAbsensi } from "../../lib/rekap";
+import type { BarisAbsensi } from "../../lib/rekap";
 import type { Divisi } from "../../types/database";
-
-interface PegawaiRingkas {
-  id: string;
-  nama: string;
-  divisi_id: string | null;
-}
 
 export default function TinjauAbsensi() {
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
@@ -36,8 +30,6 @@ export default function TinjauAbsensi() {
   const [divisiId, setDivisiId] = useState<string>("semua");
   const [cari, setCari] = useState("");
 
-  const [pegawaiAktif, setPegawaiAktif] = useState<PegawaiRingkas[]>([]);
-
   useEffect(() => {
     supabase
       .from("divisi")
@@ -45,13 +37,6 @@ export default function TinjauAbsensi() {
       .eq("aktif", true)
       .order("nama")
       .then(({ data }) => setDivisiList((data as Divisi[]) ?? []));
-
-    supabase
-      .from("profiles")
-      .select("id, nama, divisi_id")
-      .eq("aktif", true)
-      .order("nama")
-      .then(({ data }) => setPegawaiAktif((data as PegawaiRingkas[]) ?? []));
   }, []);
 
   async function muat() {
@@ -102,33 +87,35 @@ export default function TinjauAbsensi() {
     return hasil;
   }, [rowsTersaring]);
 
-  // Rekap per pegawai untuk rentang yang sedang diterapkan — dipakai untuk
-  // memperlihatkan "siapa yang tidak masuk" beserta angkanya (izin 2x,
-  // telat 2x, dst) alih-alih cuma daftar nama untuk 1 hari saja.
-  const rekapPegawai = useMemo(() => {
-    const dariTgl = ambilTanggal(dari);
-    const sampaiTgl = ambilTanggal(sampai);
-    const perUser = new Map<string, BarisAbsensi[]>();
-    for (const r of rows) {
-      const arr = perUser.get(r.user_id) ?? [];
-      arr.push(r);
-      perUser.set(r.user_id, arr);
+  // Cuma dua hal yang perlu disorot di sini: telat (merah) & izin/sakit
+  // (hitam). Hadir/dinas luar/tidak ada baris tidak ditampilkan di kartu ini
+  // — sudah cukup terwakili di kartu ringkasan total di atas.
+  const satuHari = dari === sampai;
+
+  const orangSatuHari = useMemo(() => {
+    if (!satuHari) return [];
+    return rowsTersaring
+      .filter((r): r is BarisAbsensi & { status: "telat" | "izin" } =>
+        r.status === "telat" || r.status === "izin"
+      )
+      .map((r) => ({ id: r.id, nama: r.profiles?.nama ?? "-", status: r.status }))
+      .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+  }, [rowsTersaring, satuHari]);
+
+  const rekapRentang = useMemo(() => {
+    if (satuHari) return [];
+    const perUser = new Map<string, { nama: string; telat: number; izin: number }>();
+    for (const r of rowsTersaring) {
+      if (r.status !== "telat" && r.status !== "izin") continue;
+      const cur = perUser.get(r.user_id) ?? { nama: r.profiles?.nama ?? "-", telat: 0, izin: 0 };
+      if (r.status === "telat") cur.telat++;
+      else cur.izin++;
+      perUser.set(r.user_id, cur);
     }
-    return pegawaiAktif
-      .filter((p) => divisiId === "semua" || p.divisi_id === divisiId)
-      .filter((p) => !cariNormal || p.nama.toLowerCase().includes(cariNormal))
-      .map((p) => {
-        const rk = hitungRingkasan(perUser.get(p.id) ?? [], dariTgl, sampaiTgl);
-        return { id: p.id, nama: p.nama, ...rk };
-      })
-      .filter((p) => p.hadir + p.telat + p.dinasLuar + p.izin + p.tidakAbsen > 0)
-      .sort((a, b) => {
-        const masalahA = a.tidakAbsen + a.telat + a.izin;
-        const masalahB = b.tidakAbsen + b.telat + b.izin;
-        if (masalahA !== masalahB) return masalahB - masalahA;
-        return a.nama.localeCompare(b.nama, "id");
-      });
-  }, [rows, pegawaiAktif, divisiId, cariNormal, dari, sampai]);
+    return Array.from(perUser.entries())
+      .map(([id, v]) => ({ id, ...v }))
+      .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+  }, [rowsTersaring, satuHari]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -213,30 +200,48 @@ export default function TinjauAbsensi() {
       )}
 
       <div className="rounded-xl bg-white p-3 shadow-sm">
-        <p className="mb-2 text-sm font-semibold text-brand-text">👤 Rekap per Pegawai</p>
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <p className="text-sm font-semibold text-brand-text">🚩 Telat & Izin/Sakit</p>
+          <span className="flex items-center gap-1 text-[11px] text-gray-400">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Telat
+            <span className="ml-1 h-2.5 w-2.5 rounded-full bg-gray-900" /> Izin/Sakit
+          </span>
+        </div>
+
         {loading ? (
           <p className="text-xs text-gray-400">Memuat...</p>
-        ) : rekapPegawai.length === 0 ? (
-          <p className="text-xs text-gray-400">
-            Tidak ada pegawai yang cocok dengan filter ini, atau rentang tanggal ini bukan hari
-            kerja.
-          </p>
+        ) : satuHari ? (
+          orangSatuHari.length === 0 ? (
+            <p className="text-xs text-gray-400">Tidak ada yang telat atau izin/sakit hari ini.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {orangSatuHari.map((o) => (
+                <span
+                  key={o.id}
+                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+                    o.status === "telat" ? "bg-red-500 text-white" : "bg-gray-900 text-white"
+                  }`}
+                >
+                  {o.nama}
+                </span>
+              ))}
+            </div>
+          )
+        ) : rekapRentang.length === 0 ? (
+          <p className="text-xs text-gray-400">Tidak ada yang telat atau izin/sakit di rentang ini.</p>
         ) : (
-          <div className="flex flex-col divide-y divide-gray-50">
-            {rekapPegawai.map((p) => (
-              <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                <span className="text-sm font-medium text-brand-text">{p.nama}</span>
-                <div className="flex flex-wrap justify-end gap-1.5">
-                  {p.hadir > 0 && <Lencana label={`Hadir ${p.hadir}x`} warna="bg-green-50 text-green-700" />}
-                  {p.telat > 0 && <Lencana label={`Telat ${p.telat}x`} warna="bg-amber-50 text-amber-700" />}
-                  {p.dinasLuar > 0 && (
-                    <Lencana label={`Dinas Luar ${p.dinasLuar}x`} warna="bg-blue-50 text-blue-700" />
-                  )}
-                  {p.izin > 0 && <Lencana label={`Izin ${p.izin}x`} warna="bg-gray-100 text-gray-600" />}
-                  {p.tidakAbsen > 0 && (
-                    <Lencana label={`Tidak Absen ${p.tidakAbsen}x`} warna="bg-red-50 text-red-700" />
-                  )}
-                </div>
+          <div className="flex flex-wrap gap-3">
+            {rekapRentang.map((p) => (
+              <div key={p.id} className="flex items-center gap-1">
+                <span className="rounded-full bg-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-800">
+                  {p.nama}
+                </span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                  {p.telat}
+                </span>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
+                  {p.izin}
+                </span>
               </div>
             ))}
           </div>
@@ -460,12 +465,6 @@ function Ringkas({ label, nilai, warna }: { label: string; nilai: number; warna?
       <p className={`text-lg font-bold ${warna ?? "text-brand-text"}`}>{nilai}</p>
       <p className="text-[11px] text-gray-500">{label}</p>
     </div>
-  );
-}
-
-function Lencana({ label, warna }: { label: string; warna: string }) {
-  return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${warna}`}>{label}</span>
   );
 }
 
