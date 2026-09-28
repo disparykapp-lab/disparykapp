@@ -314,9 +314,10 @@ export default function Rekap() {
               <button
                 onClick={() => void unduhPeringkat()}
                 disabled={mengunduhGambar || pegawaiWajib.length === 0}
-                className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
+                className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
               >
-                {mengunduhGambar ? "Membuat gambar..." : "🖼️ Unduh Peringkat Terajin"}
+                <img src="/icon_album.png" alt="" className="h-7 w-7 object-contain" />
+                {mengunduhGambar ? "Membuat gambar..." : "Unduh Peringkat Terajin"}
               </button>
             )}
           </div>
