@@ -8,6 +8,7 @@ import { formatTanggal, geserBulan, geserMinggu, rentangBulan, rentangMinggu } f
 import { supabase } from "../lib/supabase";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import HeaderHalaman from "../components/HeaderHalaman";
+import GrafikKerajinan from "../components/GrafikKerajinan";
 import type { Divisi, Profile } from "../types/database";
 
 type Mode = "mingguan" | "bulanan";
@@ -228,6 +229,18 @@ export default function Rekap() {
               >
                 🖨️ Cetak
               </button>
+            </div>
+          )}
+
+          {isAdmin && tampilkanPerPegawai && (
+            <div className="print:hidden">
+              <GrafikKerajinan
+                key={`${dari.getTime()}-${sampai.getTime()}-${divisiId}`}
+                rows={rows}
+                pegawai={pegawaiList.filter((p) => divisiId === "semua" || p.divisi_id === divisiId)}
+                dari={dari}
+                sampai={sampai}
+              />
             </div>
           )}
 

@@ -185,6 +185,14 @@ export default function PanduanAdmin() {
         <Langkah no={1}>Buka menu Rekap — sebagai admin kamu bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
         <Langkah no={2}>Pilih "Semua Pegawai" untuk lihat ringkasan semua orang sekaligus.</Langkah>
         <Langkah no={3}>
+          Di mode "Semua Pegawai" muncul grafik <strong>🏅 Peringkat Kerajinan</strong> untuk
+          minggu/bulan yang dipilih: podium 3 pegawai terajin, daftar <strong>Paling Malas</strong>,
+          dan bar per pegawai yang menunjukkan komposisi hari kerjanya (hijau = hadir tepat waktu,
+          biru = dinas luar, kuning = telat, ungu = izin/sakit, merah = tidak absen). Skornya:
+          hadir tepat waktu &amp; dinas luar = 1 poin, telat/izin = ½ poin, tidak absen = 0, dibagi
+          jumlah hari kerja (Senin–Jumat sampai hari ini). Filter divisi ikut berlaku.
+        </Langkah>
+        <Langkah no={4}>
           Tombol "Ekspor Excel" mengunduh file .xlsx rapi (judul, periode, ringkasan, tabel
           berwarna) siap dipakai untuk laporan ke atasan. Ada juga tombol "Cetak" untuk print
           langsung.
