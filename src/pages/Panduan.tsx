@@ -65,6 +65,13 @@ export default function Panduan() {
         </p>
       </Bagian>
 
+      <Bagian judul="🟢 Pengguna Online">
+        <p className="text-sm text-gray-600">
+          Di bagian atas Beranda ada penunjuk jumlah pengguna yang sedang membuka aplikasi saat
+          ini. Angkanya bergerak real-time, dan kamu otomatis dihitung selama aplikasi terbuka.
+        </p>
+      </Bagian>
+
       <Bagian judul="⚠️ Kenapa Absen Saya Ditolak?">
         <ButirMasalah
           judul='"Lokasi kamu terlalu jauh dari kantor"'

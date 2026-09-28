@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { PresenceProvider } from "./contexts/PresenceContext";
 import { RequireAdmin, RequireAuth, RequireFiturKalender } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <PresenceProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/daftar" element={<Daftar />} />
@@ -59,6 +61,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </PresenceProvider>
       </AuthProvider>
     </BrowserRouter>
   );

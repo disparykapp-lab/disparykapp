@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import HeaderHub from "../components/HeaderHub";
 import IconTile from "../components/IconTile";
+import KartuOnline from "../components/KartuOnline";
 import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
@@ -58,6 +59,8 @@ export default function Beranda() {
       <HeaderHub />
 
       <p className="text-center text-sm text-gray-500">{tanggalHariIni}</p>
+
+      <KartuOnline />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 

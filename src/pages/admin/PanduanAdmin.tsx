@@ -43,6 +43,13 @@ export default function PanduanAdmin() {
           Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
           absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>
+        <Langkah no={9}>
+          Pegawai yang sedang membuka aplikasi ditandai titik hijau di foto profilnya dan badge{" "}
+          <strong>"Online"</strong> di samping nama; judul tiap divisi juga menampilkan berapa
+          anggotanya yang online. Status ini real-time dan langsung hilang saat pegawai menutup
+          aplikasi. Jumlah seluruh pengguna online (semua peran) juga tampil di Beranda dan
+          halaman Kelola.
+        </Langkah>
         <Catatan>
           Menghapus akun di Supabase Auth (dashboard Supabase) <strong>tidak</strong> otomatis
           menghapus data pegawai di sini — dua hal berbeda, hapus manual di kedua tempat kalau

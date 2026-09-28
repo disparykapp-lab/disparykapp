@@ -4,6 +4,7 @@ import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePresence } from "../../contexts/PresenceContext";
 import { simpanMasaMagang, hitungProgressMagang } from "../../lib/profil";
 import { formatTanggal } from "../../lib/tanggal";
 import type { Divisi, Profile, Role } from "../../types/database";
@@ -12,6 +13,7 @@ const TANPA_DIVISI = "— Belum Ada Divisi —";
 
 export default function Pegawai() {
   const { profile: profileSaya } = useAuth();
+  const { onlineIds } = usePresence();
   const [list, setList] = useState<Profile[]>([]);
   const [menghapusId, setMenghapusId] = useState<string | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
@@ -214,6 +216,11 @@ export default function Pegawai() {
             <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-sm font-semibold text-brand-text marker:content-none">
               <span>
                 📁 {namaDivisi} ({anggota.length})
+                {anggota.some((p) => onlineIds.has(p.id)) && (
+                  <span className="ml-2 text-xs font-medium text-green-600">
+                    🟢 {anggota.filter((p) => onlineIds.has(p.id)).length} online
+                  </span>
+                )}
               </span>
               <span className="text-gray-400 transition group-open:rotate-180">▾</span>
             </summary>
@@ -225,15 +232,27 @@ export default function Pegawai() {
                     className="flex items-start justify-between text-left"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
-                        {p.foto_url ? (
-                          <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          p.nama.charAt(0).toUpperCase()
+                      <div className="relative shrink-0">
+                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
+                          {p.foto_url ? (
+                            <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            p.nama.charAt(0).toUpperCase()
+                          )}
+                        </div>
+                        {onlineIds.has(p.id) && (
+                          <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500" />
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-brand-text">{p.nama}</p>
+                        <p className="font-semibold text-brand-text">
+                          {p.nama}
+                          {onlineIds.has(p.id) && (
+                            <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+                              Online
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs text-gray-500">{p.email}</p>
                       </div>
                     </div>

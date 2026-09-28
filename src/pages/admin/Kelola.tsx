@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import IconTile from "../../components/IconTile";
+import KartuOnline from "../../components/KartuOnline";
 import { supabase } from "../../lib/supabase";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
@@ -30,6 +31,8 @@ export default function Kelola() {
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Kelola" kembaliKe="/" />
+
+      <KartuOnline />
 
       {retensi && retensi.akanTerhapus > 0 && (
         <Link
