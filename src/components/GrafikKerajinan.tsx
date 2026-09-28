@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { hitungRingkasan, type BarisAbsensi } from "../lib/rekap";
+import type { BarisAbsensi } from "../lib/rekap";
 import { jumlahHariKerja } from "../lib/tanggal";
-import type { Profile } from "../types/database";
-
-type PegawaiGrafik = Pick<Profile, "id" | "nama" | "foto_url">;
+import {
+  hitungPeringkat,
+  tingkatKerajinan as tingkat,
+  type EntriPeringkat as Entri,
+  type PegawaiGrafik,
+} from "../lib/peringkat";
 
 interface Props {
   rows: BarisAbsensi[];
@@ -24,26 +27,6 @@ const SEGMEN = [
   { kunci: "izin", label: "Izin/Sakit", ikon: "📝", warna: "#4a3aa7" },
   { kunci: "tidakAbsen", label: "Tidak absen", ikon: "❌", warna: "#d03b3b" },
 ] as const;
-
-interface Entri {
-  id: string;
-  nama: string;
-  foto_url: string | null;
-  hadir: number;
-  dinasLuar: number;
-  telat: number;
-  izin: number;
-  tidakAbsen: number;
-  skor: number;
-}
-
-function tingkat(skor: number) {
-  if (skor >= 95) return { label: "Sangat Rajin", emoji: "🌟", cls: "bg-green-100 text-green-800" };
-  if (skor >= 85) return { label: "Rajin", emoji: "💪", cls: "bg-green-50 text-green-700" };
-  if (skor >= 70) return { label: "Cukup", emoji: "🙂", cls: "bg-gray-100 text-gray-600" };
-  if (skor >= 50) return { label: "Kurang Rajin", emoji: "😕", cls: "bg-amber-100 text-amber-800" };
-  return { label: "Sangat Malas", emoji: "😴", cls: "bg-red-100 text-red-700" };
-}
 
 function useCountUp(target: number, durasi = 900) {
   const [nilai, setNilai] = useState(0);
@@ -93,39 +76,10 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecuali
   const [terbuka, setTerbuka] = useState(false);
   const hariKerja = useMemo(() => jumlahHariKerja(dari, sampai), [dari, sampai]);
 
-  const daftar = useMemo<Entri[]>(() => {
-    const perUser = new Map<string, BarisAbsensi[]>();
-    for (const r of rows) {
-      const arr = perUser.get(r.user_id) ?? [];
-      arr.push(r);
-      perUser.set(r.user_id, arr);
-    }
-    return pegawai
-      .map((p) => {
-        const r = hitungRingkasan(perUser.get(p.id) ?? [], dari, sampai);
-        // Poin: hadir tepat waktu & dinas luar = 1, telat/izin = 1/2, tidak absen = 0.
-        const poin = r.hadir + r.dinasLuar + 0.5 * (r.telat + r.izin);
-        const skor = hariKerja > 0 ? Math.min(100, Math.round((poin / hariKerja) * 100)) : 0;
-        return {
-          id: p.id,
-          nama: p.nama,
-          foto_url: p.foto_url,
-          hadir: r.hadir,
-          dinasLuar: r.dinasLuar,
-          telat: r.telat,
-          izin: r.izin,
-          tidakAbsen: r.tidakAbsen,
-          skor,
-        };
-      })
-      .sort(
-        (a, b) =>
-          b.skor - a.skor ||
-          a.tidakAbsen - b.tidakAbsen ||
-          a.telat - b.telat ||
-          a.nama.localeCompare(b.nama, "id")
-      );
-  }, [rows, pegawai, dari, sampai, hariKerja]);
+  const daftar = useMemo(
+    () => hitungPeringkat(rows, pegawai, dari, sampai),
+    [rows, pegawai, dari, sampai]
+  );
 
   if (hariKerja === 0) {
     return (

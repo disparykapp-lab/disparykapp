@@ -200,8 +200,9 @@ export default function PanduanAdmin() {
         </Langkah>
         <Langkah no={4}>
           Tombol "Ekspor Excel" mengunduh file .xlsx rapi (judul, periode, ringkasan, tabel
-          berwarna) siap dipakai untuk laporan ke atasan. Ada juga tombol "Cetak" untuk print
-          langsung.
+          berwarna) siap dipakai untuk laporan ke atasan. Di mode "Semua Pegawai" ada juga tombol{" "}
+          <strong>"Unduh Peringkat Terajin"</strong> yang mengunduh gambar PNG berisi 10 pegawai
+          terajin di rentang tanggal itu (siap dibagikan), bukan lagi tombol Cetak.
         </Langkah>
       </Bagian>
 

@@ -9,6 +9,7 @@ import { supabase } from "../lib/supabase";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import HeaderHalaman from "../components/HeaderHalaman";
 import GrafikKerajinan from "../components/GrafikKerajinan";
+import { hitungPeringkat, unduhGambarPeringkat } from "../lib/peringkat";
 import type { Divisi, Profile } from "../types/database";
 
 /** "yyyy-MM-dd" -> Date tengah malam waktu lokal (bukan UTC) supaya tanggal tidak meleset. */
@@ -33,6 +34,7 @@ export default function Rekap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mengekspor, setMengekspor] = useState(false);
+  const [mengunduhGambar, setMengunduhGambar] = useState(false);
 
   const [pegawaiList, setPegawaiList] = useState<Profile[]>([]);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
@@ -147,6 +149,22 @@ export default function Rekap() {
       setErrorKlarifikasi(e instanceof Error ? e.message : "Gagal mengirim keterangan.");
     } finally {
       setMengirimKlarifikasi(false);
+    }
+  }
+
+  async function unduhPeringkat() {
+    setMengunduhGambar(true);
+    setError(null);
+    try {
+      await unduhGambarPeringkat({
+        daftar: hitungPeringkat(rows, pegawaiWajib, dari, sampai),
+        dari,
+        sampai,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal membuat gambar peringkat.");
+    } finally {
+      setMengunduhGambar(false);
     }
   }
 
@@ -283,23 +301,25 @@ export default function Rekap() {
             </p>
           )}
 
-          {isAdmin && (
-            <div className="flex gap-2 print:hidden">
+          <div className="flex gap-2 print:hidden">
+            <button
+              onClick={() => void eksporExcel()}
+              disabled={mengekspor}
+              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
+            >
+              <img src="/icon_excel.png" alt="" className="-ml-1 h-9 w-9 object-contain" />
+              {mengekspor ? "Menyiapkan..." : "Ekspor Excel"}
+            </button>
+            {isAdmin && tampilkanPerPegawai && (
               <button
-                onClick={() => void eksporExcel()}
-                disabled={mengekspor}
+                onClick={() => void unduhPeringkat()}
+                disabled={mengunduhGambar || pegawaiWajib.length === 0}
                 className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
               >
-                {mengekspor ? "Menyiapkan..." : "⬇️ Ekspor Excel"}
+                {mengunduhGambar ? "Membuat gambar..." : "🖼️ Unduh Peringkat Terajin"}
               </button>
-              <button
-                onClick={() => window.print()}
-                className="min-h-[44px] flex-1 rounded-xl border border-gray-300 bg-white text-sm font-semibold text-brand-text"
-              >
-                🖨️ Cetak
-              </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {isAdmin && tampilkanPerPegawai && (
             <div className="print:hidden">

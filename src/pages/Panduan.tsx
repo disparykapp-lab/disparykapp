@@ -65,6 +65,14 @@ export default function Panduan() {
         </p>
       </Bagian>
 
+      <Bagian judul="📊 Rekap Absensi Saya">
+        <p className="text-sm text-gray-600">
+          Buka menu Rekap, pilih tanggal mulai &amp; akhir lalu tekan "Terapkan" untuk melihat
+          riwayat absensimu. Tekan <strong>"Ekspor Excel"</strong> untuk mengunduh rekap itu
+          sebagai file Excel.
+        </p>
+      </Bagian>
+
       <Bagian judul="🟢 Pengguna Online">
         <p className="text-sm text-gray-600">
           Di bagian atas Beranda ada penunjuk jumlah pengguna yang sedang membuka aplikasi saat
