@@ -68,6 +68,7 @@ export default function Beranda() {
         <Loading teks="Memuat status absen..." />
       ) : (
         <>
+          <div className={`grid gap-4 ${magang ? "lg:grid-cols-2" : ""}`}>
           {magang && (
             <section className="rounded-2xl bg-white p-5 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
@@ -102,8 +103,9 @@ export default function Beranda() {
               )}
             </div>
           </section>
+          </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <IconTile
               to="/absen/masuk"
               iconSrc="/icon_absen_masuk.png"

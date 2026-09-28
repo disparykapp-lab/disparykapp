@@ -47,7 +47,7 @@ export default function Kelola() {
         </Link>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <IconTile
           to="/kelola/undangan"
           iconSrc="/icon_mail.png"
