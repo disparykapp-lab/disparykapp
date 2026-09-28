@@ -206,7 +206,7 @@ export default function Pegawai() {
 
       <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama, email, atau jabatan..." />
 
-      <div className="flex flex-col gap-3">
+      <div className="grid items-start gap-3 lg:grid-cols-2">
         {kelompokDivisi.map(([namaDivisi, anggota]) => (
           <details
             key={namaDivisi}

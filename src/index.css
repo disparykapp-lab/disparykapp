@@ -88,3 +88,18 @@ button:disabled {
     linear-gradient(135deg, var(--color-brand-masuk) 0%, var(--color-brand-gold) 100%);
   background-size: 14px 14px, auto;
 }
+
+/* Halaman berbentuk form/teks/kamera: di desktop isinya tetap satu kolom
+   sempit di tengah (header tetap melebar). Di HP tidak ada efek. */
+@media (min-width: 1024px) {
+  .kolom-sempit > :not(header) {
+    width: 100%;
+    max-width: 42rem;
+    margin-inline: auto;
+  }
+  .kolom-sempit-sm > :not(header) {
+    width: 100%;
+    max-width: 32rem;
+    margin-inline: auto;
+  }
+}

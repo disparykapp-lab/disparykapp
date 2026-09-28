@@ -121,7 +121,7 @@ export default function Absen() {
   }
 
   return (
-    <div className="flex min-h-[80vh] flex-col">
+    <div className="kolom-sempit-sm flex min-h-[80vh] flex-col">
       <HeaderHalaman judul={LABEL_JENIS[jenis]} kembaliKe="/" />
 
       {langkah === "mode" && (

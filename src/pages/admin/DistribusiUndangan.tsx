@@ -235,7 +235,7 @@ export default function DistribusiUndangan() {
       </div>
 
       {kategoriAktif === null ? (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {(Object.keys(LABEL_KATEGORI) as KategoriUndangan[]).map((k) => {
             const r = ringkasanPerKategori.get(k) ?? { total: 0, selesai: 0 };
             return (

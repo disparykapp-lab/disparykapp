@@ -3,7 +3,7 @@ import HeaderHalaman from "../components/HeaderHalaman";
 
 export default function Panduan() {
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="kolom-sempit flex flex-col gap-4 pb-6">
       <HeaderHalaman judul="Panduan Penggunaan" kembaliKe="/" />
 
       <p className="text-sm text-gray-500">

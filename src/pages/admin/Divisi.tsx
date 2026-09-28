@@ -61,7 +61,7 @@ export default function Divisi() {
   if (loading) return <Loading teks="Memuat divisi..." />;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="kolom-sempit flex flex-col gap-4">
       <HeaderHalaman judul="Kelola Divisi" />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}

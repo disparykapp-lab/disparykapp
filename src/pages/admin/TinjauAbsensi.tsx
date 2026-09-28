@@ -251,7 +251,7 @@ export default function TinjauAbsensi() {
       {loading ? (
         <Loading teks="Memuat data absensi..." />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="grid items-start gap-2 lg:grid-cols-2">
           {rowsTersaring.map((r) => (
             <div
               key={r.id}

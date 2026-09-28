@@ -164,7 +164,7 @@ export default function FotoAbsensi() {
           Tidak ada foto pada rentang ini.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {fotoTersaring.map((f) => (
             <KartuFoto
               key={`${f.absensiId}-${f.jenis}`}

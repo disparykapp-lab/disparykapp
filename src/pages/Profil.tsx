@@ -67,7 +67,7 @@ export default function Profil() {
   const inisial = nama.trim().charAt(0).toUpperCase() || "?";
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="kolom-sempit flex flex-col gap-4 pb-6">
       <HeaderHalaman judul="Profil Saya" kembaliKe="/" />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}

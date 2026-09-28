@@ -126,7 +126,7 @@ export default function KontenForm() {
   if (loading) return <Loading teks="Memuat konten..." />;
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="kolom-sempit flex flex-col gap-4 pb-6">
       <HeaderHalaman
         judul={isBaru ? "Tambah Konten" : bisaEditPenuh ? "Edit Konten" : "Detail Konten"}
         kembaliKe="/kalender"
