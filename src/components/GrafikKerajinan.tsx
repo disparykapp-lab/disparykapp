@@ -88,6 +88,7 @@ function Avatar({ e, ukuran }: { e: Entri; ukuran: string }) {
  * (komposisi hari kerja: hadir/dinas luar/telat/izin/tidak absen).
  */
 export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) {
+  const [terbuka, setTerbuka] = useState(false);
   const hariKerja = useMemo(() => jumlahHariKerja(dari, sampai), [dari, sampai]);
 
   const daftar = useMemo<Entri[]>(() => {
@@ -199,6 +200,19 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) 
         </div>
       )}
 
+      <button
+        onClick={() => setTerbuka((v) => !v)}
+        aria-expanded={terbuka}
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold text-brand-text transition active:scale-[0.98]"
+      >
+        {terbuka ? "Tutup peringkat lengkap" : `Lihat peringkat lengkap (${daftar.length} pegawai)`}
+        <span className={`text-gray-400 transition-transform duration-300 ${terbuka ? "rotate-180" : ""}`}>
+          ▾
+        </span>
+      </button>
+
+      {terbuka && (
+      <div className="anim-buka flex flex-col gap-4">
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
         {SEGMEN.map((s) => (
           <span key={s.kunci} className="flex items-center gap-1">
@@ -260,6 +274,15 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) 
           );
         })}
       </ol>
+
+      <button
+        onClick={() => setTerbuka(false)}
+        className="min-h-[40px] rounded-xl text-xs font-semibold text-gray-500"
+      >
+        ▲ Tutup peringkat lengkap
+      </button>
+      </div>
+      )}
     </section>
   );
 }
