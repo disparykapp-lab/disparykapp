@@ -182,11 +182,11 @@ export default function PanduanAdmin() {
       </Bagian>
 
       <Bagian judul="📊 Rekap Semua Pegawai">
-        <Langkah no={1}>Buka menu Rekap — sebagai admin kamu bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
+        <Langkah no={1}>Buka menu Rekap — pilih sendiri tanggal mulai &amp; akhir lalu tekan "Terapkan" (atau pakai tombol cepat "Minggu ini"/"Bulan ini"). Sebagai admin kamu juga bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
         <Langkah no={2}>Pilih "Semua Pegawai" untuk lihat ringkasan semua orang sekaligus.</Langkah>
         <Langkah no={3}>
           Di mode "Semua Pegawai" muncul grafik <strong>🏅 Peringkat Kerajinan</strong> untuk
-          minggu/bulan yang dipilih: podium 3 pegawai terajin, daftar <strong>Paling Malas</strong>,
+          rentang tanggal yang dipilih: podium 3 pegawai terajin, daftar <strong>Paling Bawah</strong>,
           dan bar per pegawai yang menunjukkan komposisi hari kerjanya (hijau = hadir tepat waktu,
           biru = dinas luar, kuning = telat, ungu = izin/sakit, merah = tidak absen). Skornya:
           hadir tepat waktu &amp; dinas luar = 1 poin, telat/izin = ½ poin, tidak absen = 0, dibagi

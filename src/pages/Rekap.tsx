@@ -4,21 +4,31 @@ import Loading from "../components/Loading";
 import { ambilAbsensiRentang, hitungRingkasan, type BarisAbsensi } from "../lib/rekap";
 import { unduhExcelRekap } from "../lib/excel";
 import { kirimKlarifikasiAbsensi } from "../lib/absensi";
-import { formatTanggal, geserBulan, geserMinggu, rentangBulan, rentangMinggu } from "../lib/tanggal";
+import { formatTanggal, keYMD, rentangBulan, rentangMinggu } from "../lib/tanggal";
 import { supabase } from "../lib/supabase";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import HeaderHalaman from "../components/HeaderHalaman";
 import GrafikKerajinan from "../components/GrafikKerajinan";
 import type { Divisi, Profile } from "../types/database";
 
-type Mode = "mingguan" | "bulanan";
+/** "yyyy-MM-dd" -> Date tengah malam waktu lokal (bukan UTC) supaya tanggal tidak meleset. */
+function ambilTanggal(ymd: string): Date {
+  const [tahun, bulan, tgl] = ymd.split("-").map(Number);
+  return new Date(tahun, bulan - 1, tgl);
+}
 
 export default function Rekap() {
   const { profile } = useAuth();
   const isAdmin = profile?.role === "admin";
 
-  const [mode, setMode] = useState<Mode>("mingguan");
-  const [ref, setRef] = useState(new Date());
+  // dariInput/sampaiInput = isian tanggal di form; dari/sampai = rentang yang
+  // benar-benar dipakai (baru berubah saat "Terapkan" ditekan). Default: minggu ini.
+  const [awal] = useState(() => rentangMinggu(new Date()));
+  const [dariInput, setDariInput] = useState(keYMD(awal.dari));
+  const [sampaiInput, setSampaiInput] = useState(keYMD(awal.sampai));
+  const [dari, setDari] = useState(awal.dari);
+  const [sampai, setSampai] = useState(awal.sampai);
+  const [errorTanggal, setErrorTanggal] = useState<string | null>(null);
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +45,30 @@ export default function Rekap() {
   const [mengirimKlarifikasi, setMengirimKlarifikasi] = useState(false);
   const [errorKlarifikasi, setErrorKlarifikasi] = useState<string | null>(null);
 
-  const { dari, sampai } = useMemo(
-    () => (mode === "mingguan" ? rentangMinggu(ref) : rentangBulan(ref)),
-    [mode, ref]
-  );
+  function terapkanRentang(dariYmd = dariInput, sampaiYmd = sampaiInput) {
+    if (!dariYmd || !sampaiYmd) {
+      setErrorTanggal("Isi tanggal mulai dan tanggal akhir dulu.");
+      return;
+    }
+    if (dariYmd > sampaiYmd) {
+      setErrorTanggal("Tanggal mulai tidak boleh setelah tanggal akhir.");
+      return;
+    }
+    setErrorTanggal(null);
+    setDari(ambilTanggal(dariYmd));
+    setSampai(ambilTanggal(sampaiYmd));
+  }
+
+  function pakaiPreset(rentang: { dari: Date; sampai: Date }) {
+    const d = keYMD(rentang.dari);
+    const s = keYMD(rentang.sampai);
+    setDariInput(d);
+    setSampaiInput(s);
+    terapkanRentang(d, s);
+  }
+
+  const adaPerubahanBelumDiterapkan =
+    dariInput !== keYMD(dari) || sampaiInput !== keYMD(sampai);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -115,7 +145,7 @@ export default function Rekap() {
     setMengekspor(true);
     try {
       await unduhExcelRekap({
-        namaFile: `rekap-${mode}-${formatTanggal(dari, "yyyy-MM-dd")}`,
+        namaFile: `rekap-${keYMD(dari)}_sd_${keYMD(sampai)}`,
         judul: "Rekap Absensi — Dinas Pariwisata Kota Yogyakarta",
         periode: `${formatTanggal(dari, "d MMM yyyy")} – ${formatTanggal(sampai, "d MMM yyyy")}`,
         sertakanNama: isAdmin,
@@ -136,27 +166,57 @@ export default function Rekap() {
       </div>
       <h1 className="hidden text-xl font-bold text-brand-text print:block">Rekap Absensi</h1>
 
-      <div className="flex gap-2 print:hidden">
-        <ToggleMode label="Mingguan" aktif={mode === "mingguan"} onClick={() => setMode("mingguan")} />
-        <ToggleMode label="Bulanan" aktif={mode === "bulanan"} onClick={() => setMode("bulanan")} />
-      </div>
-
-      <div className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm print:hidden">
-        <button
-          onClick={() => setRef((r) => (mode === "mingguan" ? geserMinggu(r, -1) : geserBulan(r, -1)))}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100"
-        >
-          ‹
-        </button>
-        <span className="text-sm font-medium text-brand-text">
-          {formatTanggal(dari, "d MMM")} – {formatTanggal(sampai, "d MMM yyyy")}
-        </span>
-        <button
-          onClick={() => setRef((r) => (mode === "mingguan" ? geserMinggu(r, 1) : geserBulan(r, 1)))}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100"
-        >
-          ›
-        </button>
+      <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm print:hidden">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={dariInput}
+            onChange={(e) => setDariInput(e.target.value)}
+            className="rounded-lg border border-gray-300 p-2 text-sm"
+          />
+          <span className="text-gray-400">–</span>
+          <input
+            type="date"
+            value={sampaiInput}
+            onChange={(e) => setSampaiInput(e.target.value)}
+            className="rounded-lg border border-gray-300 p-2 text-sm"
+          />
+          <button
+            onClick={() => terapkanRentang()}
+            className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
+              adaPerubahanBelumDiterapkan
+                ? "bg-brand-masuk text-white"
+                : "border border-gray-300 bg-white text-gray-400"
+            }`}
+          >
+            Terapkan
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-gray-400">Cepat:</span>
+          <button
+            onClick={() => pakaiPreset(rentangMinggu(new Date()))}
+            className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-600"
+          >
+            Minggu ini
+          </button>
+          <button
+            onClick={() => pakaiPreset(rentangBulan(new Date()))}
+            className="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-600"
+          >
+            Bulan ini
+          </button>
+        </div>
+        {errorTanggal && <p className="text-xs text-red-600">{errorTanggal}</p>}
+        <p className="text-xs text-gray-400">
+          Menampilkan:{" "}
+          <strong className="text-gray-600">
+            {formatTanggal(dari, "d MMM yyyy")} – {formatTanggal(sampai, "d MMM yyyy")}
+          </strong>
+          {adaPerubahanBelumDiterapkan && (
+            <span className="ml-1 text-amber-600">(ada perubahan tanggal, tekan Terapkan)</span>
+          )}
+        </p>
       </div>
 
       {isAdmin && (
@@ -343,19 +403,6 @@ export default function Rekap() {
         </>
       )}
     </div>
-  );
-}
-
-function ToggleMode({ label, aktif, onClick }: { label: string; aktif: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`min-h-[40px] flex-1 rounded-xl text-sm font-semibold ${
-        aktif ? "bg-brand-masuk text-white" : "bg-white text-gray-500"
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 

@@ -84,7 +84,7 @@ function Avatar({ e, ukuran }: { e: Entri; ukuran: string }) {
 
 /**
  * Peringkat kerajinan pegawai untuk rentang tanggal yang sedang dilihat:
- * podium 3 teratas, daftar "paling malas", dan bar bertumpuk per pegawai
+ * podium 3 teratas, daftar "paling bawah", dan bar bertumpuk per pegawai
  * (komposisi hari kerja: hadir/dinas luar/telat/izin/tidak absen).
  */
 export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) {
@@ -141,20 +141,14 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) 
   const podium = daftar.length >= 3 ? [daftar[1], daftar[0], daftar[2]] : [];
   const tinggiPodium = [64, 88, 48];
   const urutanMedali = ["🥈", "🥇", "🥉"];
-  const paling_malas = [...daftar]
+  const paling_bawah = [...daftar]
     .reverse()
     .filter((e) => e.skor < 70)
     .slice(0, 3);
 
   return (
     <section className="flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm print:break-inside-avoid">
-      <div>
-        <h2 className="text-sm font-semibold text-brand-text">🏅 Peringkat Kerajinan</h2>
-        <p className="mt-0.5 text-xs text-gray-400">
-          {hariKerja} hari kerja · skor: hadir tepat waktu &amp; dinas luar = 1, telat/izin = ½,
-          tidak absen = 0
-        </p>
-      </div>
+      <h2 className="text-sm font-semibold text-brand-text">🏅 Peringkat Kerajinan</h2>
 
       {podium.length === 3 && (
         <div className="flex items-end justify-center gap-2 sm:gap-4">
@@ -180,11 +174,11 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) 
         </div>
       )}
 
-      {paling_malas.length > 0 && (
+      {paling_bawah.length > 0 && (
         <div className="rounded-xl bg-red-50 p-3">
-          <p className="mb-2 text-xs font-semibold text-red-700">😴 Paling Malas</p>
+          <p className="mb-2 text-xs font-semibold text-red-700">😴 Paling Bawah</p>
           <div className="flex flex-wrap gap-2">
-            {paling_malas.map((e) => (
+            {paling_bawah.map((e) => (
               <span
                 key={e.id}
                 className="flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-3 text-xs shadow-sm"
