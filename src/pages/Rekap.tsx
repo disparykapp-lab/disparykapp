@@ -113,7 +113,16 @@ export default function Rekap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, isAdmin, pegawaiId, divisiId, pegawaiList, dari, sampai]);
 
-  const ringkasan = useMemo(() => hitungRingkasan(rows, dari, sampai), [rows, dari, sampai]);
+  const wajibAbsen =
+    pegawaiId !== "semua"
+      ? (pegawaiList.find((p) => p.id === pegawaiId)?.wajib_absen !== false)
+      : (profile?.wajib_absen !== false);
+  const ringkasan = useMemo(
+    () => hitungRingkasan(rows, dari, sampai, wajibAbsen),
+    [rows, dari, sampai, wajibAbsen]
+  );
+  const pegawaiDivisi = pegawaiList.filter((p) => divisiId === "semua" || p.divisi_id === divisiId);
+  const pegawaiWajib = pegawaiDivisi.filter((p) => p.wajib_absen !== false);
   const tampilkanPerPegawai = isAdmin && pegawaiId === "semua";
 
   function bukaFormKlarifikasi(r: BarisAbsensi) {
@@ -297,7 +306,8 @@ export default function Rekap() {
               <GrafikKerajinan
                 key={`${dari.getTime()}-${sampai.getTime()}-${divisiId}`}
                 rows={rows}
-                pegawai={pegawaiList.filter((p) => divisiId === "semua" || p.divisi_id === divisiId)}
+                pegawai={pegawaiWajib}
+                dikecualikan={pegawaiDivisi.length - pegawaiWajib.length}
                 dari={dari}
                 sampai={sampai}
               />

@@ -27,6 +27,8 @@ export interface Profile {
   jabatan: string | null;
   foto_url: string | null;
   aktif: boolean;
+  /** false = tidak dihitung "tidak absen" & tidak ikut peringkat kerajinan */
+  wajib_absen: boolean;
   tanggal_lahir: string | null;
   asal_sekolah: string | null;
   tanggal_mulai_magang: string | null;

@@ -36,7 +36,13 @@ export interface Ringkasan {
   totalJamKerja: number;
 }
 
-export function hitungRingkasan(rows: BarisAbsensi[], dari: Date, sampai: Date): Ringkasan {
+/** wajibAbsen=false: pegawai tidak wajib absen, jadi hari tanpa absen tidak dihitung "tidak absen". */
+export function hitungRingkasan(
+  rows: BarisAbsensi[],
+  dari: Date,
+  sampai: Date,
+  wajibAbsen = true
+): Ringkasan {
   let hadir = 0;
   let telat = 0;
   let dinasLuar = 0;
@@ -55,7 +61,7 @@ export function hitungRingkasan(rows: BarisAbsensi[], dari: Date, sampai: Date):
   }
 
   const hariKerja = jumlahHariKerja(dari, sampai);
-  const tidakAbsen = Math.max(0, hariKerja - rows.length);
+  const tidakAbsen = wajibAbsen ? Math.max(0, hariKerja - rows.length) : 0;
 
   return {
     hadir,

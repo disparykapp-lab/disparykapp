@@ -44,6 +44,12 @@ export default function PanduanAdmin() {
           absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>
         <Langkah no={9}>
+          Tiap pegawai punya pilihan <strong>"Wajib absen / Tidak wajib absen"</strong> di
+          daftar. Pegawai yang tidak wajib absen tetap boleh absen, tapi hari tanpa absennya tidak
+          dihitung "Tidak Absen" di Rekap dan dia tidak ikut Peringkat Kerajinan (ditandai badge
+          abu-abu "Tidak wajib absen"). Default semua pegawai: wajib absen.
+        </Langkah>
+        <Langkah no={10}>
           Pegawai yang sedang membuka aplikasi ditandai titik hijau di foto profilnya dan badge{" "}
           <strong>"Online"</strong> di samping nama; judul tiap divisi juga menampilkan berapa
           anggotanya yang online. Status ini real-time dan langsung hilang saat pegawai menutup

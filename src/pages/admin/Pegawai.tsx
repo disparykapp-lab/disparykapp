@@ -89,6 +89,12 @@ export default function Pegawai() {
     else await muat();
   }
 
+  async function ubahWajibAbsen(id: string, wajib: boolean) {
+    const { error } = await supabase.from("profiles").update({ wajib_absen: wajib }).eq("id", id);
+    if (error) setError(error.message);
+    else await muat();
+  }
+
   async function toggleAktif(id: string, aktif: boolean) {
     const { error } = await supabase.from("profiles").update({ aktif: !aktif }).eq("id", id);
     if (error) setError(error.message);
@@ -252,6 +258,11 @@ export default function Pegawai() {
                               Online
                             </span>
                           )}
+                          {p.wajib_absen === false && (
+                            <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
+                              Tidak wajib absen
+                            </span>
+                          )}
                         </p>
                         <p className="text-xs text-gray-500">{p.email}</p>
                       </div>
@@ -285,6 +296,15 @@ export default function Pegawai() {
                     >
                       <option value="user">Pegawai</option>
                       <option value="admin">Admin</option>
+                    </select>
+                    <select
+                      value={p.wajib_absen === false ? "tidak" : "ya"}
+                      onChange={(e) => void ubahWajibAbsen(p.id, e.target.value === "ya")}
+                      className="rounded-lg border border-gray-300 p-2 text-xs"
+                      aria-label="Wajib absen"
+                    >
+                      <option value="ya">Wajib absen</option>
+                      <option value="tidak">Tidak wajib absen</option>
                     </select>
                     <button
                       onClick={() => void toggleAktif(p.id, p.aktif)}

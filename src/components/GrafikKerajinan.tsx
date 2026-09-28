@@ -10,6 +10,8 @@ interface Props {
   pegawai: PegawaiGrafik[];
   dari: Date;
   sampai: Date;
+  /** jumlah pegawai yang tidak wajib absen (tidak diikutkan peringkat) */
+  dikecualikan?: number;
 }
 
 // Warna segmen = warna status (hadir hijau, telat kuning, tidak absen merah,
@@ -87,7 +89,7 @@ function Avatar({ e, ukuran }: { e: Entri; ukuran: string }) {
  * podium 3 teratas, daftar "paling bawah", dan bar bertumpuk per pegawai
  * (komposisi hari kerja: hadir/dinas luar/telat/izin/tidak absen).
  */
-export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) {
+export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecualikan = 0 }: Props) {
   const [terbuka, setTerbuka] = useState(false);
   const hariKerja = useMemo(() => jumlahHariKerja(dari, sampai), [dari, sampai]);
 
@@ -148,7 +150,14 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai }: Props) 
 
   return (
     <section className="flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm print:break-inside-avoid">
-      <h2 className="text-sm font-semibold text-brand-text">🏅 Peringkat Kerajinan</h2>
+      <div>
+        <h2 className="text-sm font-semibold text-brand-text">🏅 Peringkat Kerajinan</h2>
+        {dikecualikan > 0 && (
+          <p className="mt-0.5 text-[11px] text-gray-400">
+            {dikecualikan} pegawai tidak wajib absen, tidak diikutkan.
+          </p>
+        )}
+      </div>
 
       {podium.length === 3 && (
         <div className="flex items-end justify-center gap-2 sm:gap-4">
