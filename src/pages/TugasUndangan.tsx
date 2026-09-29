@@ -13,6 +13,7 @@ import {
   LABEL_STATUS_UNDANGAN,
   type StatusUndangan,
   type Undangan,
+  type UndanganDenganPic,
 } from "../lib/undangan";
 
 const TAB: { value: "semua" | StatusUndangan; label: string }[] = [
@@ -24,7 +25,7 @@ const TAB: { value: "semua" | StatusUndangan; label: string }[] = [
 
 export default function TugasUndangan() {
   const { profile } = useAuth();
-  const [rows, setRows] = useState<Undangan[]>([]);
+  const [rows, setRows] = useState<UndanganDenganPic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<"semua" | StatusUndangan>("semua");
@@ -117,6 +118,9 @@ export default function TugasUndangan() {
                     )}
                     {r.lokasi_pengantaran && (
                       <p className="text-xs text-gray-400">Lokasi: {r.lokasi_pengantaran}</p>
+                    )}
+                    {r.pic_tim && (
+                      <p className="text-xs font-medium text-brand-info">👥 Tim {r.pic_tim.nama}</p>
                     )}
                     {r.catatan && <p className="text-xs text-gray-400">Kontak: {r.catatan}</p>}
                     {r.tanda_tangan_url && (

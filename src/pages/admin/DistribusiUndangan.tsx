@@ -3,6 +3,7 @@ import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import LihatTandaTangan from "../../components/LihatTandaTangan";
+import PanelTim from "../../components/PanelTim";
 import { supabase } from "../../lib/supabase";
 import {
   ambilSemuaUndangan,
@@ -19,11 +20,17 @@ import {
   type UndanganDenganPic,
   type UndanganInput,
 } from "../../lib/undangan";
+import { ambilSemuaTim, type TimDenganAnggota } from "../../lib/tim";
 import type { Profile } from "../../types/database";
+
+/** value dropdown "Tugaskan ke...": beda prefix buat pegawai vs tim. */
+const PREFIX_PEGAWAI = "pegawai:";
+const PREFIX_TIM = "tim:";
 
 export default function DistribusiUndangan() {
   const [rows, setRows] = useState<UndanganDenganPic[]>([]);
   const [pegawaiList, setPegawaiList] = useState<Profile[]>([]);
+  const [timList, setTimList] = useState<TimDenganAnggota[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +44,7 @@ export default function DistribusiUndangan() {
   const [menugaskan, setMenugaskan] = useState(false);
   const [terbuka, setTerbuka] = useState<string | null>(null);
   const [tambahTerbuka, setTambahTerbuka] = useState(false);
+  const [timTerbuka, setTimTerbuka] = useState(false);
 
   async function muat() {
     setLoading(true);
@@ -51,8 +59,17 @@ export default function DistribusiUndangan() {
     }
   }
 
+  async function muatTim() {
+    try {
+      setTimList(await ambilSemuaTim());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal memuat data tim.");
+    }
+  }
+
   useEffect(() => {
     void muat();
+    void muatTim();
     supabase
       .from("profiles")
       .select("*")
@@ -77,9 +94,16 @@ export default function DistribusiUndangan() {
   const ringkasanPerPic = useMemo(() => {
     const peta = new Map<string, { nama: string; total: number; selesai: number }>();
     for (const r of rows) {
-      if (!r.pic_user_id) continue;
-      const key = r.pic_user_id;
-      const nama = r.pic?.nama ?? "-";
+      let key: string | null = null;
+      let nama = "-";
+      if (r.pic_user_id) {
+        key = `p:${r.pic_user_id}`;
+        nama = r.pic?.nama ?? "-";
+      } else if (r.pic_tim_id) {
+        key = `t:${r.pic_tim_id}`;
+        nama = `👥 ${r.pic_tim?.nama ?? "-"}`;
+      }
+      if (!key) continue;
       const ada = peta.get(key) ?? { nama, total: 0, selesai: 0 };
       ada.total++;
       if (r.status === "selesai") ada.selesai++;
@@ -96,8 +120,10 @@ export default function DistribusiUndangan() {
   const rowsTersaring = useMemo(() => {
     return rowsKategori.filter((r) => {
       if (filterStatus !== "semua" && r.status !== filterStatus) return false;
-      if (filterPic === "belum_ditugaskan" && r.pic_user_id) return false;
-      if (filterPic !== "semua" && filterPic !== "belum_ditugaskan" && r.pic_user_id !== filterPic)
+      if (filterPic === "belum_ditugaskan" && (r.pic_user_id || r.pic_tim_id)) return false;
+      if (filterPic.startsWith(PREFIX_PEGAWAI) && r.pic_user_id !== filterPic.slice(PREFIX_PEGAWAI.length))
+        return false;
+      if (filterPic.startsWith(PREFIX_TIM) && r.pic_tim_id !== filterPic.slice(PREFIX_TIM.length))
         return false;
       if (cari.trim() && !r.nama.toLowerCase().includes(cari.trim().toLowerCase())) return false;
       return true;
@@ -142,7 +168,10 @@ export default function DistribusiUndangan() {
     setMenugaskan(true);
     setError(null);
     try {
-      await tugaskanUndangan(Array.from(terpilih), picTugas);
+      const target = picTugas.startsWith(PREFIX_TIM)
+        ? { timId: picTugas.slice(PREFIX_TIM.length) }
+        : { userId: picTugas.slice(PREFIX_PEGAWAI.length) };
+      await tugaskanUndangan(Array.from(terpilih), target);
       setTerpilih(new Set());
       setPicTugas("");
       await muat();
@@ -234,6 +263,19 @@ export default function DistribusiUndangan() {
         )}
       </div>
 
+      <button
+        onClick={() => setTimTerbuka((v) => !v)}
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-brand-text shadow-sm"
+      >
+        👥 Kelola Tim {timList.length > 0 ? `(${timList.length})` : ""}
+        <span className={`text-gray-400 transition-transform duration-300 ${timTerbuka ? "rotate-180" : ""}`}>
+          ▾
+        </span>
+      </button>
+      {timTerbuka && (
+        <PanelTim timList={timList} pegawaiList={pegawaiList} onUbah={muatTim} />
+      )}
+
       {kategoriAktif === null ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {(Object.keys(LABEL_KATEGORI) as KategoriUndangan[]).map((k) => {
@@ -293,11 +335,22 @@ export default function DistribusiUndangan() {
               >
                 <option value="semua">Semua PIC</option>
                 <option value="belum_ditugaskan">Belum Ditugaskan</option>
-                {pegawaiList.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nama}
-                  </option>
-                ))}
+                {timList.length > 0 && (
+                  <optgroup label="Tim">
+                    {timList.map((t) => (
+                      <option key={t.id} value={`${PREFIX_TIM}${t.id}`}>
+                        👥 {t.nama}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                <optgroup label="Pegawai">
+                  {pegawaiList.map((p) => (
+                    <option key={p.id} value={`${PREFIX_PEGAWAI}${p.id}`}>
+                      {p.nama}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
             <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama..." />
@@ -319,11 +372,22 @@ export default function DistribusiUndangan() {
               className="ml-auto rounded-lg border border-gray-300 bg-white p-2 text-sm"
             >
               <option value="">Tugaskan ke...</option>
-              {pegawaiList.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nama}
-                </option>
-              ))}
+              {timList.length > 0 && (
+                <optgroup label="Tim">
+                  {timList.map((t) => (
+                    <option key={t.id} value={`${PREFIX_TIM}${t.id}`}>
+                      👥 {t.nama} ({t.anggota.map((a) => a.nama).join(", ") || "kosong"})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="Pegawai">
+                {pegawaiList.map((p) => (
+                  <option key={p.id} value={`${PREFIX_PEGAWAI}${p.id}`}>
+                    {p.nama}
+                  </option>
+                ))}
+              </optgroup>
             </select>
             <button
               onClick={() => void tugaskanTerpilih()}
@@ -388,7 +452,8 @@ export default function DistribusiUndangan() {
                         >
                           <p className="text-sm font-semibold leading-snug text-brand-text">{r.nama}</p>
                           <p className="text-xs text-gray-400">
-                            PIC: {r.pic?.nama ?? "belum ditugaskan"}
+                            PIC:{" "}
+                            {r.pic?.nama ?? (r.pic_tim ? `👥 Tim ${r.pic_tim.nama}` : "belum ditugaskan")}
                           </p>
                         </button>
                         <BadgeStatus status={r.status} />

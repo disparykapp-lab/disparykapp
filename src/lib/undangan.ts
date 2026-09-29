@@ -26,6 +26,7 @@ export interface Undangan {
   lokasi_pengantaran: string | null;
   status: StatusUndangan;
   pic_user_id: string | null;
+  pic_tim_id: string | null;
   catatan: string | null;
   tanda_tangan_url: string | null;
   diperbarui_oleh: string | null;
@@ -35,31 +36,56 @@ export interface Undangan {
 
 export interface UndanganDenganPic extends Undangan {
   pic?: { nama: string } | null;
+  pic_tim?: { nama: string } | null;
 }
 
 export async function ambilSemuaUndangan(): Promise<UndanganDenganPic[]> {
   const { data, error } = await supabase
     .from("undangan")
-    .select("*, pic:pic_user_id(nama)")
+    .select("*, pic:pic_user_id(nama), pic_tim:pic_tim_id(nama)")
     .order("kategori")
     .order("nomor");
   if (error) throw new Error(error.message);
   return (data as UndanganDenganPic[]) ?? [];
 }
 
-export async function ambilTugasSaya(userId: string): Promise<Undangan[]> {
-  const { data, error } = await supabase
+/** Tugas milik pegawai: yang ditugaskan langsung ke dia ATAU lewat tim yang dia ikuti. */
+export async function ambilTugasSaya(userId: string): Promise<UndanganDenganPic[]> {
+  const { data: timSaya } = await supabase.from("tim_anggota").select("tim_id").eq("user_id", userId);
+  const timIds = (timSaya ?? []).map((t) => t.tim_id as string);
+
+  let query = supabase
     .from("undangan")
-    .select("*")
-    .eq("pic_user_id", userId)
+    .select("*, pic_tim:pic_tim_id(nama)")
     .order("kategori")
     .order("nomor");
+
+  query =
+    timIds.length > 0
+      ? query.or(`pic_user_id.eq.${userId},pic_tim_id.in.(${timIds.join(",")})`)
+      : query.eq("pic_user_id", userId);
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data as Undangan[]) ?? [];
+  return (data as UndanganDenganPic[]) ?? [];
 }
 
-export async function tugaskanUndangan(ids: string[], picUserId: string | null) {
-  const { error } = await supabase.from("undangan").update({ pic_user_id: picUserId }).in("id", ids);
+/**
+ * Tugaskan ke 1 pegawai, ke 1 tim, atau batalkan penugasan (null) — cuma
+ * salah satu dari pic_user_id/pic_tim_id yang boleh terisi (yang lain
+ * otomatis dikosongkan, dijaga juga di trigger DB).
+ */
+export async function tugaskanUndangan(
+  ids: string[],
+  target: { userId: string } | { timId: string } | null
+) {
+  const payload =
+    target && "userId" in target
+      ? { pic_user_id: target.userId, pic_tim_id: null }
+      : target && "timId" in target
+        ? { pic_user_id: null, pic_tim_id: target.timId }
+        : { pic_user_id: null, pic_tim_id: null };
+  const { error } = await supabase.from("undangan").update(payload).in("id", ids);
   if (error) throw new Error(error.message);
 }
 

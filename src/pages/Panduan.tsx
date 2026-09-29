@@ -114,7 +114,9 @@ export default function Panduan() {
       <Bagian judul="✉️ Tugas Undangan">
         <p className="text-sm text-gray-600">
           Kalau admin menugaskan kamu untuk mengantar undangan, menu "Tugas Undangan" di Beranda
-          akan menampilkan daftarnya.
+          akan menampilkan daftarnya. Kalau kamu ditugaskan lewat <strong>tim</strong> (bukan
+          perorangan), tugas itu muncul dengan keterangan "👥 Tim ..." — kamu dan anggota tim yang
+          lain sama-sama bisa mengerjakan &amp; menandai tugas itu, statusnya dipakai bersama.
         </p>
         <Langkah no={1}>Tekan salah satu undangan untuk membuka detailnya.</Langkah>
         <Langkah no={2}>

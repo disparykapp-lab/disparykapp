@@ -74,6 +74,10 @@ npm run dev
    17. `0017_wajib_absen.sql` — kolom `profiles.wajib_absen` (default true) untuk mengatur
        pegawai wajib absen atau tidak; yang tidak wajib tidak dihitung "tidak absen" di
        rekap dan tidak ikut peringkat kerajinan. Hanya admin yang bisa mengubahnya.
+   18. `0018_tim_undangan.sql` — tabel `tim` & `tim_anggota` dan kolom `undangan.pic_tim_id`,
+       supaya undangan bisa ditugaskan ke satu tim (gabungan beberapa pegawai, rencana
+       pemakaian 2 orang per tim) selain ke satu pegawai; anggota tim yang ditugaskan boleh
+       ikut mengubah status/lokasi/tanda tangan baris itu.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

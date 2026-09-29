@@ -220,27 +220,36 @@ export default function PanduanAdmin() {
           (misalnya berdasarkan lokasi, jenis tamu, dll), tidak harus ikut kategori Excel asli.
         </Langkah>
         <Langkah no={3}>
-          Filter (status/PIC/cari nama), lalu centang undangan yang mau dibagikan — bisa banyak
-          sekaligus, pilih pegawai di dropdown "Tugaskan ke..." lalu tekan{" "}
-          <strong>"Tugaskan"</strong>. Tombol <strong>"Batalkan Penugasan"</strong> mengembalikan
-          jadi "belum ditugaskan" tanpa harus pindah ke pegawai lain dulu.
+          Sebelum menugaskan, buka <strong>"👥 Kelola Tim"</strong> di atas kalau mau menugaskan
+          beberapa pegawai sekaligus dalam 1 grup (rencana pemakaian: 2 orang per tim) — buat tim
+          baru, beri nama, centang anggotanya. Tim bisa diedit/dihapus kapan saja; menghapus tim
+          membuat undangan yang sedang ditugaskan ke tim itu jadi "belum ditugaskan" lagi.
         </Langkah>
         <Langkah no={4}>
+          Filter (status/PIC/cari nama), lalu centang undangan yang mau dibagikan — bisa banyak
+          sekaligus, pilih <strong>tim atau pegawai perorangan</strong> di dropdown "Tugaskan
+          ke..." lalu tekan <strong>"Tugaskan"</strong>. Satu undangan hanya bisa punya satu PIC:
+          kalau ditugaskan ke tim, semua anggota tim itu melihat &amp; boleh mengerjakan tugas
+          yang sama (statusnya dipakai bersama, bukan diduplikasi per orang). Tombol{" "}
+          <strong>"Batalkan Penugasan"</strong> mengembalikan jadi "belum ditugaskan" tanpa harus
+          pindah ke pegawai/tim lain dulu.
+        </Langkah>
+        <Langkah no={5}>
           Tekan <strong>"+ Tambah Undangan di Kategori Ini"</strong> untuk menambah undangan baru
           secara manual (di luar 451 data awal dari Excel WJNC).
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={6}>
           Tekan salah satu undangan untuk buka detail — bisa <strong>Edit</strong> (nama,
           kategori, folder/sub-kelompok, lokasi parkir) atau <strong>Hapus</strong> permanen. Di
           situ juga bisa isi/ubah <strong>Lokasi Pengantaran</strong> (beda dari "Lokasi Parkir"
           yang khusus hari-H) — kolom ini juga bisa diisi/diubah pegawai yang jadi PIC-nya.
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={7}>
           Pegawai menandai sendiri undangan yang jadi tanggung jawabnya lewat menu "Tugas
           Undangan" di Beranda mereka (Selesai/Kendala + nomor HP tamu untuk pengingat H-2).
           Progresnya otomatis muncul di halaman ini.
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={8}>
           Kalau petugas sudah menandai <strong>Selesai</strong>, buka detail undangannya — akan
           muncul thumbnail <strong>tanda tangan tamu undangan</strong> (bukti penerimaan surat)
           yang diambil petugas langsung dari layar HP. Tekan gambarnya untuk melihat ukuran
