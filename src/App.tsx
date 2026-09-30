@@ -20,6 +20,7 @@ import Pengaturan from "./pages/admin/Pengaturan";
 import TinjauAbsensi from "./pages/admin/TinjauAbsensi";
 import FotoAbsensi from "./pages/admin/FotoAbsensi";
 import DistribusiUndangan from "./pages/admin/DistribusiUndangan";
+import DistribusiPerPetugas from "./pages/admin/DistribusiPerPetugas";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
                 <Route path="/kelola/tinjau" element={<TinjauAbsensi />} />
                 <Route path="/kelola/foto" element={<FotoAbsensi />} />
                 <Route path="/kelola/undangan" element={<DistribusiUndangan />} />
+                <Route path="/kelola/undangan/petugas" element={<DistribusiPerPetugas />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>

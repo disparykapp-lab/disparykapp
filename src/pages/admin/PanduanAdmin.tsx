@@ -18,28 +18,28 @@ export default function PanduanAdmin() {
           Isi nama, email Google, divisi, dan jabatan (opsional), lalu simpan. Pegawai bisa
           langsung "Masuk dengan Google" setelah ini — tidak perlu langkah lain.
         </Langkah>
-        <Langkah no={3}>
+        <Langkah no={4}>
           Tiap pegawai bisa diubah divisi dan perannya (Pegawai/Admin) langsung dari daftar.
         </Langkah>
-        <Langkah no={4}>
+        <Langkah no={5}>
           Daftar pegawai dikelompokkan otomatis per divisi (accordion, tekan untuk buka/tutup),
           dan ada kolom pencarian di atas untuk mencari nama/email/jabatan dengan cepat.
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={6}>
           Tombol "Aktifkan/Nonaktifkan" untuk menonaktifkan sementara (pegawai nonaktif tidak
           bisa absen atau login, tapi datanya tetap tersimpan).
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={7}>
           Tekan kartu pegawai untuk buka detail profilnya: foto, tanggal lahir, dan asal
           sekolah/kampus (diisi pegawai sendiri lewat Profil Saya, jadi di sini hanya tampil,
           tidak bisa diedit admin).
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={8}>
           Di bagian yang sama, admin bisa atur <strong>Masa Magang</strong> (tanggal mulai &amp;
           selesai) untuk pegawai yang berstatus magang/PKL. Setelah disimpan, pegawai itu akan
           melihat progress bar persentase magangnya sendiri di Beranda &amp; Profil Saya.
         </Langkah>
-        <Langkah no={8}>
+        <Langkah no={9}>
           Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
           absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>
@@ -214,18 +214,23 @@ export default function PanduanAdmin() {
           salah satu folder untuk masuk ke isinya.
         </Langkah>
         <Langkah no={2}>
+          Ada kolom pencarian di bagian paling atas halaman (di luar folder) buat cari 1 nama
+          undangan tanpa perlu tahu dia ada di kategori mana — hasilnya tampil lintas kategori,
+          lengkap dengan tombol pilih &amp; tugaskan seperti di dalam folder.
+        </Langkah>
+        <Langkah no={3}>
           Di dalam folder, undangan otomatis dikelompokkan lagi jadi "sub-folder" (accordion)
           berdasarkan kolom <strong>Folder/Sub-kelompok</strong> tiap undangan — teks ini bebas
           diubah admin (lewat Edit), jadi kelompoknya bisa diatur ulang sesuai kebutuhan
           (misalnya berdasarkan lokasi, jenis tamu, dll), tidak harus ikut kategori Excel asli.
         </Langkah>
-        <Langkah no={3}>
+        <Langkah no={4}>
           Sebelum menugaskan, buka <strong>"👥 Kelola Tim"</strong> di atas kalau mau menugaskan
           beberapa pegawai sekaligus dalam 1 grup (rencana pemakaian: 2 orang per tim) — buat tim
           baru, beri nama, centang anggotanya. Tim bisa diedit/dihapus kapan saja; menghapus tim
           membuat undangan yang sedang ditugaskan ke tim itu jadi "belum ditugaskan" lagi.
         </Langkah>
-        <Langkah no={4}>
+        <Langkah no={5}>
           Filter (status/PIC/cari nama), lalu centang undangan yang mau dibagikan — bisa banyak
           sekaligus, pilih <strong>tim atau pegawai perorangan</strong> di dropdown "Tugaskan
           ke..." lalu tekan <strong>"Tugaskan"</strong>. Satu undangan hanya bisa punya satu PIC:
@@ -234,26 +239,32 @@ export default function PanduanAdmin() {
           <strong>"Batalkan Penugasan"</strong> mengembalikan jadi "belum ditugaskan" tanpa harus
           pindah ke pegawai/tim lain dulu.
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={6}>
           Tekan <strong>"+ Tambah Undangan di Kategori Ini"</strong> untuk menambah undangan baru
           secara manual (di luar 451 data awal dari Excel WJNC).
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={7}>
           Tekan salah satu undangan untuk buka detail — bisa <strong>Edit</strong> (nama,
           kategori, folder/sub-kelompok, lokasi parkir) atau <strong>Hapus</strong> permanen. Di
           situ juga bisa isi/ubah <strong>Lokasi Pengantaran</strong> (beda dari "Lokasi Parkir"
           yang khusus hari-H) — kolom ini juga bisa diisi/diubah pegawai yang jadi PIC-nya.
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={8}>
           Pegawai menandai sendiri undangan yang jadi tanggung jawabnya lewat menu "Tugas
           Undangan" di Beranda mereka (Selesai/Kendala + nomor HP tamu untuk pengingat H-2).
           Progresnya otomatis muncul di halaman ini.
         </Langkah>
-        <Langkah no={8}>
+        <Langkah no={9}>
           Kalau petugas sudah menandai <strong>Selesai</strong>, buka detail undangannya — akan
           muncul thumbnail <strong>tanda tangan tamu undangan</strong> (bukti penerimaan surat)
           yang diambil petugas langsung dari layar HP. Tekan gambarnya untuk melihat ukuran
           penuh di tab baru.
+        </Langkah>
+        <Langkah no={10}>
+          Tombol <strong>"📋 Lihat per Petugas"</strong> di bagian atas membuka halaman terpisah
+          yang menampilkan rekap kebalikannya: dikelompokkan per petugas/tim (bukan per kategori),
+          jadi langsung kelihatan undangan siapa saja yang dibawa satu orang/tim, digabung dari
+          semua kategori sekaligus. Ada juga kelompok "Belum Ditugaskan" di paling bawah.
         </Langkah>
       </Bagian>
 

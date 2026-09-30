@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
@@ -38,6 +39,7 @@ export default function DistribusiUndangan() {
   const [filterStatus, setFilterStatus] = useState<string>("semua");
   const [filterPic, setFilterPic] = useState<string>("semua");
   const [cari, setCari] = useState("");
+  const [cariSemua, setCariSemua] = useState("");
 
   const [terpilih, setTerpilih] = useState<Set<string>>(new Set());
   const [picTugas, setPicTugas] = useState("");
@@ -141,14 +143,22 @@ export default function DistribusiUndangan() {
     return Array.from(peta.entries());
   }, [rowsTersaring]);
 
-  function toggleSemuaTampil() {
+  // Pencarian global (lintas kategori) — dipakai di bagian atas halaman,
+  // beda dari "cari" yang cuma nyari di dalam 1 kategori yang sedang dibuka.
+  const hasilPencarianGlobal = useMemo(() => {
+    const q = cariSemua.trim().toLowerCase();
+    if (!q) return [];
+    return rows.filter((r) => r.nama.toLowerCase().includes(q));
+  }, [rows, cariSemua]);
+
+  function toggleSemuaTampil(daftar: UndanganDenganPic[]) {
     setTerpilih((prev) => {
-      const semuaSudah = rowsTersaring.every((r) => prev.has(r.id));
+      const semuaSudah = daftar.length > 0 && daftar.every((r) => prev.has(r.id));
       const next = new Set(prev);
       if (semuaSudah) {
-        rowsTersaring.forEach((r) => next.delete(r.id));
+        daftar.forEach((r) => next.delete(r.id));
       } else {
-        rowsTersaring.forEach((r) => next.add(r.id));
+        daftar.forEach((r) => next.add(r.id));
       }
       return next;
     });
@@ -265,6 +275,22 @@ export default function DistribusiUndangan() {
         )}
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <div className="min-w-[220px] flex-1">
+          <SearchBarAnimasi
+            value={cariSemua}
+            onChange={setCariSemua}
+            placeholder="Cari undangan di semua kategori..."
+          />
+        </div>
+        <Link
+          to="/kelola/undangan/petugas"
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-brand-text shadow-sm"
+        >
+          📋 Lihat per Petugas
+        </Link>
+      </div>
+
       <button
         onClick={() => setTimTerbuka((v) => !v)}
         className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-brand-text shadow-sm"
@@ -278,7 +304,96 @@ export default function DistribusiUndangan() {
         <PanelTim timList={timList} pegawaiList={pegawaiList} onUbah={muatTim} />
       )}
 
-      {kategoriAktif === null ? (
+      {cariSemua.trim() ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-500">
+            {hasilPencarianGlobal.length} hasil untuk "{cariSemua.trim()}"
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-brand-bg p-3">
+            <button
+              onClick={() => toggleSemuaTampil(hasilPencarianGlobal)}
+              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-brand-text"
+            >
+              {hasilPencarianGlobal.length > 0 && hasilPencarianGlobal.every((r) => terpilih.has(r.id))
+                ? "Batalkan Semua"
+                : "Pilih Semua yang Tampil"}
+            </button>
+            <span className="text-xs text-gray-500">{terpilih.size} dipilih</span>
+            <select
+              value={picTugas}
+              onChange={(e) => setPicTugas(e.target.value)}
+              className="min-w-[220px] flex-1 rounded-lg border border-gray-300 bg-white p-2 text-sm sm:ml-auto sm:flex-none"
+            >
+              <option value="">Tugaskan ke...</option>
+              {timList.length > 0 && (
+                <optgroup label="Tim">
+                  {timList.map((t) => (
+                    <option key={t.id} value={`${PREFIX_TIM}${t.id}`}>
+                      👥 {t.nama} ({t.anggota.map((a) => a.nama).join(", ") || "kosong"})
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              <optgroup label="Pegawai">
+                {pegawaiList.map((p) => (
+                  <option key={p.id} value={`${PREFIX_PEGAWAI}${p.id}`}>
+                    {p.nama}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+            <button
+              onClick={() => void tugaskanTerpilih()}
+              disabled={terpilih.size === 0 || !picTugas || menugaskan}
+              className="min-h-[40px] rounded-lg bg-brand-masuk px-4 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {menugaskan ? "Menugaskan..." : "Tugaskan"}
+            </button>
+            <button
+              onClick={() => void batalkanPenugasanTerpilih()}
+              disabled={terpilih.size === 0 || menugaskan}
+              className="min-h-[40px] rounded-lg border border-red-300 px-4 text-sm font-semibold text-red-600 disabled:opacity-50"
+            >
+              Batalkan Penugasan
+            </button>
+          </div>
+
+          <div className="grid items-start gap-2 lg:grid-cols-2">
+            {hasilPencarianGlobal.map((r) => (
+              <div key={r.id} className="rounded-lg border border-gray-100 bg-white">
+                <div className="flex items-center gap-3 p-3">
+                  <input
+                    type="checkbox"
+                    checked={terpilih.has(r.id)}
+                    onChange={() => toggleSatu(r.id)}
+                    className="h-5 w-5 shrink-0"
+                  />
+                  <button
+                    onClick={() => setTerbuka(terbuka === r.id ? null : r.id)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="text-sm font-semibold leading-snug text-brand-text">{r.nama}</p>
+                    <p className="text-xs text-gray-400">
+                      📁 {LABEL_KATEGORI[r.kategori]} · PIC:{" "}
+                      {r.pic?.nama ?? (r.pic_tim ? `👥 Tim ${r.pic_tim.nama}` : "belum ditugaskan")}
+                    </p>
+                  </button>
+                  <BadgeStatus status={r.status} />
+                </div>
+                {terbuka === r.id && (
+                  <DetailUndangan row={r} onUbah={muat} onHapus={() => void hapusSatu(r)} />
+                )}
+              </div>
+            ))}
+            {hasilPencarianGlobal.length === 0 && (
+              <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm lg:col-span-2">
+                Tidak ada undangan yang cocok dengan pencarian ini.
+              </p>
+            )}
+          </div>
+        </div>
+      ) : kategoriAktif === null ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {(Object.keys(LABEL_KATEGORI) as KategoriUndangan[]).map((k) => {
             const r = ringkasanPerKategori.get(k) ?? { total: 0, selesai: 0 };
@@ -362,7 +477,7 @@ export default function DistribusiUndangan() {
 
           <div className="flex flex-wrap items-center gap-2 rounded-xl bg-brand-bg p-3">
             <button
-              onClick={toggleSemuaTampil}
+              onClick={() => toggleSemuaTampil(rowsTersaring)}
               className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-brand-text"
             >
               {rowsTersaring.length > 0 && rowsTersaring.every((r) => terpilih.has(r.id))
