@@ -91,7 +91,7 @@ export default function PanelTim({ timList, pegawaiList, onUbah }: Props) {
         </p>
       )}
 
-      <div className="flex flex-col gap-2">
+      <div className="grid items-start gap-2 lg:grid-cols-2">
         {timList.map((t) => (
           <div key={t.id} className="flex flex-col gap-2 rounded-lg border border-gray-100 p-3">
             <div className="flex items-start justify-between gap-2">

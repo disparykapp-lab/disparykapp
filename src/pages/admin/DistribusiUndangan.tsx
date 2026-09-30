@@ -243,8 +243,9 @@ export default function DistribusiUndangan() {
         </p>
 
         {ringkasanPerPic.length > 0 && (
-          <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-3">
-            <p className="text-xs font-semibold text-gray-500">Progres per Pegawai</p>
+          <div className="mt-4 border-t border-gray-100 pt-3">
+            <p className="mb-2 text-xs font-semibold text-gray-500">Progres per Pegawai</p>
+            <div className="grid gap-2 lg:grid-cols-2">
             {ringkasanPerPic.map((p) => (
               <div key={p.nama} className="flex items-center gap-2 text-xs">
                 <span className="w-24 shrink-0 truncate text-gray-600">{p.nama}</span>
@@ -259,6 +260,7 @@ export default function DistribusiUndangan() {
                 </span>
               </div>
             ))}
+            </div>
           </div>
         )}
       </div>
@@ -319,7 +321,7 @@ export default function DistribusiUndangan() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
+                className="min-w-[140px] flex-1 rounded-lg border border-gray-300 bg-white p-2 text-sm"
               >
                 <option value="semua">Semua Status</option>
                 {(Object.keys(LABEL_STATUS_UNDANGAN) as StatusUndangan[]).map((s) => (
@@ -331,7 +333,7 @@ export default function DistribusiUndangan() {
               <select
                 value={filterPic}
                 onChange={(e) => setFilterPic(e.target.value)}
-                className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
+                className="min-w-[140px] flex-1 rounded-lg border border-gray-300 bg-white p-2 text-sm"
               >
                 <option value="semua">Semua PIC</option>
                 <option value="belum_ditugaskan">Belum Ditugaskan</option>
@@ -352,8 +354,10 @@ export default function DistribusiUndangan() {
                   ))}
                 </optgroup>
               </select>
+              <div className="w-full sm:ml-auto sm:w-auto sm:max-w-[220px]">
+                <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama..." />
+              </div>
             </div>
-            <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama..." />
           </div>
 
           <div className="flex flex-wrap items-center gap-2 rounded-xl bg-brand-bg p-3">
@@ -369,7 +373,7 @@ export default function DistribusiUndangan() {
             <select
               value={picTugas}
               onChange={(e) => setPicTugas(e.target.value)}
-              className="ml-auto rounded-lg border border-gray-300 bg-white p-2 text-sm"
+              className="min-w-[220px] flex-1 rounded-lg border border-gray-300 bg-white p-2 text-sm sm:ml-auto sm:flex-none"
             >
               <option value="">Tugaskan ke...</option>
               {timList.length > 0 && (
@@ -436,7 +440,7 @@ export default function DistribusiUndangan() {
                   </span>
                   <span className="text-gray-400 transition group-open:rotate-180">▾</span>
                 </summary>
-                <div className="flex flex-col gap-2 border-t border-gray-100 p-2">
+                <div className="grid items-start gap-2 border-t border-gray-100 p-2 lg:grid-cols-2">
                   {list.map((r) => (
                     <div key={r.id} className="rounded-lg border border-gray-100">
                       <div className="flex items-center gap-3 p-3">
