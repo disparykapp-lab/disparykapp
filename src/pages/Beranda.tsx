@@ -130,14 +130,19 @@ export default function Beranda() {
             {tugasTotal > 0 && tugasBelum === 0 ? (
               <Link
                 to="/tugas-undangan"
-                className="col-span-2 flex items-center gap-2 overflow-hidden rounded-2xl bg-white p-3 shadow-sm transition active:scale-95"
+                className="col-span-2 flex items-center gap-3 overflow-hidden rounded-2xl bg-white p-4 shadow-sm transition active:scale-95"
               >
+                <div className="flex shrink-0 flex-col items-center gap-2">
+                  <img src="/icon_mail.png" alt="" className="h-16 w-16 rounded-full object-cover" />
+                  <span className="text-sm font-semibold leading-tight text-brand-text">
+                    Tugas Undangan
+                  </span>
+                </div>
                 <img
                   src="/gambar_terimakasih.png"
                   alt="Terima kasih sudah menjalankan tugas dengan baik"
-                  className="animasi-terimakasih h-20 w-auto shrink-0 object-contain sm:h-24"
+                  className="animasi-terimakasih h-20 w-full min-w-0 flex-1 object-contain sm:h-24"
                 />
-                <span className="text-xs font-semibold text-gray-400">Tugas Undangan</span>
               </Link>
             ) : (
               <IconTile
