@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 import HeaderHub from "../components/HeaderHub";
@@ -18,6 +19,7 @@ export default function Beranda() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tugasBelum, setTugasBelum] = useState(0);
+  const [tugasTotal, setTugasTotal] = useState(0);
 
   async function muatStatus() {
     if (!profile) return;
@@ -34,8 +36,15 @@ export default function Beranda() {
     setLoading(true);
     muatStatus().finally(() => setLoading(false));
     ambilTugasSaya(profile.id)
-      .then((rows) => setTugasBelum(hitungRingkasanUndangan(rows).belum))
-      .catch(() => setTugasBelum(0));
+      .then((rows) => {
+        const r = hitungRingkasanUndangan(rows);
+        setTugasBelum(r.belum);
+        setTugasTotal(r.total);
+      })
+      .catch(() => {
+        setTugasBelum(0);
+        setTugasTotal(0);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
@@ -118,13 +127,27 @@ export default function Beranda() {
               label="Absen Pulang"
               disabled={!sudahMasuk || sudahPulang}
             />
-            <IconTile
-              to="/tugas-undangan"
-              iconSrc="/icon_mail.png"
-              label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
-              penuh
-              animasi={tugasBelum > 0}
-            />
+            {tugasTotal > 0 && tugasBelum === 0 ? (
+              <Link
+                to="/tugas-undangan"
+                className="col-span-2 flex items-center gap-2 overflow-hidden rounded-2xl bg-white p-3 shadow-sm transition active:scale-95"
+              >
+                <img
+                  src="/gambar_terimakasih.png"
+                  alt="Terima kasih sudah menjalankan tugas dengan baik"
+                  className="animasi-terimakasih h-20 w-auto shrink-0 object-contain sm:h-24"
+                />
+                <span className="text-xs font-semibold text-gray-400">Tugas Undangan</span>
+              </Link>
+            ) : (
+              <IconTile
+                to="/tugas-undangan"
+                iconSrc="/icon_mail.png"
+                label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
+                penuh
+                animasi={tugasBelum > 0}
+              />
+            )}
             <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
             {bisaKalenderKonten && (
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />

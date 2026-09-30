@@ -134,6 +134,11 @@ export default function Panduan() {
           baru tekan Simpan. Tanda tangan ini tersimpan sebagai bukti penerimaan dan bisa dilihat
           lagi kapan saja di tugas yang sama, juga oleh admin untuk verifikasi.
         </Langkah>
+        <Langkah no={5}>
+          Kalau semua tugas undanganmu sudah beres (tidak ada lagi yang berstatus "Belum"), menu
+          ini di Beranda berubah jadi kartu ucapan terima kasih dari Dinas Pariwisata Kota
+          Yogyakarta — masih bisa ditekan untuk membuka daftar tugasmu seperti biasa.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kalender Konten">

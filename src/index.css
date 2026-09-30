@@ -142,3 +142,17 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   .anim-buka { animation: none; }
 }
+
+/* Kartu "Terima kasih" di Beranda (petugas sudah selesai semua tugas
+   undangan) — melayang halus terus-menerus + hati berdenyut pelan,
+   dibuat lembut supaya tidak mengganggu di dashboard. */
+@keyframes melayang-terimakasih {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(-1deg); }
+}
+.animasi-terimakasih {
+  animation: melayang-terimakasih 3.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animasi-terimakasih { animation: none; }
+}
