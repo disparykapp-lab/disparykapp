@@ -162,22 +162,17 @@ export default function PanduanAdmin() {
           sesuai filter yang aktif.
         </Langkah>
         <Langkah no={4}>
-          Kartu <strong>"🚩 Telat & Izin/Sakit"</strong> cuma menyorot dua hal itu saja (hadir
-          normal tidak perlu ditampilkan lagi di sini). Kalau rentangnya 1 hari, nama pegawai
-          langsung tampil dengan warna latar merah (telat) atau hitam (izin/sakit). Kalau
-          rentangnya lebih dari 1 hari, nama pegawai tampil netral diikuti dua lingkaran angka:
-          merah = jumlah telat, hitam = jumlah izin/sakit di rentang itu.
+          Tekan salah satu baris di daftar bawah untuk membuka detail: foto absen, akurasi GPS,
+          dan alamat IP — dipakai untuk mengecek kewajaran absen. Peta lokasi cuma ditampilkan
+          untuk absen <strong>Dinas Luar</strong>; absen "Di Kantor" tidak perlu peta karena
+          lokasinya sudah otomatis tervalidasi radius kantor saat absen.
         </Langkah>
         <Langkah no={5}>
-          Tekan salah satu baris di daftar bawah untuk membuka detail: foto absen, peta lokasi,
-          akurasi GPS, dan alamat IP — dipakai untuk mengecek kewajaran absen.
-        </Langkah>
-        <Langkah no={6}>
           Kalau ada yang mencurigakan, isi alasan lalu tekan <strong>"⚑ Tandai Entri Ini"</strong>{" "}
           di bagian bawah detail. Entri yang ditandai tampil dengan garis merah dan bisa
           difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={6}>
           Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta link bukti
           (mis. surat dokter di Google Drive) — lewat tombol "+ Tambah Keterangan" di Beranda,
           kolom keterangan opsional saat absen, atau tombol "+Keterangan" di Rekap mereka —

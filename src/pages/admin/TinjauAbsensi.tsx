@@ -87,36 +87,6 @@ export default function TinjauAbsensi() {
     return hasil;
   }, [rowsTersaring]);
 
-  // Cuma dua hal yang perlu disorot di sini: telat (merah) & izin/sakit
-  // (hitam). Hadir/dinas luar/tidak ada baris tidak ditampilkan di kartu ini
-  // — sudah cukup terwakili di kartu ringkasan total di atas.
-  const satuHari = dari === sampai;
-
-  const orangSatuHari = useMemo(() => {
-    if (!satuHari) return [];
-    return rowsTersaring
-      .filter((r): r is BarisAbsensi & { status: "telat" | "izin" } =>
-        r.status === "telat" || r.status === "izin"
-      )
-      .map((r) => ({ id: r.id, nama: r.profiles?.nama ?? "-", status: r.status }))
-      .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
-  }, [rowsTersaring, satuHari]);
-
-  const rekapRentang = useMemo(() => {
-    if (satuHari) return [];
-    const perUser = new Map<string, { nama: string; telat: number; izin: number }>();
-    for (const r of rowsTersaring) {
-      if (r.status !== "telat" && r.status !== "izin") continue;
-      const cur = perUser.get(r.user_id) ?? { nama: r.profiles?.nama ?? "-", telat: 0, izin: 0 };
-      if (r.status === "telat") cur.telat++;
-      else cur.izin++;
-      perUser.set(r.user_id, cur);
-    }
-    return Array.from(perUser.entries())
-      .map(([id, v]) => ({ id, ...v }))
-      .sort((a, b) => a.nama.localeCompare(b.nama, "id"));
-  }, [rowsTersaring, satuHari]);
-
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Tinjau Absensi" />
@@ -198,55 +168,6 @@ export default function TinjauAbsensi() {
           <Ringkas label="Izin" nilai={ringkasan.izin} warna="text-gray-500" />
         </div>
       )}
-
-      <div className="rounded-xl bg-white p-3 shadow-sm">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <p className="text-sm font-semibold text-brand-text">🚩 Telat & Izin/Sakit</p>
-          <span className="flex items-center gap-1 text-[11px] text-gray-400">
-            <span className="h-2.5 w-2.5 rounded-full bg-red-500" /> Telat
-            <span className="ml-1 h-2.5 w-2.5 rounded-full bg-gray-900" /> Izin/Sakit
-          </span>
-        </div>
-
-        {loading ? (
-          <p className="text-xs text-gray-400">Memuat...</p>
-        ) : satuHari ? (
-          orangSatuHari.length === 0 ? (
-            <p className="text-xs text-gray-400">Tidak ada yang telat atau izin/sakit hari ini.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {orangSatuHari.map((o) => (
-                <span
-                  key={o.id}
-                  className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-                    o.status === "telat" ? "bg-red-500 text-white" : "bg-gray-900 text-white"
-                  }`}
-                >
-                  {o.nama}
-                </span>
-              ))}
-            </div>
-          )
-        ) : rekapRentang.length === 0 ? (
-          <p className="text-xs text-gray-400">Tidak ada yang telat atau izin/sakit di rentang ini.</p>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {rekapRentang.map((p) => (
-              <div key={p.id} className="flex items-center gap-1">
-                <span className="rounded-full bg-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-800">
-                  {p.nama}
-                </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                  {p.telat}
-                </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
-                  {p.izin}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {loading ? (
         <Loading teks="Memuat data absensi..." />
@@ -428,8 +349,11 @@ function SesiAbsensi({
     );
   }
 
+  // Absen "Di Kantor" sudah pasti lokasinya kantor (tervalidasi radius saat
+  // absen) — peta cuma ditampilkan untuk Dinas Luar, supaya tidak makan
+  // tempat percuma menampilkan titik yang sama berulang-ulang.
   const petaUrl =
-    lat != null && lng != null
+    mode !== "kantor" && lat != null && lng != null
       ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.003}%2C${lat - 0.003}%2C${
           lng + 0.003
         }%2C${lat + 0.003}&layer=mapnik&marker=${lat}%2C${lng}`
