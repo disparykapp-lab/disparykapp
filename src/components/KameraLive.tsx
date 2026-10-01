@@ -101,11 +101,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
       ctx.drawImage(bingkai, 0, 0, canvas.width, canvas.height);
     }
 
-    const waktu = new Date().toLocaleString("id-ID", {
-      dateStyle: "medium",
-      timeStyle: "medium",
-    });
-    const baris = [nama, waktu, `${lat.toFixed(5)}, ${lng.toFixed(5)}`];
+    const baris = [nama, `${lat.toFixed(5)}, ${lng.toFixed(5)}`];
 
     // Watermark digambar di DALAM lubang bingkai (bukan mepet tepi kanvas)
     // supaya tidak ketutupan bingkai emas yang solid.
