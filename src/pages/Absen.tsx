@@ -249,9 +249,11 @@ export default function Absen() {
           <h2 className="text-xl font-bold text-brand-text">
             {LABEL_JENIS[jenis]} berhasil pukul {hasil.jam}
           </h2>
-          <p className="text-sm text-gray-500">
-            Status: <StatusBadge status={hasil.status} />
-          </p>
+          {jenis === "masuk" && (
+            <p className="text-sm text-gray-500">
+              Status: <StatusBadge status={hasil.status} />
+            </p>
+          )}
           {mode === "kantor" && (
             <p className="text-sm text-gray-500">Jarak dari kantor: {hasil.jarak} meter</p>
           )}
