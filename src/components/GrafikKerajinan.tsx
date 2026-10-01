@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { BarisAbsensi } from "../lib/rekap";
 import { jumlahHariKerja } from "../lib/tanggal";
-import {
-  hitungPeringkat,
-  tingkatKerajinan as tingkat,
-  type EntriPeringkat as Entri,
-  type PegawaiGrafik,
-} from "../lib/peringkat";
+import { hitungPeringkat, type EntriPeringkat as Entri, type PegawaiGrafik } from "../lib/peringkat";
 
 interface Props {
   rows: BarisAbsensi[];
@@ -16,17 +11,6 @@ interface Props {
   /** jumlah pegawai yang tidak wajib absen (tidak diikutkan peringkat) */
   dikecualikan?: number;
 }
-
-// Warna segmen = warna status (hadir hijau, telat kuning, tidak absen merah,
-// dst). Kuning/merah/hijau memakai token status baku; makna warna selalu
-// dibantu ikon + label + angka, jadi tidak bergantung pada warna saja.
-const SEGMEN = [
-  { kunci: "hadir", label: "Hadir tepat waktu", ikon: "✅", warna: "#0ca30c" },
-  { kunci: "dinasLuar", label: "Dinas luar", ikon: "🚗", warna: "#2a78d6" },
-  { kunci: "telat", label: "Telat", ikon: "⏰", warna: "#fab219" },
-  { kunci: "izin", label: "Izin/Sakit", ikon: "📝", warna: "#4a3aa7" },
-  { kunci: "tidakAbsen", label: "Tidak absen", ikon: "❌", warna: "#d03b3b" },
-] as const;
 
 function useCountUp(target: number, durasi = 900) {
   const [nilai, setNilai] = useState(0);
@@ -68,12 +52,10 @@ function Avatar({ e, ukuran }: { e: Entri; ukuran: string }) {
 }
 
 /**
- * Peringkat kerajinan pegawai untuk rentang tanggal yang sedang dilihat:
- * podium 3 teratas, daftar "paling bawah", dan bar bertumpuk per pegawai
- * (komposisi hari kerja: hadir/dinas luar/telat/izin/tidak absen).
+ * Peringkat kerajinan pegawai untuk rentang tanggal yang sedang dilihat —
+ * cuma podium 3 teratas, tidak ada daftar lengkap pegawai lain.
  */
 export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecualikan = 0 }: Props) {
-  const [terbuka, setTerbuka] = useState(false);
   const hariKerja = useMemo(() => jumlahHariKerja(dari, sampai), [dari, sampai]);
 
   const daftar = useMemo(
@@ -97,10 +79,6 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecuali
   const podium = daftar.length >= 3 ? [daftar[1], daftar[0], daftar[2]] : [];
   const tinggiPodium = [64, 88, 48];
   const urutanMedali = ["🥈", "🥇", "🥉"];
-  const paling_bawah = [...daftar]
-    .reverse()
-    .filter((e) => e.skor < 70)
-    .slice(0, 3);
 
   return (
     <section className="flex flex-col gap-5 rounded-2xl bg-white p-4 shadow-sm print:break-inside-avoid">
@@ -137,109 +115,6 @@ export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecuali
         </div>
       )}
 
-      {paling_bawah.length > 0 && (
-        <div className="rounded-xl bg-red-50 p-3">
-          <p className="mb-2 text-xs font-semibold text-red-700">😴 Paling Bawah</p>
-          <div className="flex flex-wrap gap-2">
-            {paling_bawah.map((e) => (
-              <span
-                key={e.id}
-                className="flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-3 text-xs shadow-sm"
-              >
-                <Avatar e={e} ukuran="h-6 w-6 text-[10px]" />
-                <span className="font-semibold text-brand-text">{e.nama}</span>
-                <span className="text-red-600">
-                  {e.skor}% · tidak absen {e.tidakAbsen}x
-                </span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <button
-        onClick={() => setTerbuka((v) => !v)}
-        aria-expanded={terbuka}
-        className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold text-brand-text transition active:scale-[0.98]"
-      >
-        {terbuka ? "Tutup peringkat lengkap" : `Lihat peringkat lengkap (${daftar.length} pegawai)`}
-        <span className={`text-gray-400 transition-transform duration-300 ${terbuka ? "rotate-180" : ""}`}>
-          ▾
-        </span>
-      </button>
-
-      {terbuka && (
-      <div className="anim-buka flex flex-col gap-4">
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
-        {SEGMEN.map((s) => (
-          <span key={s.kunci} className="flex items-center gap-1">
-            <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: s.warna }} />
-            {s.ikon} {s.label}
-          </span>
-        ))}
-      </div>
-
-      <ol className="flex flex-col gap-3">
-        {daftar.map((e, i) => {
-          const t = tingkat(e.skor);
-          const total = Math.max(
-            hariKerja,
-            e.hadir + e.dinasLuar + e.telat + e.izin + e.tidakAbsen
-          );
-          return (
-            <li key={e.id} className="flex items-start gap-3">
-              <span className="w-6 shrink-0 pt-0.5 text-right text-xs font-bold text-gray-400">
-                {i + 1}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="min-w-0 truncate text-sm font-semibold text-brand-text">{e.nama}</p>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${t.cls}`}>
-                      {t.emoji} {t.label}
-                    </span>
-                    <Skor nilai={e.skor} className="w-10 text-right text-sm font-bold text-brand-text" />
-                  </div>
-                </div>
-
-                <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-gray-100">
-                  <div
-                    className="anim-bar flex h-full gap-[2px]"
-                    style={{ animationDelay: `${Math.min(i, 20) * 40}ms` }}
-                  >
-                    {SEGMEN.map((s) => {
-                      const jumlah = e[s.kunci];
-                      if (jumlah <= 0) return null;
-                      return (
-                        <div
-                          key={s.kunci}
-                          title={`${s.label}: ${jumlah} hari`}
-                          style={{ width: `${(jumlah / total) * 100}%`, backgroundColor: s.warna }}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <p className="mt-1 text-[11px] text-gray-500">
-                  {SEGMEN.filter((s) => e[s.kunci] > 0)
-                    .map((s) => `${s.ikon} ${s.label} ${e[s.kunci]}`)
-                    .join(" · ") || "Belum ada data"}
-                </p>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-
-      <button
-        onClick={() => setTerbuka(false)}
-        className="min-h-[40px] rounded-xl text-xs font-semibold text-gray-500"
-      >
-        ▲ Tutup peringkat lengkap
-      </button>
-      </div>
-      )}
     </section>
   );
 }
