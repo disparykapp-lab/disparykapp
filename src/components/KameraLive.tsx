@@ -8,17 +8,11 @@ interface KameraLiveProps {
   onBatal: () => void;
 }
 
-// Batas area transparan (lubang foto) pada bingkai twibbon.png, dalam
-// persentase lebar/tinggi gambar bingkainya sendiri — dipakai supaya
-// watermark teks digambar di dalam lubang, tidak ketutupan bingkai emas
-// yang solid di pinggir (diukur langsung dari file twibbon.png).
-const BINGKAI_LUBANG = { kiri: 0.19, kanan: 0.8, atas: 0.19, bawah: 0.86 };
-
 /**
  * Kamera langsung dari getUserMedia — sengaja TIDAK memakai <input type="file">
  * supaya foto tidak bisa diambil dari galeri (lihat spesifikasi 7.1).
  */
-export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: KameraLiveProps) {
+export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -85,8 +79,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
 
     // Sebagian perangkat mengirim frame kamera depan yang sudah mirror dari
     // sumbernya (bukan cuma soal CSS) — balik lagi di sini supaya wajah di
-    // foto yang benar-benar tersimpan tidak terbalik. Teks watermark di
-    // bawah digambar normal (di luar transform ini) supaya tetap terbaca.
+    // foto yang benar-benar tersimpan tidak terbalik.
     ctx.save();
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
@@ -101,29 +94,6 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
       ctx.drawImage(bingkai, 0, 0, canvas.width, canvas.height);
     }
 
-    const baris = [nama, `${lat.toFixed(5)}, ${lng.toFixed(5)}`];
-
-    // Watermark digambar di DALAM lubang bingkai (bukan mepet tepi kanvas)
-    // supaya tidak ketutupan bingkai emas yang solid.
-    const batasKiri = canvas.width * BINGKAI_LUBANG.kiri;
-    const batasKanan = canvas.width * BINGKAI_LUBANG.kanan;
-    const batasBawah = canvas.height * BINGKAI_LUBANG.bawah;
-    const lebarLubang = batasKanan - batasKiri;
-
-    const ukuranFont = Math.max(12, Math.round(lebarLubang / 26));
-    const tinggiBaris = ukuranFont * 1.35;
-    const tinggiOverlay = tinggiBaris * baris.length + 14;
-
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(batasKiri, batasBawah - tinggiOverlay, lebarLubang, tinggiOverlay);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = `600 ${ukuranFont}px sans-serif`;
-    ctx.textBaseline = "top";
-    baris.forEach((teks, i) => {
-      ctx.fillText(teks, batasKiri + 8, batasBawah - tinggiOverlay + 6 + i * tinggiBaris);
-    });
-
     const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
     setHasilUrl(dataUrl);
 
@@ -136,7 +106,7 @@ export default function KameraLive({ nama, lat, lng, onFotoSiap, onBatal }: Kame
     );
 
     streamRef.current?.getTracks().forEach((t) => t.stop());
-  }, [nama, lat, lng]);
+  }, []);
 
   const gunakanFoto = useCallback(() => {
     if (hasilBlob && hasilUrl) onFotoSiap(hasilBlob, hasilUrl);
