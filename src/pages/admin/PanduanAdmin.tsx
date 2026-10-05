@@ -260,6 +260,10 @@ export default function PanduanAdmin() {
           jadi langsung kelihatan undangan siapa saja yang dibawa satu orang/tim, digabung dari
           semua kategori sekaligus. Ada juga kelompok "Belum Ditugaskan" di paling bawah.
         </Langkah>
+        <Langkah no={11}>
+          Tombol <strong>"Ekspor Excel"</strong> di bagian atas mengunduh daftar{" "}
+          <strong>semua undangan</strong> (semua kategori) berisi dua kolom saja: Nama dan Catatan.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

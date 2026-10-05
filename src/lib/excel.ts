@@ -1,3 +1,4 @@
+import type { Workbook } from "exceljs";
 import type { BarisAbsensi, Ringkasan } from "./rekap";
 import { LABEL_STATUS_ABSEN } from "./absensiMeta";
 
@@ -131,6 +132,11 @@ export async function unduhExcelRekap(opts: OpsiEksporExcel) {
 
   ws.views = [{ state: "frozen", ySplit: barisHeader }];
 
+  await unduhWorkbook(wb, opts.namaFile);
+}
+
+/** Unduh workbook sebagai file .xlsx. */
+async function unduhWorkbook(wb: Workbook, namaFile: string) {
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -138,7 +144,38 @@ export async function unduhExcelRekap(opts: OpsiEksporExcel) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${opts.namaFile}.xlsx`;
+  a.download = `${namaFile}.xlsx`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+export interface BarisEksporUndangan {
+  nama: string;
+  catatan: string | null;
+}
+
+/** Ekspor daftar undangan berisi nama & catatan saja. */
+export async function unduhExcelUndangan(rows: BarisEksporUndangan[], namaFile: string) {
+  const { default: ExcelJS } = await import("exceljs");
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "DisparYK";
+  wb.created = new Date();
+
+  const ws = wb.addWorksheet("Undangan");
+  ws.columns = [
+    { header: "Nama", key: "nama", width: 60 },
+    { header: "Catatan", key: "catatan", width: 50 },
+  ];
+
+  const header = ws.getRow(1);
+  header.font = { bold: true, color: { argb: "FFFFFFFF" } };
+  header.fill = { type: "pattern", pattern: "solid", fgColor: { argb: WARNA_HIJAU } };
+  header.alignment = { vertical: "middle", horizontal: "center" };
+  ws.views = [{ state: "frozen", ySplit: 1 }];
+
+  for (const r of rows) {
+    ws.addRow({ nama: r.nama, catatan: r.catatan ?? "" });
+  }
+
+  await unduhWorkbook(wb, namaFile);
 }

@@ -22,6 +22,7 @@ import {
   type UndanganInput,
 } from "../../lib/undangan";
 import { ambilSemuaTim, type TimDenganAnggota } from "../../lib/tim";
+import { unduhExcelUndangan } from "../../lib/excel";
 import type { Profile } from "../../types/database";
 
 /** value dropdown "Tugaskan ke...": beda prefix buat pegawai vs tim. */
@@ -289,6 +290,13 @@ export default function DistribusiUndangan() {
         >
           📋 Lihat per Petugas
         </Link>
+        <button
+          onClick={() => void unduhExcelUndangan(rows, "Daftar Undangan")}
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-brand-text shadow-sm"
+        >
+          <img src="/icon_excel.png" alt="" className="-ml-1 h-7 w-7 object-contain" />
+          Ekspor Excel
+        </button>
       </div>
 
       <button
