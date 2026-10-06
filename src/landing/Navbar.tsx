@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { Menu, Search, X } from "lucide-react";
 import type { IsiNavbar } from "./types";
@@ -129,7 +130,7 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
         </div>
       </nav>
 
-      {menuBuka && (
+      {menuBuka && createPortal(
         <div
           id="menu-mobile"
           ref={panel}
@@ -170,7 +171,8 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
               {isi.tombolDaftar}
             </Link>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );
