@@ -266,6 +266,46 @@ export default function PanduanAdmin() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="🌐 Landing Page">
+        <Langkah no={1}>
+          Alamat utama aplikasi (<strong>/</strong>) sekarang adalah halaman depan publik yang
+          bisa dibuka siapa saja, termasuk sebelum login. Dashboard pegawai pindah ke{" "}
+          <strong>/beranda</strong>. Buka Kelola → <strong>Landing Page</strong> untuk mengubah
+          isinya.
+        </Langkah>
+        <Langkah no={2}>
+          Setiap bagian (Hero, Destinasi, Gaya Wisata, Agenda, Berita, Testimoni, Newsletter,
+          Footer, dan Navigasi) bisa dibuka dengan menekan judulnya. Ubah isinya, lalu tekan{" "}
+          <strong>"Simpan"</strong> di bagian itu. Perubahan langsung tampil untuk pengunjung.
+        </Langkah>
+        <Langkah no={3}>
+          Untuk foto, tekan <strong>"Unggah foto"</strong> atau <strong>"Ganti foto"</strong>.
+          Foto otomatis diperkecil ke format WebP (maks. 1600 px) sebelum disimpan. Pakai foto
+          yang kamu punya haknya (mis. foto sendiri atau berlisensi bebas), bukan tautan dari
+          situs lain.
+        </Langkah>
+        <Langkah no={4}>
+          Bagian <strong>Agenda, Berita, Testimoni, Destinasi, Gaya Wisata, dan Newsletter</strong>{" "}
+          bisa disembunyikan dengan centang "Tampilkan bagian ini di landing". Agenda, Berita,
+          dan Testimoni sengaja disembunyikan dulu sampai ada konten aslinya. Jangan mengisi
+          testimoni yang tidak benar-benar dari pengunjung.
+        </Langkah>
+        <Langkah no={5}>
+          Tombol <strong>"+ Tambah ..."</strong> menambah item baru (destinasi, berita, dll),
+          dan <strong>↑ Naik / ↓ Turun</strong> mengatur urutannya. Untuk menghapus item, tekan
+          "Hapus" lalu konfirmasi.
+        </Langkah>
+        <Langkah no={6}>
+          Tombol <strong>"Kembalikan isi bawaan"</strong> mengganti isi bagian itu dengan contoh
+          awal. Perubahan belum tersimpan sampai kamu menekan "Simpan".
+        </Langkah>
+        <Langkah no={7}>
+          Kategori destinasi memakai ID kategori (mis. <em>budaya, alam</em>), dan Gaya Wisata
+          yang dipilih pengunjung meredupkan agenda yang tidak cocok. Pastikan ID-nya sama
+          persis.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="📅 Kelola Kalender Konten">
         <Langkah no={1}>
           Buka menu Kalender, tekan "+ Tambah" — semua pegawai yang divisinya punya akses

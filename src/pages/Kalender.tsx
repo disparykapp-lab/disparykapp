@@ -73,7 +73,7 @@ export default function Kalender() {
     <div className="flex flex-col gap-4">
       <HeaderHalaman
         judul="Kalender Konten"
-        kembaliKe="/"
+        kembaliKe="/beranda"
         aksi={
           <Link
             to="/kalender/baru"

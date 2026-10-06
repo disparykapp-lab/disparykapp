@@ -7,6 +7,7 @@ Spesifikasi lengkap ada di [`disparyk-app-spec.md`](./disparyk-app-spec.md). Dok
 ## Tech Stack
 
 - **Frontend:** React + Vite + TypeScript, Tailwind CSS v4
+- **Landing page:** GSAP (ScrollTrigger, Flip) + Lenis, lazy-loaded
 - **Auth, Database, Storage:** Supabase (Auth Google, Postgres, Storage)
 - **Logika sensitif** (jarak ke kantor, waktu absen, aturan telat): fungsi Postgres RPC `SECURITY DEFINER` — **bukan** di frontend
 - **Hosting:** Render (Static Site), auto-deploy dari GitHub
@@ -78,6 +79,9 @@ npm run dev
        supaya undangan bisa ditugaskan ke satu tim (gabungan beberapa pegawai, rencana
        pemakaian 2 orang per tim) selain ke satu pegawai; anggota tim yang ditugaskan boleh
        ikut mengubah status/lokasi/tanda tangan baris itu.
+   19. `0019_landing_page.sql` — tabel `landing_konten` (isi landing page publik dalam JSON,
+       satu baris per bagian) dan bucket Storage publik `landing` untuk foto landing. Pengunjung
+       tanpa login boleh membaca; hanya admin yang boleh menulis.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
@@ -99,6 +103,18 @@ npm run dev
    - Login ulang di aplikasi — sekarang masuk sebagai admin.
    - Pegawai berikutnya **tidak perlu langkah SQL manual**: admin cukup mendaftarkan email mereka lewat *Kelola → Pegawai*, lalu pegawai tinggal "Masuk dengan Google". (Baris profil yang didaftarkan admin otomatis "diklaim" oleh akun Google yang cocok emailnya saat login pertama — lihat fungsi `klaim_profil()` di `0001_schema.sql`.)
 
+## Landing page publik
+
+- Alamat utama (`/`) sekarang adalah **landing page** publik, bukan dashboard. Dashboard pegawai pindah ke `/beranda` (perlu login).
+- Desain mengikuti referensi Roamly (`roamly-landing-spec.md`), dengan isi Dinas Pariwisata Kota Yogyakarta. Animasi memakai GSAP (ScrollTrigger, Flip) dan Lenis; chunk-nya dimuat terpisah (lazy) supaya aplikasi absensi tidak ikut mengunduhnya.
+- **Admin mengubah isi landing** lewat *Kelola → Landing Page*: foto, judul, teks, destinasi, gaya wisata, agenda, berita terkini, testimoni, newsletter, dan footer. Tiap bagian bisa disembunyikan. Foto diperkecil otomatis ke WebP (maks. 1600 px) sebelum diunggah.
+- Bagian paket/agenda, berita, dan testimoni **disembunyikan dulu** sampai admin mengisi data aslinya. Jangan mengisi testimoni fiktif.
+- Wishlist destinasi tersimpan di localStorage perangkat (tidak ke database).
+- Form newsletter hanya validasi di browser; email **tidak** disimpan atau dikirim ke mana pun.
+- Pengaturan gerak: kalau pengguna mengaktifkan *reduced motion*, animasi dimatikan dan konten tetap tampil.
+
+Sumber foto bawaan: belum ada. Setiap foto memakai gradien placeholder sampai admin mengunggah foto asli (berlisensi) lewat editor. Pastikan foto yang diunggah bukan hasil hotlink.
+
 ## Deploy ke Render
 
 1. Push repo ini ke GitHub.
@@ -118,7 +134,8 @@ src/
   contexts/       # AuthContext (login Google, whitelist, sesi)
   lib/            # supabase client, RPC absensi, rekap, konten, tanggal
   pages/          # Beranda, Absen, Rekap, Kalender, KontenForm
-  pages/admin/    # Kelola: Pegawai, Divisi, Pengaturan, Tinjau Absensi
+  landing/        # Landing page publik (/): bagian-bagian, efek GSAP/Lenis, skema isi
+  pages/admin/    # Kelola: Pegawai, Divisi, Pengaturan, Tinjau Absensi, Landing Page
   types/          # tipe tabel database
 supabase/migrations/  # SQL: skema, RLS, RPC, storage (jalankan berurutan)
 ```

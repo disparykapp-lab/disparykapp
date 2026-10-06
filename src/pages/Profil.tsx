@@ -68,7 +68,7 @@ export default function Profil() {
 
   return (
     <div className="kolom-sempit flex flex-col gap-4 pb-6">
-      <HeaderHalaman judul="Profil Saya" kembaliKe="/" />
+      <HeaderHalaman judul="Profil Saya" kembaliKe="/beranda" />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
       {sukses && (

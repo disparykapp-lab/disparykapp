@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
 
 @theme {
   --color-brand-masuk: #8e1e3c;
@@ -10,6 +12,21 @@
   --color-brand-bg: #f7f8fa;
   --color-brand-text: #1f2937;
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Token landing page publik (prefix lnd- supaya tidak bentrok dengan palet admin) */
+  --color-lnd-navy: #0b1b3a;
+  --color-lnd-ink: #2a3a57;
+  --color-lnd-muted: #5f6f86;
+  --color-lnd-blue: #1b5fe4;
+  --color-lnd-blue-dark: #164cc0;
+  --color-lnd-sky: #eef5fd;
+  --color-lnd-sky-100: #ddeafb;
+  --color-lnd-line: #e5ecf6;
+  --color-lnd-heart: #e5484d;
+  --font-lnd-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --radius-lnd: 16px;
+  --shadow-lnd: 0 6px 24px rgba(15, 40, 90, 0.08);
+  --shadow-lnd-hover: 0 18px 40px rgba(15, 40, 90, 0.16);
 }
 
 html {

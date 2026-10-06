@@ -25,7 +25,7 @@ export function RequireAdmin() {
   if (loading) return <Loading teks="Memeriksa akses..." />;
 
   if (profile?.role !== "admin") {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/beranda" replace />;
   }
 
   return <Outlet />;
@@ -37,7 +37,7 @@ export function RequireFiturKalender() {
   if (loading) return <Loading teks="Memeriksa akses..." />;
 
   if (!bisaKalenderKonten) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/beranda" replace />;
   }
 
   return <Outlet />;

@@ -122,7 +122,7 @@ export default function Absen() {
 
   return (
     <div className="kolom-sempit-sm flex min-h-[80vh] flex-col">
-      <HeaderHalaman judul={LABEL_JENIS[jenis]} kembaliKe="/" />
+      <HeaderHalaman judul={LABEL_JENIS[jenis]} kembaliKe="/beranda" />
 
       {langkah === "mode" && (
         <div className="flex flex-col gap-5">
@@ -258,7 +258,7 @@ export default function Absen() {
             <p className="text-sm text-gray-500">Jarak dari kantor: {hasil.jarak} meter</p>
           )}
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/beranda")}
             className="mt-2 min-h-[52px] w-full max-w-xs rounded-xl bg-brand-masuk text-base font-semibold text-white"
           >
             Kembali ke Beranda
@@ -275,7 +275,7 @@ export default function Absen() {
           <p className="max-w-xs text-sm text-gray-600">{error}</p>
           <div className="flex w-full max-w-xs gap-3">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/beranda")}
               className="min-h-[52px] flex-1 rounded-xl border border-gray-300 bg-white font-semibold text-brand-text"
             >
               Beranda

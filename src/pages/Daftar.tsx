@@ -107,7 +107,7 @@ export default function Daftar() {
   }
 
   if (!loading && session && profile) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/beranda" replace />;
   }
 
   if (loading) {

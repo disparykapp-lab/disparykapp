@@ -4,7 +4,7 @@ import HeaderHalaman from "../components/HeaderHalaman";
 export default function Panduan() {
   return (
     <div className="kolom-sempit flex flex-col gap-4 pb-6">
-      <HeaderHalaman judul="Panduan Penggunaan" kembaliKe="/" />
+      <HeaderHalaman judul="Panduan Penggunaan" kembaliKe="/beranda" />
 
       <p className="text-sm text-gray-500">
         Panduan singkat cara absen dan memakai Kalender Konten di aplikasi DisparYK.

@@ -12,6 +12,7 @@ const MENU = [
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },
   { to: "/kelola/tinjau", label: "Tinjau Absensi", iconSrc: "/kelola/icon_tinjau.png" },
   { to: "/kelola/foto", label: "Foto Absensi", iconSrc: "/kelola/icon_album.png" },
+  { to: "/kelola/landing", label: "Landing Page", iconSrc: "/icon_kalender_konten.png" },
   { to: "/kelola/panduan", label: "Panduan Admin", iconSrc: "/kelola/icon_panduan.png" },
 ];
 
@@ -30,7 +31,7 @@ export default function Kelola() {
 
   return (
     <div className="flex flex-col gap-4">
-      <HeaderHalaman judul="Kelola" kembaliKe="/" />
+      <HeaderHalaman judul="Kelola" kembaliKe="/beranda" />
 
       <KartuOnline />
 

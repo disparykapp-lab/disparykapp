@@ -1,0 +1,164 @@
+/* Gaya khusus landing page: tirai intro, kartu 3D, kilau, riak, dan titik hati.
+   Token warna/radius ada di index.css (@theme, prefix lnd-). */
+
+.container-lnd {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1240px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 768px) {
+  .container-lnd { padding-left: 60px; padding-right: 60px; }
+}
+@media (min-width: 1280px) {
+  .container-lnd { padding-left: 100px; padding-right: 100px; }
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-lnd-blue);
+}
+.label-kecil {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-lnd-muted);
+}
+.judul-section {
+  font-family: var(--font-lnd-serif);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.15;
+  color: var(--color-lnd-navy);
+}
+@media (min-width: 768px) {
+  .judul-section { font-size: 40px; }
+}
+
+/* Tirai putih intro (dibuka ke atas) */
+.tirai-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #fff;
+  pointer-events: none;
+}
+
+/* Kartu 3D: perspective di wrapper, preserve-3d di kartu */
+.kartu-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+}
+.kartu-3d > .lapis-depan {
+  transform: translateZ(20px);
+}
+.kartu-3d > .lapis-teks {
+  transform: translateZ(40px);
+}
+.kilau {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  opacity: 0;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.55), transparent 55%);
+  mix-blend-mode: soft-light;
+  transition: opacity 0.3s;
+}
+.kartu-3d:hover .kilau {
+  opacity: 1;
+}
+
+/* Fokus cincin lembut saat input pencarian aktif */
+.fokus-cincin:focus-within {
+  box-shadow: 0 0 0 4px rgba(27, 95, 228, 0.18);
+}
+
+/* Riak tombol magnetik */
+.riak {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+/* Titik hati yang memancar */
+.titik-hati {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px;
+  border-radius: 9999px;
+  background: var(--color-lnd-heart);
+  pointer-events: none;
+}
+
+.tanpa-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tanpa-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reduced motion: tirai tidak dipakai, transisi dipersingkat */
+@media (prefers-reduced-motion: reduce) {
+  .tirai-intro {
+    display: none;
+  }
+  .kilau,
+  .riak,
+  .titik-hati {
+    display: none;
+  }
+}
+
+/* Tautan "View All →": panah bergeser 4px ke kanan saat hover */
+.link-lnd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-lnd-blue);
+  transition: color 0.2s;
+}
+.link-lnd:hover {
+  color: var(--color-lnd-blue-dark);
+}
+.link-lnd svg {
+  transition: transform 0.3s;
+}
+.link-lnd:hover svg {
+  transform: translateX(4px);
+}
+
+/* Tombol bulat kecil (panah carousel) */
+.tombol-bulat {
+  display: flex;
+  height: 40px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid var(--color-lnd-line);
+  background: #fff;
+  color: var(--color-lnd-navy);
+  transition: background-color 0.2s, color 0.2s;
+}
+.tombol-bulat:not(:disabled):hover {
+  background: var(--color-lnd-blue);
+  color: #fff;
+  border-color: var(--color-lnd-blue);
+}

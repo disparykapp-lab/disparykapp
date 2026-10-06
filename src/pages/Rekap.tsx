@@ -189,7 +189,7 @@ export default function Rekap() {
   return (
     <div className="flex flex-col gap-5 print:gap-3">
       <div className="print:hidden">
-        <HeaderHalaman judul="Rekap Absensi" kembaliKe="/" />
+        <HeaderHalaman judul="Rekap Absensi" kembaliKe="/beranda" />
       </div>
       <h1 className="hidden text-xl font-bold text-brand-text print:block">Rekap Absensi</h1>
 

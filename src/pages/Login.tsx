@@ -5,7 +5,7 @@ export default function Login() {
   const { session, profile, loading, belumTerdaftar, loginGoogle } = useAuth();
 
   if (!loading && session && profile) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/beranda" replace />;
   }
 
   return (

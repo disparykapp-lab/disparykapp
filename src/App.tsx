@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PresenceProvider } from "./contexts/PresenceContext";
@@ -6,6 +7,7 @@ import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import Beranda from "./pages/Beranda";
+import KelolaLanding from "./pages/admin/KelolaLanding";
 import Absen from "./pages/Absen";
 import Rekap from "./pages/Rekap";
 import Kalender from "./pages/Kalender";
@@ -23,18 +25,29 @@ import DistribusiUndangan from "./pages/admin/DistribusiUndangan";
 import DistribusiPerPetugas from "./pages/admin/DistribusiPerPetugas";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
+// Landing (GSAP + Lenis) dimuat terpisah: pengguna aplikasi tidak perlu mengunduhnya.
+const LandingPage = lazy(() => import("./landing/LandingPage"));
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <PresenceProvider>
         <Routes>
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={null}>
+                <LandingPage />
+              </Suspense>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/daftar" element={<Daftar />} />
 
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<Beranda />} />
+              <Route path="/beranda" element={<Beranda />} />
               <Route path="/absen/:jenis" element={<Absen />} />
               <Route path="/rekap" element={<Rekap />} />
               <Route path="/panduan" element={<Panduan />} />
@@ -56,6 +69,7 @@ export default function App() {
                 <Route path="/kelola/foto" element={<FotoAbsensi />} />
                 <Route path="/kelola/undangan" element={<DistribusiUndangan />} />
                 <Route path="/kelola/undangan/petugas" element={<DistribusiPerPetugas />} />
+                <Route path="/kelola/landing" element={<KelolaLanding />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>
