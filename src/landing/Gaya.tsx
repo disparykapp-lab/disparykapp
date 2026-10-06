@@ -44,10 +44,10 @@ export default function Gaya({ isi, aktif, onPilih }: { isi: IsiGaya; aktif: str
                   aria-pressed={terpilih}
                   onClick={() => onPilih(terpilih ? null : g.id)}
                   className={`group flex min-h-[96px] w-full flex-col items-center justify-center gap-2.5 rounded-lnd border-2 bg-white px-3 py-4 text-center shadow-lnd transition-all duration-300 hover:-translate-y-1 ${
-                    terpilih ? "border-lnd-blue bg-lnd-sky-100" : "border-transparent"
+                    terpilih ? "border-lnd-merah bg-lnd-sky-100" : "border-transparent"
                   }`}
                 >
-                  <span className="text-lnd-blue transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
+                  <span className="text-lnd-merah transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6">
                     <IkonNama nama={g.icon} size={26} />
                   </span>
                   <span className="text-[13px] font-semibold leading-tight text-lnd-navy">{g.label}</span>

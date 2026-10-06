@@ -168,9 +168,9 @@ function KartuTestimoni({ item }: { item: ItemTestimoni }) {
           <div className="lapis-depan flex items-center gap-3">
             <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full">
               {item.foto ? (
-                <Foto src={item.foto} alt={`Foto ${item.nama}`} gradien="linear-gradient(160deg,#9ed2ff,#1b5fe4)" />
+                <Foto src={item.foto} alt={`Foto ${item.nama}`} gradien="linear-gradient(160deg,#f2b8c4,#8e1e3c)" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-lnd-blue to-lnd-blue-dark font-lnd-serif text-xl font-bold text-white" aria-hidden="true">
+                <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-lnd-merah to-lnd-merah-dark font-lnd-serif text-xl font-bold text-white" aria-hidden="true">
                   {item.nama.charAt(0).toUpperCase()}
                 </div>
               )}

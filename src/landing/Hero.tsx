@@ -123,7 +123,7 @@ export default function Hero({ isi, kategori, destinasi, kategoriAktif, onKatego
               alt=""
               lazy={false}
               prioritas
-              gradien="linear-gradient(100deg,#eaf6ff 0%,#9ad0ff 28%,#2d8ee6 60%,#1b5fe4 100%)"
+              gradien="linear-gradient(100deg,#fdf1f4 0%,#e8a6b4 28%,#b33951 60%,#8e1e3c 100%)"
             />
           </div>
         </div>
@@ -173,10 +173,10 @@ export default function Hero({ isi, kategori, destinasi, kategoriAktif, onKatego
                     aria-pressed={aktif}
                     onClick={() => onKategori(aktif ? null : k.id)}
                     className={`group flex min-w-[56px] flex-col items-center gap-1.5 rounded-xl px-2 py-1.5 text-center transition ${
-                      aktif ? "text-lnd-blue" : "text-lnd-navy hover:text-lnd-blue"
+                      aktif ? "text-lnd-merah" : "text-lnd-navy hover:text-lnd-merah"
                     }`}
                   >
-                    <span className={`transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${aktif ? "text-lnd-blue" : ""}`}>
+                    <span className={`transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6 ${aktif ? "text-lnd-merah" : ""}`}>
                       <IkonNama nama={k.icon} size={24} />
                     </span>
                     <span className="text-[11px] font-medium leading-tight md:text-[12px]">{k.label}</span>
@@ -289,7 +289,7 @@ function HeroSearch({
         <button
           ref={tombolRef}
           type="submit"
-          className="relative shrink-0 rounded-full bg-lnd-blue px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-lnd-blue-dark"
+          className="relative shrink-0 rounded-full bg-lnd-merah px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-lnd-merah-dark"
         >
           <span data-magnetic-inner className="inline-flex items-center gap-2">
             Cari
@@ -315,7 +315,7 @@ function HeroSearch({
               }}
               onMouseEnter={() => setAktif(i)}
               className={`flex cursor-pointer items-center justify-between px-5 py-2.5 text-[15px] ${
-                i === aktif ? "bg-lnd-sky text-lnd-blue" : "text-lnd-ink"
+                i === aktif ? "bg-lnd-sky text-lnd-merah" : "text-lnd-ink"
               }`}
             >
               <span className="font-semibold">{d.nama}</span>

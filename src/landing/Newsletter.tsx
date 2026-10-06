@@ -35,7 +35,7 @@ export default function Newsletter({ isi }: { isi: IsiNewsletter }) {
       <div className="container-lnd grid items-center gap-6 py-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)] md:py-8">
         <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[32%] md:block" aria-hidden="true">
           <div className="h-full w-full [mask-image:linear-gradient(90deg,#000_40%,transparent)]">
-            <Foto src={isi.foto} alt="" gradien="linear-gradient(90deg,#7fb6e6 0%,#2f7fbf 100%)" />
+            <Foto src={isi.foto} alt="" gradien="linear-gradient(90deg,#d98a9b 0%,#7a1a33 100%)" />
           </div>
         </div>
 
@@ -51,7 +51,7 @@ export default function Newsletter({ isi }: { isi: IsiNewsletter }) {
 
         <div className="relative">
           {sukses ? (
-            <div role="status" className="flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-lnd-blue px-6 py-3 text-[15px] font-semibold text-white">
+            <div role="status" className="flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-lnd-merah px-6 py-3 text-[15px] font-semibold text-white">
               <Check size={18} aria-hidden="true" /> Terima kasih! Kamu sudah terdaftar.
             </div>
           ) : (
@@ -74,7 +74,7 @@ export default function Newsletter({ isi }: { isi: IsiNewsletter }) {
                 <button
                   ref={tombol}
                   type="submit"
-                  className="relative shrink-0 rounded-full bg-lnd-blue px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-lnd-blue-dark"
+                  className="relative shrink-0 rounded-full bg-lnd-merah px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-lnd-merah-dark"
                 >
                   <span data-magnetic-inner className="inline-block">{isi.tombol}</span>
                 </button>

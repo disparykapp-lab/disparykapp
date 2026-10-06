@@ -46,7 +46,7 @@ export default function Berita({ isi }: { isi: IsiBerita }) {
               <article className="group flex h-full flex-col overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.05]">
-                    <Foto src={b.foto} alt={b.judul} gradien="linear-gradient(160deg,#9ed2ff 0%,#1b5fe4 100%)" />
+                    <Foto src={b.foto} alt={b.judul} gradien="linear-gradient(160deg,#f2b8c4 0%,#8e1e3c 100%)" />
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col p-5">

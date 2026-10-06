@@ -8,7 +8,7 @@ export default function Foto({
   src,
   alt,
   className = "",
-  gradien = "linear-gradient(160deg,#9ed2ff 0%,#1b5fe4 100%)",
+  gradien = "linear-gradient(160deg,#f2b8c4 0%,#8e1e3c 100%)",
   lazy = true,
   prioritas = false,
 }: {

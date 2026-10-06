@@ -99,10 +99,10 @@ function KartuPaket({ item, onInfo }: { item: ItemPaket; onInfo: (p: string) => 
             <p className="mt-2 line-clamp-2 text-[14px] text-lnd-muted">{item.deskripsi}</p>
             <div className="mt-4 flex items-center justify-between gap-2 border-t border-lnd-line pt-3 text-[13px] text-lnd-ink">
               <span className="flex items-center gap-1.5">
-                <MapPin size={14} aria-hidden="true" className="text-lnd-blue" /> {item.negara}
+                <MapPin size={14} aria-hidden="true" className="text-lnd-merah" /> {item.negara}
               </span>
               <span className="flex items-center gap-1.5">
-                <Route size={14} aria-hidden="true" className="text-lnd-blue" /> {item.durasi} hari
+                <Route size={14} aria-hidden="true" className="text-lnd-merah" /> {item.durasi} hari
               </span>
               <span className="font-semibold text-lnd-navy">{item.harga}</span>
             </div>
@@ -110,7 +110,7 @@ function KartuPaket({ item, onInfo }: { item: ItemPaket; onInfo: (p: string) => 
               type="button"
               aria-label={`Lihat ${item.judul}`}
               onClick={() => onInfo("Segera hadir")}
-              className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-blue group-hover:bg-lnd-blue group-hover:text-white"
+              className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-merah group-hover:bg-lnd-merah group-hover:text-white"
             >
               <ArrowUpRight size={16} aria-hidden="true" className="transition-transform duration-500 group-hover:-rotate-45" />
             </button>

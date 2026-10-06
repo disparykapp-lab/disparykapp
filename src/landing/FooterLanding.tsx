@@ -20,7 +20,7 @@ export default function FooterLanding({ isi, navbarLogo, onInfo }: { isi: IsiFoo
               <ul className="mt-3 flex flex-col gap-2">
                 {k.tautan.map((t) => (
                   <li key={t}>
-                    <button type="button" onClick={() => onInfo("Segera hadir")} className="text-left text-[14px] text-lnd-muted transition-colors hover:text-lnd-blue">
+                    <button type="button" onClick={() => onInfo("Segera hadir")} className="text-left text-[14px] text-lnd-muted transition-colors hover:text-lnd-merah">
                       {t}
                     </button>
                   </li>
@@ -40,7 +40,7 @@ export default function FooterLanding({ isi, navbarLogo, onInfo }: { isi: IsiFoo
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.nama}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line text-lnd-navy transition hover:border-lnd-blue hover:text-lnd-blue"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line text-lnd-navy transition hover:border-lnd-merah hover:text-lnd-merah"
                     >
                       <IkonSosial nama={s.nama} />
                     </a>
@@ -55,7 +55,7 @@ export default function FooterLanding({ isi, navbarLogo, onInfo }: { isi: IsiFoo
           <p>© {tahun} {isi.hak}</p>
           <div className="flex gap-5">
             {["Kebijakan Privasi", "Syarat Layanan", "Preferensi Cookie"].map((t) => (
-              <button key={t} type="button" onClick={() => onInfo("Segera hadir")} className="transition-colors hover:text-lnd-blue">
+              <button key={t} type="button" onClick={() => onInfo("Segera hadir")} className="transition-colors hover:text-lnd-merah">
                 {t}
               </button>
             ))}

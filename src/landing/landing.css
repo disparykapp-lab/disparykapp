@@ -21,7 +21,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-lnd-blue);
+  color: var(--color-lnd-merah);
 }
 .label-kecil {
   font-size: 10px;
@@ -78,7 +78,7 @@
 
 /* Fokus cincin lembut saat input pencarian aktif */
 .fokus-cincin:focus-within {
-  box-shadow: 0 0 0 4px rgba(27, 95, 228, 0.18);
+  box-shadow: 0 0 0 4px rgba(142, 30, 60, 0.18);
 }
 
 /* Riak tombol magnetik */
@@ -130,11 +130,11 @@
   gap: 6px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-lnd-blue);
+  color: var(--color-lnd-merah);
   transition: color 0.2s;
 }
 .link-lnd:hover {
-  color: var(--color-lnd-blue-dark);
+  color: var(--color-lnd-merah-dark);
 }
 .link-lnd svg {
   transition: transform 0.3s;
@@ -158,7 +158,7 @@
   transition: background-color 0.2s, color 0.2s;
 }
 .tombol-bulat:not(:disabled):hover {
-  background: var(--color-lnd-blue);
+  background: var(--color-lnd-merah);
   color: #fff;
-  border-color: var(--color-lnd-blue);
+  border-color: var(--color-lnd-merah);
 }

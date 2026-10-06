@@ -85,7 +85,7 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
               <button
                 type="button"
                 onClick={() => ke(m.target)}
-                className="text-[15px] font-medium text-lnd-ink transition-colors hover:text-lnd-blue"
+                className="text-[15px] font-medium text-lnd-ink transition-colors hover:text-lnd-merah"
               >
                 {m.label}
               </button>
@@ -104,14 +104,14 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
           </button>
           <Link
             to={sudahMasuk ? "/beranda" : "/login"}
-            className="hidden px-3 text-[15px] font-medium text-lnd-ink transition hover:text-lnd-blue md:inline-block"
+            className="hidden px-3 text-[15px] font-medium text-lnd-ink transition hover:text-lnd-merah md:inline-block"
           >
             {sudahMasuk ? "Buka Aplikasi" : isi.tombolMasuk}
           </Link>
           <Link
             ref={tombolDaftar}
             to="/daftar"
-            className="relative hidden overflow-hidden rounded-full bg-lnd-blue px-5 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-lnd-blue-dark md:inline-block"
+            className="relative hidden overflow-hidden rounded-full bg-lnd-merah px-5 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-lnd-merah-dark md:inline-block"
           >
             <span data-magnetic-inner className="inline-block">{isi.tombolDaftar}</span>
           </Link>
@@ -166,7 +166,7 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
             <Link to={sudahMasuk ? "/beranda" : "/login"} className="min-h-[48px] rounded-full border border-lnd-line text-center leading-[48px] font-semibold text-lnd-navy">
               {sudahMasuk ? "Buka Aplikasi" : isi.tombolMasuk}
             </Link>
-            <Link to="/daftar" className="min-h-[48px] rounded-full bg-lnd-blue text-center leading-[48px] font-semibold text-white">
+            <Link to="/daftar" className="min-h-[48px] rounded-full bg-lnd-merah text-center leading-[48px] font-semibold text-white">
               {isi.tombolDaftar}
             </Link>
           </div>

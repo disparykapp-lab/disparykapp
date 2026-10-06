@@ -70,8 +70,8 @@ export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWis
     if (!prefersReducedMotion()) {
       gsap.fromTo(el, { scale: 1 }, { scale: 1.04, duration: 0.25, yoyo: true, repeat: 3, ease: "power2.inOut" });
     }
-    el.classList.add("ring-2", "ring-lnd-blue", "ring-offset-4", "rounded-lnd");
-    const t = window.setTimeout(() => el.classList.remove("ring-2", "ring-lnd-blue", "ring-offset-4"), 1800);
+    el.classList.add("ring-2", "ring-lnd-merah", "ring-offset-4", "rounded-lnd");
+    const t = window.setTimeout(() => el.classList.remove("ring-2", "ring-lnd-merah", "ring-offset-4"), 1800);
     return () => window.clearTimeout(t);
   }, [sorotId]);
 
@@ -169,7 +169,7 @@ function KartuDestinasi({
               type="button"
               aria-label={`Lihat ${item.nama}`}
               onClick={() => onInfo("Segera hadir")}
-              className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-blue group-hover:bg-lnd-blue group-hover:text-white"
+              className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-merah group-hover:bg-lnd-merah group-hover:text-white"
             >
               <ArrowUpRight size={16} aria-hidden="true" className="transition-transform duration-500 group-hover:-rotate-45" />
             </button>
@@ -185,10 +185,10 @@ function KartuDestinasi({
 function gradienDefault(id: string): string {
   const pilihan = [
     "linear-gradient(160deg,#5fd3c6 0%,#2aa98f 45%,#f6d58e 100%)",
-    "linear-gradient(160deg,#9ed2ff 0%,#fff 45%,#1b5fe4 100%)",
+    "linear-gradient(160deg,#f2b8c4 0%,#fff 45%,#8e1e3c 100%)",
     "linear-gradient(150deg,#e0524a 0%,#b3261e 50%,#3d2b1f 100%)",
     "linear-gradient(170deg,#c9e6f5 0%,#5b8db0 50%,#1f4e6b 100%)",
-    "linear-gradient(160deg,#ffd27a 0%,#f08a6b 45%,#2f7fbf 100%)",
+    "linear-gradient(160deg,#ffd27a 0%,#f08a6b 45%,#7a1a33 100%)",
     "linear-gradient(160deg,#7fe0e6 0%,#1fb6c4 50%,#0e7f8f 100%)",
   ];
   let h = 0;

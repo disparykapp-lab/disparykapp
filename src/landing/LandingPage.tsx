@@ -103,7 +103,7 @@ export default function LandingPage() {
 
       {tirai && <div ref={tiraiEl} className="tirai-intro" aria-hidden="true" style={{ clipPath: "inset(0% 0% 0% 0%)" }} />}
 
-      <div ref={bilahProgres} aria-hidden="true" className="fixed inset-x-0 top-0 z-[55] h-[3px] origin-left bg-lnd-blue" style={{ transform: "scaleX(0)" }} />
+      <div ref={bilahProgres} aria-hidden="true" className="fixed inset-x-0 top-0 z-[55] h-[3px] origin-left bg-lnd-merah" style={{ transform: "scaleX(0)" }} />
 
       <Navbar isi={k.navbar.isi} sudahMasuk={sudahMasuk} />
 

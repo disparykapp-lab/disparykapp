@@ -49,7 +49,7 @@ export default function HeartButton({
         size={18}
         strokeWidth={1.8}
         className={aktif ? "text-lnd-heart" : "text-lnd-navy"}
-        fill={aktif ? "var(--heart)" : "none"}
+        fill={aktif ? "var(--color-lnd-heart)" : "none"}
         aria-hidden="true"
       />
     </button>
