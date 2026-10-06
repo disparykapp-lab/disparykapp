@@ -51,11 +51,6 @@ export default function Hero({ isi, kategori, destinasi, kategoriAktif, onKatego
         ease: "none",
         scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.6 },
       });
-      gsap.to(".hero-kategori", {
-        opacity: 0.4,
-        ease: "none",
-        scrollTrigger: { trigger: el, start: "top top", end: "bottom top", scrub: 0.6 },
-      });
     }, el);
 
     if (isCoarsePointer()) return () => ctx.revert();
