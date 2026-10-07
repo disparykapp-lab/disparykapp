@@ -2,7 +2,14 @@ import { useEffect, useId, useState, type ChangeEvent } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import { useAuth } from "../../contexts/AuthContext";
-import { ambilLanding, simpanLanding, unggahFotoLanding, type LandingTergabung } from "../../lib/landing";
+import {
+  ambilLanding,
+  ambilStatusLanding,
+  simpanLanding,
+  simpanStatusLanding,
+  unggahFotoLanding,
+  type LandingTergabung,
+} from "../../lib/landing";
 import { BAWAAN } from "../../landing/defaults";
 import { DAFTAR_IKON } from "../../landing/ikon";
 import { SEMUA_KUNCI, type Isi, type KunciLanding } from "../../landing/types";
@@ -219,6 +226,12 @@ export default function KelolaLanding() {
   const [terbuka, setTerbuka] = useState<KunciLanding | null>(null);
   const [status, setStatus] = useState<{ kunci: string; pesan: string; galat: boolean } | null>(null);
   const [menyimpan, setMenyimpan] = useState<string | null>(null);
+  const [aktif, setAktif] = useState<boolean | null>(null);
+  const [statusAktif, setStatusAktif] = useState<string | null>(null);
+
+  useEffect(() => {
+    ambilStatusLanding().then(setAktif);
+  }, []);
 
   useEffect(() => {
     ambilLanding().then((d) => {
@@ -260,9 +273,46 @@ export default function KelolaLanding() {
     }
   }
 
+  async function ubahAktif(nilai: boolean) {
+    if (!profile) return;
+    setStatusAktif(null);
+    try {
+      await simpanStatusLanding(nilai, profile.id);
+      setAktif(nilai);
+      setStatusAktif(nilai ? "Landing dinyalakan. Pengunjung bisa melihatnya." : "Landing dimatikan. Pengunjung langsung diarahkan ke login.");
+    } catch (e) {
+      setStatusAktif(e instanceof Error ? e.message : "Gagal mengubah status.");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Landing Page" kembaliKe="/kelola" />
+
+      <div className="flex items-center justify-between gap-4 rounded-xl bg-white p-4 shadow-sm">
+        <div>
+          <p className="font-semibold text-brand-text">Landing page: {aktif === null ? "..." : aktif ? "Aktif" : "Nonaktif"}</p>
+          <p className="text-xs text-gray-500">
+            {aktif === false
+              ? "Alamat utama langsung ke halaman login."
+              : "Alamat utama menampilkan landing page untuk pengunjung."}
+          </p>
+          {statusAktif && <p className="mt-1 text-xs text-gray-600">{statusAktif}</p>}
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={aktif === true}
+          disabled={aktif === null}
+          onClick={() => void ubahAktif(!aktif)}
+          className={`relative h-7 w-12 shrink-0 rounded-full transition disabled:opacity-50 ${aktif ? "bg-brand-masuk" : "bg-gray-300"}`}
+        >
+          <span
+            className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${aktif ? "left-[22px]" : "left-0.5"}`}
+          />
+          <span className="sr-only">Nyalakan atau matikan landing page</span>
+        </button>
+      </div>
 
       <div className="rounded-xl bg-white p-4 text-sm text-gray-600 shadow-sm">
         Ini isi halaman depan yang dilihat pengunjung di alamat utama aplikasi. Ubah lalu tekan{" "}

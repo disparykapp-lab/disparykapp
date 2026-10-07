@@ -26,7 +26,7 @@ import DistribusiPerPetugas from "./pages/admin/DistribusiPerPetugas";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 
 // Landing (GSAP + Lenis) dimuat terpisah: pengguna aplikasi tidak perlu mengunduhnya.
-const LandingPage = lazy(() => import("./landing/LandingPage"));
+const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
 
 export default function App() {
   return (
@@ -38,7 +38,7 @@ export default function App() {
             path="/"
             element={
               <Suspense fallback={null}>
-                <LandingPage />
+                <GerbangLanding />
               </Suspense>
             }
           />

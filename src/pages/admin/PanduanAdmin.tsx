@@ -304,6 +304,11 @@ export default function PanduanAdmin() {
           yang dipilih pengunjung meredupkan agenda yang tidak cocok. Pastikan ID-nya sama
           persis.
         </Langkah>
+        <Langkah no={8}>
+          Di bagian atas halaman ada sakelar <strong>"Landing page"</strong>. Kalau dimatikan,
+          alamat utama langsung mengarahkan pengunjung ke halaman login. Kamu tetap bisa masuk
+          dan mengedit landing seperti biasa. Nyalakan lagi kapan pun kamu siap.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

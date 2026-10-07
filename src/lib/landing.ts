@@ -99,3 +99,33 @@ export function bawaanTergabung(): LandingTergabung {
   }
   return hasil;
 }
+
+/**
+ * Status landing aktif/nonaktif. Disimpan sebagai baris khusus `status` di
+ * landing_konten (bukan bagian landing, jadi diabaikan oleh ambilLanding).
+ * Kalau baris belum ada atau gagal dibaca, landing dianggap aktif.
+ */
+export async function ambilStatusLanding(): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("landing_konten")
+    .select("isi")
+    .eq("kunci", "status")
+    .maybeSingle();
+  if (error || !data) return true;
+  const isi = data.isi as { aktif?: unknown } | null;
+  return isi?.aktif !== false;
+}
+
+export async function simpanStatusLanding(aktif: boolean, oleh: string): Promise<void> {
+  const { error } = await supabase.from("landing_konten").upsert(
+    {
+      kunci: "status",
+      isi: { aktif },
+      tampil: true,
+      diperbarui_at: new Date().toISOString(),
+      diperbarui_oleh: oleh,
+    },
+    { onConflict: "kunci" }
+  );
+  if (error) throw new Error(error.message);
+}
