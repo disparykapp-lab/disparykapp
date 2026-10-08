@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import Foto from "./Foto";
 import HeartButton from "./HeartButton";
 import SectionHeading from "./SectionHeading";
 import type { IsiDestinasi, ItemDestinasi } from "./types";
 import { gsap, Flip, prefersReducedMotion, useTilt } from "./efek";
+import { bukaDenganTransisi, gradienDefault } from "./transisi";
 
 interface Props {
   isi: IsiDestinasi;
@@ -121,7 +123,6 @@ export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWis
               item={d}
               aktif={wishlist.has(d.id)}
               onWishlist={() => onWishlist(d.id)}
-              onInfo={onInfo}
               tags={d.tags.join(",")}
             />
           ))}
@@ -137,27 +138,37 @@ function KartuDestinasi({
   item,
   aktif,
   onWishlist,
-  onInfo,
   tags,
 }: {
   item: ItemDestinasi;
   aktif: boolean;
   onWishlist: () => boolean;
-  onInfo: (pesan: string) => void;
   tags: string;
 }) {
   const kartu = useRef<HTMLElement>(null);
+  const fotoEl = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   useTilt(kartu, { maks: 12 });
+
+  // Seluruh kartu bisa diklik (kecuali tombol hati): foto mengembang lalu pindah ke detail.
+  function buka(e: MouseEvent) {
+    if ((e.target as HTMLElement).closest("[data-tanpa-buka]")) return;
+    bukaDenganTransisi(
+      fotoEl.current,
+      { foto: item.foto, gradien: gradienDefault(item.id), nama: item.nama, wilayah: item.negara },
+      () => navigate(`/destinasi/${item.id}`)
+    );
+  }
 
   return (
     <li data-kartu data-tags={tags} id={`destinasi-${item.id}`} className="group list-none">
       <div style={{ perspective: 900 }}>
-        <article ref={kartu} className="kartu-3d relative overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
-          <div className="relative aspect-square overflow-hidden rounded-t-lnd">
+        <article ref={kartu} onClick={buka} className="kartu-3d relative cursor-pointer overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
+          <div ref={fotoEl} className="relative aspect-square overflow-hidden rounded-t-lnd">
             <div className="lapis-depan absolute inset-0 transition-transform duration-500 group-hover:scale-[1.08]">
               <Foto src={item.foto} alt={`Foto ${item.nama}`} gradien={gradienDefault(item.id)} />
             </div>
-            <div className="absolute right-3 top-3 z-10">
+            <div data-tanpa-buka className="absolute right-3 top-3 z-10">
               <HeartButton aktif={aktif} nama={item.nama} onKlik={onWishlist} />
             </div>
           </div>
@@ -168,7 +179,6 @@ function KartuDestinasi({
             <button
               type="button"
               aria-label={`Lihat ${item.nama}`}
-              onClick={() => onInfo("Segera hadir")}
               className="absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-merah group-hover:bg-lnd-merah group-hover:text-white"
             >
               <ArrowUpRight size={16} aria-hidden="true" className="transition-transform duration-500 group-hover:-rotate-45" />
@@ -179,19 +189,4 @@ function KartuDestinasi({
       </div>
     </li>
   );
-}
-
-/** Gradien placeholder berbeda per destinasi, supaya kartu tanpa foto tidak abu-abu polos. */
-function gradienDefault(id: string): string {
-  const pilihan = [
-    "linear-gradient(160deg,#5fd3c6 0%,#2aa98f 45%,#f6d58e 100%)",
-    "linear-gradient(160deg,#f2b8c4 0%,#fff 45%,#8e1e3c 100%)",
-    "linear-gradient(150deg,#e0524a 0%,#b3261e 50%,#3d2b1f 100%)",
-    "linear-gradient(170deg,#c9e6f5 0%,#5b8db0 50%,#1f4e6b 100%)",
-    "linear-gradient(160deg,#ffd27a 0%,#f08a6b 45%,#7a1a33 100%)",
-    "linear-gradient(160deg,#7fe0e6 0%,#1fb6c4 50%,#0e7f8f 100%)",
-  ];
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return pilihan[h % pilihan.length];
 }

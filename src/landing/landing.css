@@ -111,10 +111,36 @@
   display: none;
 }
 
+/* Penanda "Gulir" di hero detail destinasi: garis dengan titik yang turun */
+.garis-gulir {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+}
+.garis-gulir::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 1px;
+  height: 40%;
+  background: #fff;
+  animation: turun-gulir 1.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes turun-gulir {
+  to { top: 100%; }
+}
+
 /* Reduced motion: tirai tidak dipakai, transisi dipersingkat */
 @media (prefers-reduced-motion: reduce) {
   .tirai-intro {
     display: none;
+  }
+  .garis-gulir::after {
+    animation: none;
   }
   .kilau,
   .riak,
