@@ -3,12 +3,14 @@ import { Navigate } from "react-router-dom";
 import { ambilStatusLanding } from "../lib/landing";
 
 const LandingPage = lazy(() => import("./LandingPage"));
+const HalamanDestinasi = lazy(() => import("./HalamanDestinasi"));
 
 /**
- * Pintu masuk `/`: kalau landing dimatikan admin, langsung diarahkan ke login.
- * Selama status belum diketahui, layar kosong putih (tidak sempat menampilkan landing).
+ * Pintu masuk halaman publik (`/` dan `/destinasi/:id`): kalau landing dimatikan
+ * admin, langsung diarahkan ke login. Selama status belum diketahui, layar kosong
+ * putih (tidak sempat menampilkan landing).
  */
-export default function GerbangLanding() {
+export default function GerbangLanding({ halaman = "landing" }: { halaman?: "landing" | "destinasi" }) {
   const [aktif, setAktif] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -23,5 +25,5 @@ export default function GerbangLanding() {
 
   if (aktif === null) return <div className="min-h-screen bg-white" />;
   if (!aktif) return <Navigate to="/login" replace />;
-  return <LandingPage />;
+  return halaman === "destinasi" ? <HalamanDestinasi /> : <LandingPage />;
 }

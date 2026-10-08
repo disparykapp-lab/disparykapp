@@ -27,6 +27,12 @@ export function gulirKe(id: string, offset = -72): void {
   }
 }
 
+/** Lompat ke paling atas tanpa animasi (dipakai saat pindah halaman). */
+export function keAtasLangsung(): void {
+  if (lenisAktif) lenisAktif.scrollTo(0, { immediate: true, force: true });
+  window.scrollTo(0, 0);
+}
+
 export function useLenis(): void {
   useEffect(() => {
     if (prefersReducedMotion()) return;

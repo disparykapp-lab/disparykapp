@@ -42,6 +42,14 @@ export default function App() {
               </Suspense>
             }
           />
+          <Route
+            path="/destinasi/:id"
+            element={
+              <Suspense fallback={null}>
+                <GerbangLanding halaman="destinasi" />
+              </Suspense>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/daftar" element={<Daftar />} />
 

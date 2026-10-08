@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { ambilLanding, bawaanTergabung, type LandingTergabung } from "../lib/landing";
 import "./landing.css";
@@ -36,6 +37,10 @@ export default function LandingPage() {
 
   useLenis();
 
+  // Kembali dari halaman detail destinasi: langsung gulir ke bagian destinasi.
+  const location = useLocation();
+  const gulirAwal = (location.state as { gulir?: string } | null)?.gulir;
+
   useEffect(() => {
     let batal = false;
     ambilLanding().then((d) => {
@@ -50,6 +55,12 @@ export default function LandingPage() {
   useEffect(() => {
     ScrollTrigger.refresh();
   }, [konten]);
+
+  useEffect(() => {
+    if (!gulirAwal) return;
+    const t = window.setTimeout(() => gulirKe(gulirAwal), 350);
+    return () => window.clearTimeout(t);
+  }, [gulirAwal]);
 
   // Tirai putih naik (clip-path) di awal, lalu dibuang dari DOM.
   useLayoutEffect(() => {
