@@ -12,7 +12,7 @@ const MENU = [
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },
   { to: "/kelola/tinjau", label: "Tinjau Absensi", iconSrc: "/kelola/icon_tinjau.png" },
   { to: "/kelola/foto", label: "Foto Absensi", iconSrc: "/kelola/icon_album.png" },
-  { to: "/kelola/landing", label: "Landing Page", iconSrc: "/icon_landing.png" },
+  { to: "/kelola/landing", label: "Landing Page", iconSrc: "/icon_landing.PNG" },
   { to: "/kelola/panduan", label: "Panduan Admin", iconSrc: "/kelola/icon_panduan.png" },
 ];
 
