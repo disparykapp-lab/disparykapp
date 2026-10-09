@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Newspaper } from "lucide-react";
+import BagianKosong from "./BagianKosong";
 import Foto from "./Foto";
 import SectionHeading from "./SectionHeading";
 import type { IsiBerita } from "./types";
@@ -12,7 +13,7 @@ function formatTanggal(iso: string): string {
 }
 
 /** Berita terkini dari admin. Tiap kartu masuk dengan fade naik. */
-export default function Berita({ isi }: { isi: IsiBerita }) {
+export default function Berita({ isi, adaNewsletter }: { isi: IsiBerita; adaNewsletter: boolean }) {
   const scope = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -39,6 +40,10 @@ export default function Berita({ isi }: { isi: IsiBerita }) {
     <section ref={scope} id="berita" aria-labelledby="judul-berita" className="scroll-mt-20 py-20 md:py-24">
       <div className="container-lnd">
         <SectionHeading id="judul-berita" judul={isi.judul} subjudul={isi.subjudul} />
+
+        {isi.items.length === 0 && (
+          <BagianKosong ikon={<Newspaper size={28} aria-hidden="true" />} judul={isi.kosongJudul} teks={isi.kosongTeks} ajakNewsletter={adaNewsletter} />
+        )}
 
         <ul className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {isi.items.map((b) => (

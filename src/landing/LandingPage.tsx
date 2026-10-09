@@ -14,6 +14,7 @@ import FooterLanding from "./FooterLanding";
 import { gsap, ScrollTrigger, gulirKe, prefersReducedMotion, useLenis } from "./efek";
 import { useWishlist } from "./wishlist";
 import { useKontenLanding } from "./pratinjau";
+import type { LandingTergabung } from "../lib/landing";
 
 /**
  * Landing page publik di `/`. Isi diambil dari tabel landing_konten (bisa diedit
@@ -106,7 +107,7 @@ export default function LandingPage() {
 
       <div ref={bilahProgres} aria-hidden="true" className="fixed inset-x-0 top-0 z-[55] h-[3px] origin-left bg-lnd-merah" style={{ transform: "scaleX(0)" }} />
 
-      <Navbar isi={k.navbar.isi} sudahMasuk={sudahMasuk} />
+      <Navbar isi={k.navbar.isi} sudahMasuk={sudahMasuk} tersedia={bagianTersedia(k)} />
 
       <main id="konten">
         <Hero
@@ -130,10 +131,8 @@ export default function LandingPage() {
             />
           )}
           {k.gaya.tampil && <Gaya isi={k.gaya.isi} aktif={gayaAktif} onPilih={setGayaAktif} />}
-          {k.paket.tampil && k.paket.isi.items.length > 0 && (
-            <Paket isi={k.paket.isi} gayaAktif={gayaAktif} onInfo={setToast} />
-          )}
-          {k.berita.tampil && k.berita.isi.items.length > 0 && <Berita isi={k.berita.isi} />}
+          {k.paket.tampil && <Paket isi={k.paket.isi} gayaAktif={gayaAktif} onInfo={setToast} adaNewsletter={k.newsletter.tampil} />}
+          {k.berita.tampil && <Berita isi={k.berita.isi} adaNewsletter={k.newsletter.tampil} />}
           {k.testimoni.tampil && <Testimoni isi={k.testimoni.isi} />}
           {k.newsletter.tampil && <Newsletter isi={k.newsletter.isi} />}
         </div>
@@ -151,4 +150,18 @@ export default function LandingPage() {
       )}
     </div>
   );
+}
+
+/** id bagian yang benar-benar ada di halaman, supaya menu tidak menunjuk ke bagian tersembunyi. */
+function bagianTersedia(k: LandingTergabung): string[] {
+  const peta: [string, boolean][] = [
+    ["destinasi", k.destinasi.tampil],
+    ["gaya", k.gaya.tampil],
+    ["agenda", k.paket.tampil],
+    ["berita", k.berita.tampil],
+    ["testimoni", k.testimoni.tampil],
+    ["newsletter", k.newsletter.tampil],
+    ["footer", k.footer.tampil],
+  ];
+  return peta.filter(([, ada]) => ada).map(([id]) => id);
 }
