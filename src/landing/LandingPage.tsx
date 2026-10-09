@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ambilLanding, bawaanTergabung, type LandingTergabung } from "../lib/landing";
 import "./landing.css";
 import Navbar from "./Navbar";
 import Hero from "./Hero";
@@ -14,6 +13,7 @@ import Newsletter from "./Newsletter";
 import FooterLanding from "./FooterLanding";
 import { gsap, ScrollTrigger, gulirKe, prefersReducedMotion, useLenis } from "./efek";
 import { useWishlist } from "./wishlist";
+import { useKontenLanding } from "./pratinjau";
 
 /**
  * Landing page publik di `/`. Isi diambil dari tabel landing_konten (bisa diedit
@@ -23,7 +23,7 @@ export default function LandingPage() {
   const { session, profile } = useAuth();
   const sudahMasuk = !!session && !!profile;
 
-  const [konten, setKonten] = useState<LandingTergabung>(() => bawaanTergabung());
+  const { konten } = useKontenLanding();
   const [kategoriAktif, setKategoriAktif] = useState<string | null>(null);
   const [gayaAktif, setGayaAktif] = useState<string | null>(null);
   const [sorotId, setSorotId] = useState<string | null>(null);
@@ -40,16 +40,6 @@ export default function LandingPage() {
   // Kembali dari halaman detail destinasi: langsung gulir ke bagian destinasi.
   const location = useLocation();
   const gulirAwal = (location.state as { gulir?: string } | null)?.gulir;
-
-  useEffect(() => {
-    let batal = false;
-    ambilLanding().then((d) => {
-      if (!batal) setKonten(d);
-    });
-    return () => {
-      batal = true;
-    };
-  }, []);
 
   // Konten berubah = tinggi section berubah, hitung ulang posisi ScrollTrigger.
   useEffect(() => {

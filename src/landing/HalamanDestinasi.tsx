@@ -2,17 +2,16 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, Lightbulb, MapPin, Navigation } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { ambilLanding, bawaanTergabung, type LandingTergabung } from "../lib/landing";
 import "./landing.css";
 import Foto from "./Foto";
 import HeartButton from "./HeartButton";
 import FooterLanding from "./FooterLanding";
 import { IkonNama } from "./ikon";
-import { DETAIL_BAWAAN } from "./detailDestinasi";
 import type { ItemDestinasi, NamaIkon } from "./types";
 import { gsap, keAtasLangsung, prefersReducedMotion, useLenis } from "./efek";
 import { bukaDenganTransisi, gradienDefault, tutupTransisi } from "./transisi";
 import { useWishlist } from "./wishlist";
+import { useKontenLanding } from "./pratinjau";
 
 /**
  * Halaman detail destinasi (`/destinasi/:id`). Dibuka dari kartu di landing dengan
@@ -21,23 +20,10 @@ import { useWishlist } from "./wishlist";
 export default function HalamanDestinasi() {
   const { id = "" } = useParams();
   const { session, profile } = useAuth();
-  const [konten, setKonten] = useState<LandingTergabung>(() => bawaanTergabung());
-  const [siap, setSiap] = useState(false);
+  const { konten, siap } = useKontenLanding();
   const [toast, setToast] = useState<string | null>(null);
 
   useLenis();
-
-  useEffect(() => {
-    let batal = false;
-    ambilLanding().then((d) => {
-      if (batal) return;
-      setKonten(d);
-      setSiap(true);
-    });
-    return () => {
-      batal = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -116,8 +102,9 @@ function Detail({
   const hero = useRef<HTMLElement>(null);
   const tentang = useRef<HTMLElement>(null);
 
-  const detail = DETAIL_BAWAAN[item.id];
-  const deskripsi = detail?.deskripsi || item.tagline;
+  const deskripsi = item.deskripsi?.trim() || item.tagline;
+  const aktivitas = (item.aktivitas ?? []).filter((a) => a.judul.trim());
+  const tips = item.tips?.trim();
   const tagKategori = kategori.filter((k) => item.tags.includes(k.id));
   const gradien = gradienDefault(item.id);
   const urlPeta = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.nama}, ${item.negara}`)}`;
@@ -306,13 +293,13 @@ function Detail({
       </section>
 
       {/* AKTIVITAS */}
-      {detail && detail.aktivitas.length > 0 && (
+      {aktivitas.length > 0 && (
         <section className="dt-aktivitas bg-lnd-sky py-20 md:py-24">
           <div className="container-lnd">
             <p className="eyebrow dt-reveal">Pengalaman</p>
             <h2 className="judul-section dt-reveal mt-2">Yang Bisa Kamu Lakukan</h2>
             <ol className="mt-10 grid gap-5 md:grid-cols-3">
-              {detail.aktivitas.map((a, i) => (
+              {aktivitas.map((a, i) => (
                 <li key={a.judul} className="dt-reveal group relative overflow-hidden rounded-lnd bg-white p-6 shadow-lnd transition-shadow hover:shadow-lnd-hover">
                   <span aria-hidden="true" className="absolute -right-2 -top-4 font-lnd-serif text-[88px] font-bold leading-none text-lnd-sky-100 transition-transform duration-500 group-hover:-translate-y-1">
                     {String(i + 1).padStart(2, "0")}
@@ -325,12 +312,12 @@ function Detail({
                 </li>
               ))}
             </ol>
-            {detail.tips && (
+            {tips && (
               <p className="dt-reveal mt-8 flex items-start gap-3 rounded-lnd border border-lnd-sky-100 bg-white p-5 text-[14px] text-lnd-ink">
                 <Lightbulb size={20} className="mt-0.5 shrink-0 text-lnd-merah" aria-hidden="true" />
                 <span>
                   <strong className="text-lnd-navy">Tips: </strong>
-                  {detail.tips}
+                  {tips}
                 </span>
               </p>
             )}

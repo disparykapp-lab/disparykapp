@@ -1,4 +1,5 @@
 import type { Isi } from "./types";
+import { lengkapiDetail } from "./detailDestinasi";
 
 // Isi awal sebelum admin mengubah apa pun. Semua teks bisa diganti dari
 // Kelola → Landing Page. Paket perjalanan dan testimoni sengaja kosong/disembunyikan
@@ -38,14 +39,14 @@ export const BAWAAN: Isi = {
     judul: "Destinasi Populer",
     subjudul: "Tempat-tempat ikonik untuk dikunjungi di Kota Yogyakarta.",
     tautanLabel: "Lihat Semua Destinasi",
-    items: [
+    items: ([
       { id: "malioboro", nama: "Malioboro", negara: "Yogyakarta", tagline: "Jalan legendaris penuh kuliner dan kerajinan", foto: "", tags: ["kota", "budaya"] },
       { id: "keraton", nama: "Keraton", negara: "Yogyakarta", tagline: "Pusat budaya dan tradisi Kesultanan", foto: "", tags: ["budaya"] },
       { id: "tamansari", nama: "Taman Sari", negara: "Yogyakarta", tagline: "Bekas taman istana dengan sejarah yang kaya", foto: "", tags: ["budaya", "kota"] },
       { id: "prambanan", nama: "Prambanan", negara: "Sleman", tagline: "Kompleks candi Hindu yang megah", foto: "", tags: ["budaya", "event"] },
       { id: "kaliurang", nama: "Kaliurang", negara: "Sleman", tagline: "Udara sejuk di lereng Gunung Merapi", foto: "", tags: ["alam", "berkelanjutan"] },
       { id: "parangtritis", nama: "Parangtritis", negara: "Bantul", tagline: "Pantai selatan dengan pemandangan matahari terbenam", foto: "", tags: ["alam", "event"] },
-    ],
+    ]).map(lengkapiDetail),
   },
   gaya: {
     judul: "Sesuai Gaya Wisatamu",

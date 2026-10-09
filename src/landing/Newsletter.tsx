@@ -31,7 +31,7 @@ export default function Newsletter({ isi }: { isi: IsiNewsletter }) {
   }
 
   return (
-    <section aria-labelledby="judul-newsletter" className="relative overflow-hidden bg-lnd-sky">
+    <section id="newsletter" aria-labelledby="judul-newsletter" className="scroll-mt-20 relative overflow-hidden bg-lnd-sky">
       <div className="container-lnd grid items-center gap-6 py-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)] md:py-8">
         <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[32%] md:block" aria-hidden="true">
           <div className="h-full w-full [mask-image:linear-gradient(90deg,#000_40%,transparent)]">
