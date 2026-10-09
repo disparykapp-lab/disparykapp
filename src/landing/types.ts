@@ -41,6 +41,16 @@ export interface ItemDestinasi {
   foto: string;
   /** id kategori (lihat kategori) untuk fitur filter */
   tags: string[];
+  /** Isi halaman detail `/destinasi/:id`. Kosong = memakai teks bawaan (bila ada) atau tagline. */
+  deskripsi?: string;
+  aktivitas?: AktivitasDestinasi[];
+  tips?: string;
+}
+
+export interface AktivitasDestinasi {
+  icon: NamaIkon;
+  judul: string;
+  teks: string;
 }
 
 export interface IsiDestinasi {

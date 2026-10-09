@@ -6,7 +6,7 @@ export default function FooterLanding({ isi, navbarLogo, onInfo }: { isi: IsiFoo
   const sosialAktif = isi.sosial.filter((s) => s.url.trim());
 
   return (
-    <footer className="bg-white pb-8 pt-14">
+    <footer id="footer" className="bg-white pb-8 pt-14">
       <div className="container-lnd">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">

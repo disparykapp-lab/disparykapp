@@ -1,6 +1,7 @@
 import { lazy, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ambilStatusLanding } from "../lib/landing";
+import { drafPratinjau } from "./drafPratinjau";
 
 const LandingPage = lazy(() => import("./LandingPage"));
 const HalamanDestinasi = lazy(() => import("./HalamanDestinasi"));
@@ -11,9 +12,11 @@ const HalamanDestinasi = lazy(() => import("./HalamanDestinasi"));
  * putih (tidak sempat menampilkan landing).
  */
 export default function GerbangLanding({ halaman = "landing" }: { halaman?: "landing" | "destinasi" }) {
-  const [aktif, setAktif] = useState<boolean | null>(null);
+  // Di pratinjau admin landing selalu tampil, walau sedang dimatikan untuk pengunjung.
+  const [aktif, setAktif] = useState<boolean | null>(() => (drafPratinjau() ? true : null));
 
   useEffect(() => {
+    if (drafPratinjau()) return;
     let batal = false;
     ambilStatusLanding().then((v) => {
       if (!batal) setAktif(v);

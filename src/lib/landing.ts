@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { BAWAAN } from "../landing/defaults";
+import { lengkapiDetail } from "../landing/detailDestinasi";
 import { SEMUA_KUNCI, TAMPIL_BAWAAN, type Isi, type KunciLanding } from "../landing/types";
 
 export interface EntriLanding<K extends KunciLanding = KunciLanding> {
@@ -36,6 +37,7 @@ export async function ambilLanding(): Promise<LandingTergabung> {
       tampil: baris.tampil,
     });
   }
+  hasil.destinasi.isi = { ...hasil.destinasi.isi, items: hasil.destinasi.isi.items.map(lengkapiDetail) };
   return hasil;
 }
 

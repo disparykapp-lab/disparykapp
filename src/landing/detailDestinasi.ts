@@ -1,17 +1,12 @@
-import type { NamaIkon } from "./types";
+import type { AktivitasDestinasi, ItemDestinasi } from "./types";
 
-// Teks pelengkap halaman detail untuk destinasi bawaan. Destinasi yang ditambah
-// admin tanpa entri di sini tetap tampil, memakai tagline sebagai deskripsi.
-
-export interface Aktivitas {
-  icon: NamaIkon;
-  judul: string;
-  teks: string;
-}
+// Teks bawaan halaman detail untuk 6 destinasi awal. Admin bisa mengubahnya di
+// Kelola → Landing Page → Destinasi populer. Destinasi yang disimpan sebelum
+// field detail ada tetap mendapat teks ini lewat lengkapiDetail().
 
 export interface DetailDestinasi {
   deskripsi: string;
-  aktivitas: Aktivitas[];
+  aktivitas: AktivitasDestinasi[];
   tips?: string;
 }
 
@@ -76,3 +71,14 @@ export const DETAIL_BAWAAN: Record<string, DetailDestinasi> = {
     tips: "Ombak selatan besar dan berbahaya. Hindari berenang dan patuhi rambu petugas.",
   },
 };
+
+/** Isi field detail yang belum pernah disimpan (undefined) dengan teks bawaan. */
+export function lengkapiDetail(item: ItemDestinasi): ItemDestinasi {
+  const b = DETAIL_BAWAAN[item.id];
+  return {
+    ...item,
+    deskripsi: item.deskripsi ?? b?.deskripsi ?? "",
+    aktivitas: item.aktivitas ?? b?.aktivitas ?? [],
+    tips: item.tips ?? b?.tips ?? "",
+  };
+}
