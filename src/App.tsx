@@ -15,6 +15,8 @@ import KontenForm from "./pages/KontenForm";
 import Panduan from "./pages/Panduan";
 import Profil from "./pages/Profil";
 import TugasUndangan from "./pages/TugasUndangan";
+import Tugas from "./pages/Tugas";
+import KelolaTugas from "./pages/admin/KelolaTugas";
 import Kelola from "./pages/admin/Kelola";
 import Pegawai from "./pages/admin/Pegawai";
 import Divisi from "./pages/admin/Divisi";
@@ -60,6 +62,7 @@ export default function App() {
               <Route path="/rekap" element={<Rekap />} />
               <Route path="/panduan" element={<Panduan />} />
               <Route path="/profil" element={<Profil />} />
+              <Route path="/tugas" element={<Tugas />} />
               <Route path="/tugas-undangan" element={<TugasUndangan />} />
 
               <Route element={<RequireFiturKalender />}>
@@ -78,6 +81,7 @@ export default function App() {
                 <Route path="/kelola/undangan" element={<DistribusiUndangan />} />
                 <Route path="/kelola/undangan/petugas" element={<DistribusiPerPetugas />} />
                 <Route path="/kelola/landing" element={<KelolaLanding />} />
+                <Route path="/kelola/tugas" element={<KelolaTugas />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
               </Route>
             </Route>
