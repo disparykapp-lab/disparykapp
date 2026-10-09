@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode, type Ref } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode, type Ref } from "react";
 import { ChevronDown, Eye, Maximize2, Minimize2, Monitor, RotateCcw, Smartphone, X } from "lucide-react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
@@ -673,10 +673,20 @@ function PanelPratinjau({
   // HP di layar HP: pakai lebar layar apa adanya. Selain itu perangkat diperkecil agar muat.
   const p = PERANGKAT[perangkat];
   const pasLayar = !bisaLayarPenuh && perangkat === "hp";
-  const skala = pasLayar || ukuran.w === 0 ? 1 : Math.min(1, ukuran.w / p.lebar, ukuran.h / p.tinggi);
-  const gaya = pasLayar
-    ? { width: "100%", height: "100%" }
-    : { width: p.lebar, height: p.tinggi, transform: `scale(${skala})`, transformOrigin: "top center" };
+  // Ukuran ditulis dalam piksel/posisi absolut: Safari iPhone menghitung tinggi 100% di dalam
+  // kotak flex sebagai 0, sehingga pratinjau tampak kosong.
+  const skala = pasLayar || ukuran.w === 0 ? 1 : Math.min(1, (ukuran.w - 24) / p.lebar, (ukuran.h - 12) / p.tinggi);
+  const gaya: CSSProperties = pasLayar
+    ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
+    : {
+        position: "absolute",
+        top: 0,
+        left: Math.max(0, (ukuran.w - p.lebar * skala) / 2),
+        width: p.lebar,
+        height: p.tinggi,
+        transform: `scale(${skala})`,
+        transformOrigin: "top left",
+      };
   const namaJalur = jalur === "/" ? "Beranda landing" : `Detail: ${jalur.replace("/destinasi/", "")}`;
 
   return (
@@ -684,7 +694,7 @@ function PanelPratinjau({
       aria-label="Pratinjau landing page"
       className={
         layarPenuh
-          ? "fixed inset-0 z-50 flex flex-col bg-gray-900"
+          ? "fixed inset-0 z-50 flex h-[100dvh] flex-col bg-gray-900"
           : "sticky top-4 mt-4 flex h-[calc(100vh-6.5rem)] flex-col overflow-hidden rounded-xl bg-gray-900 shadow-sm lg:mt-0"
       }
     >
@@ -731,17 +741,15 @@ function PanelPratinjau({
           </button>
         )}
       </div>
-      <div ref={wadah} className={`flex flex-1 justify-center overflow-hidden ${pasLayar ? "" : "px-3 pb-3"}`}>
-        <div style={pasLayar ? { width: "100%", height: "100%" } : { width: p.lebar * skala, height: p.tinggi * skala }}>
-          <iframe
-            ref={ref}
-            key={jalur}
-            src={jalur}
-            title="Pratinjau landing page"
-            style={gaya}
-            className={`block border-0 bg-white ${pasLayar ? "" : "rounded-lg"}`}
-          />
-        </div>
+      <div ref={wadah} className="relative min-h-0 flex-1 overflow-hidden">
+        <iframe
+          ref={ref}
+          key={jalur}
+          src={jalur}
+          title="Pratinjau landing page"
+          style={gaya}
+          className={`block border-0 bg-white ${pasLayar ? "" : "rounded-lg"}`}
+        />
       </div>
     </aside>
   );
