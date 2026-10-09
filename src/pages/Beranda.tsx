@@ -10,6 +10,7 @@ import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
 import { hitungProgressMagang } from "../lib/profil";
 import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
+import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
@@ -35,16 +36,22 @@ export default function Beranda() {
     if (!profile) return;
     setLoading(true);
     muatStatus().finally(() => setLoading(false));
-    ambilTugasSaya(profile.id)
-      .then((rows) => {
-        const r = hitungRingkasanUndangan(rows);
-        setTugasBelum(r.belum);
-        setTugasTotal(r.total);
-      })
-      .catch(() => {
-        setTugasBelum(0);
-        setTugasTotal(0);
-      });
+    // Ringkasan menu Tugas = tugas dari admin + Tugas Undangan (kalau menunya aktif).
+    Promise.all([
+      ambilFiturTugasUndangan()
+        .then((aktif) => (aktif ? ambilTugasSaya(profile.id) : []))
+        .then((rows) => hitungRingkasanUndangan(rows))
+        .catch(() => ({ belum: 0, total: 0 })),
+      ambilTugasUmumSaya(profile.id)
+        .then(({ tugas, progres }) => ({
+          belum: tugas.filter((t) => progres[t.id]?.status !== "selesai").length,
+          total: tugas.length,
+        }))
+        .catch(() => ({ belum: 0, total: 0 })),
+    ]).then(([u, t]) => {
+      setTugasBelum(u.belum + t.belum);
+      setTugasTotal(u.total + t.total);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
 
@@ -129,13 +136,13 @@ export default function Beranda() {
             />
             {tugasTotal > 0 && tugasBelum === 0 ? (
               <Link
-                to="/tugas-undangan"
+                to="/tugas"
                 className="col-span-2 flex items-center gap-3 overflow-hidden rounded-2xl bg-white p-4 shadow-sm transition active:scale-95"
               >
                 <div className="flex shrink-0 flex-col items-center gap-2">
-                  <img src="/icon_mail.png" alt="" className="h-16 w-16 rounded-full object-cover" />
+                  <img src="/icon_checklist.png" alt="" className="h-16 w-16 rounded-full object-cover" />
                   <span className="text-sm font-semibold leading-tight text-brand-text">
-                    Tugas Undangan
+                    Tugas
                   </span>
                 </div>
                 <img
@@ -146,9 +153,9 @@ export default function Beranda() {
               </Link>
             ) : (
               <IconTile
-                to="/tugas-undangan"
-                iconSrc="/icon_mail.png"
-                label={tugasBelum > 0 ? `Tugas Undangan (${tugasBelum} belum)` : "Tugas Undangan"}
+                to="/tugas"
+                iconSrc="/icon_checklist.png"
+                label={tugasBelum > 0 ? `Tugas (${tugasBelum} belum)` : "Tugas"}
                 penuh
                 animasi={tugasBelum > 0}
               />

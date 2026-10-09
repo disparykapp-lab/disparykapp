@@ -7,6 +7,7 @@ import { supabase } from "../../lib/supabase";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
+  { to: "/kelola/tugas", label: "Tugas", iconSrc: "/icon_checklist.png" },
   { to: "/kelola/pegawai", label: "Pegawai", iconSrc: "/kelola/icon_pegawai.png" },
   { to: "/kelola/divisi", label: "Divisi", iconSrc: "/kelola/icon_divisi.png" },
   { to: "/kelola/pengaturan", label: "Pengaturan Kantor", iconSrc: "/kelola/icon_kantor.png" },

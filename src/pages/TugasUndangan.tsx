@@ -55,7 +55,7 @@ export default function TugasUndangan() {
 
   return (
     <div className="flex flex-col gap-4">
-      <HeaderHalaman judul="Tugas Undangan" kembaliKe="/beranda" />
+      <HeaderHalaman judul="Tugas Undangan" kembaliKe="/tugas" />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
