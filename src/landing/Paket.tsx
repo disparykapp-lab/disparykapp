@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { ArrowUpRight, MapPin, Route } from "lucide-react";
+import { ArrowUpRight, CalendarDays, MapPin, Route } from "lucide-react";
+import BagianKosong from "./BagianKosong";
 import Foto from "./Foto";
 import SectionHeading from "./SectionHeading";
 import type { IsiPaket, ItemPaket } from "./types";
@@ -9,7 +10,17 @@ import { gsap, prefersReducedMotion, useTilt } from "./efek";
  * Agenda unggulan. Mobile: carousel snap satu kartu. Tablet/desktop: grid.
  * Gaya yang dipilih di chip membuat kartu yang tidak cocok meredup.
  */
-export default function Paket({ isi, gayaAktif, onInfo }: { isi: IsiPaket; gayaAktif: string | null; onInfo: (p: string) => void }) {
+export default function Paket({
+  isi,
+  gayaAktif,
+  onInfo,
+  adaNewsletter,
+}: {
+  isi: IsiPaket;
+  gayaAktif: string | null;
+  onInfo: (p: string) => void;
+  adaNewsletter: boolean;
+}) {
   const grid = useRef<HTMLUListElement>(null);
 
   // Kartu masuk dari samping bergantian: x ±60 → 0, rotateY ±12° → 0.
@@ -58,12 +69,18 @@ export default function Paket({ isi, gayaAktif, onInfo }: { isi: IsiPaket; gayaA
           judul={isi.judul}
           subjudul={isi.subjudul}
           aksi={
-            <button type="button" onClick={() => onInfo("Segera hadir")} className="link-lnd">
-              {isi.tautanLabel}
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </button>
+            isi.items.length > 0 && (
+              <button type="button" onClick={() => onInfo("Segera hadir")} className="link-lnd">
+                {isi.tautanLabel}
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </button>
+            )
           }
         />
+
+        {isi.items.length === 0 && (
+          <BagianKosong ikon={<CalendarDays size={28} aria-hidden="true" />} judul={isi.kosongJudul} teks={isi.kosongTeks} ajakNewsletter={adaNewsletter} />
+        )}
 
         <ul
           ref={grid}

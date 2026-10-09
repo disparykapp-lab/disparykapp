@@ -5,7 +5,12 @@ import { Menu, Search, X } from "lucide-react";
 import type { IsiNavbar } from "./types";
 import { gsap, gulirKe, prefersReducedMotion, useMagnetic } from "./efek";
 
-export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk: boolean }) {
+/** id bagian landing yang bisa dituju menu. Menu ke bagian lain (mis. buatan admin) dibiarkan. */
+const BAGIAN_DIKENAL = ["destinasi", "gaya", "agenda", "berita", "testimoni", "newsletter", "footer"];
+
+export default function Navbar({ isi, sudahMasuk, tersedia }: { isi: IsiNavbar; sudahMasuk: boolean; tersedia: string[] }) {
+  // Menu ke bagian yang sedang disembunyikan tidak ditampilkan (kalau diklik tidak ke mana-mana).
+  const menu = isi.menu.filter((m) => !BAGIAN_DIKENAL.includes(m.target) || tersedia.includes(m.target));
   const [scrolled, setScrolled] = useState(false);
   const [menuBuka, setMenuBuka] = useState(false);
   const header = useRef<HTMLElement>(null);
@@ -81,7 +86,7 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
         </a>
 
         <ul className="hidden items-center gap-8 lg:flex">
-          {isi.menu.map((m) => (
+          {menu.map((m) => (
             <li key={m.target}>
               <button
                 type="button"
@@ -151,7 +156,7 @@ export default function Navbar({ isi, sudahMasuk }: { isi: IsiNavbar; sudahMasuk
             </button>
           </div>
           <ul className="mt-10 flex flex-col gap-2">
-            {isi.menu.map((m) => (
+            {menu.map((m) => (
               <li key={m.target}>
                 <button
                   type="button"

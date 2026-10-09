@@ -78,7 +78,13 @@ export interface ItemPaket {
   gaya: string[];
 }
 
-export interface IsiPaket {
+/** Teks pengganti saat bagian dinyalakan tapi belum ada item. */
+export interface PesanKosong {
+  kosongJudul: string;
+  kosongTeks: string;
+}
+
+export interface IsiPaket extends PesanKosong {
   judul: string;
   subjudul: string;
   tautanLabel: string;
@@ -94,7 +100,7 @@ export interface ItemBerita {
   tautan: string;
 }
 
-export interface IsiBerita {
+export interface IsiBerita extends PesanKosong {
   judul: string;
   subjudul: string;
   items: ItemBerita[];
@@ -108,7 +114,7 @@ export interface ItemTestimoni {
   foto: string;
 }
 
-export interface IsiTestimoni {
+export interface IsiTestimoni extends PesanKosong {
   judul: string;
   subjudul: string;
   items: ItemTestimoni[];
@@ -150,16 +156,17 @@ export const SEMUA_KUNCI: KunciLanding[] = [
   "navbar", "hero", "kategori", "destinasi", "gaya", "paket", "berita", "testimoni", "newsletter", "footer",
 ];
 
-/** Bagian yang sengaja disembunyikan dulu sampai admin mengisi konten aslinya. */
+/** Tampil/tidaknya tiap bagian sebelum admin menyimpan pengaturan apa pun. Bagian
+ *  yang belum punya item menampilkan pesan "segera hadir" (lihat BagianKosong). */
 export const TAMPIL_BAWAAN: Record<KunciLanding, boolean> = {
   navbar: true,
   hero: true,
   kategori: true,
   destinasi: true,
   gaya: true,
-  paket: false,
-  berita: false,
-  testimoni: false,
+  paket: true,
+  berita: true,
+  testimoni: true,
   newsletter: true,
   footer: true,
 };

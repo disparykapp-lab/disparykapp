@@ -67,16 +67,22 @@ export const BAWAAN: Isi = {
     subjudul: "Pilihan itinerary untuk perjalanan yang berkesan.",
     tautanLabel: "Lihat Semua Agenda",
     items: [],
+    kosongJudul: "Agenda segera diumumkan",
+    kosongTeks: "Kalender event dan itinerary Kota Yogyakarta sedang disiapkan. Pantau terus halaman ini.",
   },
   berita: {
     judul: "Berita Terkini",
     subjudul: "Kabar terbaru dari Dinas Pariwisata Kota Yogyakarta.",
     items: [],
+    kosongJudul: "Berita segera hadir",
+    kosongTeks: "Kabar terbaru seputar wisata dan kegiatan Dinas Pariwisata akan tampil di sini.",
   },
   testimoni: {
     judul: "Kata Mereka",
     subjudul: "Cerita dari pengunjung.",
     items: [],
+    kosongJudul: "Cerita pengunjung segera hadir",
+    kosongTeks: "Kesan dan pengalaman wisatawan di Kota Yogyakarta akan kami bagikan di sini.",
   },
   newsletter: {
     eyebrow: "TETAP TERINSPIRASI",

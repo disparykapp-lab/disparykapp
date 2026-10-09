@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircleHeart } from "lucide-react";
+import BagianKosong from "./BagianKosong";
 import Foto from "./Foto";
 import SectionHeading from "./SectionHeading";
 import type { IsiTestimoni, ItemTestimoni } from "./types";
@@ -95,7 +96,16 @@ export default function Testimoni({ isi }: { isi: IsiTestimoni }) {
     return () => ctx.revert();
   }, [isi.items.length]);
 
-  if (isi.items.length === 0) return null;
+  if (isi.items.length === 0) {
+    return (
+      <section id="testimoni" aria-labelledby="judul-testimoni" className="scroll-mt-20 py-20 md:py-24">
+        <div className="container-lnd">
+          <SectionHeading id="judul-testimoni" judul={isi.judul} subjudul={isi.subjudul} />
+          <BagianKosong ikon={<MessageCircleHeart size={28} aria-hidden="true" />} judul={isi.kosongJudul} teks={isi.kosongTeks} />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

@@ -179,16 +179,17 @@ const SKEMA: Record<KunciLanding, Bagian> = {
   },
   paket: {
     judul: "Agenda unggulan",
-    ket: "Kartu agenda/itinerary. Disaring sesuai chip gaya wisata.",
+    ket: "Kartu agenda/itinerary. Disaring sesuai chip gaya wisata. Belum ada agenda = tampil pesan \"segera diumumkan\".",
     bisaDisembunyikan: true,
     sasaran: "agenda",
     fields: [
       { tipe: "teks", key: "judul", label: "Judul bagian" },
       { tipe: "area", key: "subjudul", label: "Kalimat di bawah judul" },
       { tipe: "teks", key: "tautanLabel", label: "Teks tautan di kanan judul" },
+      { tipe: "teks", key: "kosongJudul", label: "Pesan saat kosong: judul", hint: "Tampil selama belum ada item." },
+      { tipe: "area", key: "kosongTeks", label: "Pesan saat kosong: kalimat" },
       {
         tipe: "daftar", key: "items", label: "Daftar agenda", tambah: "Tambah agenda", judulItem: "judul", fotoItem: "foto",
-        hint: "Bagian ini hanya tampil kalau ada minimal satu agenda.",
         buatBaru: () => ({ id: idBaru("agd"), judul: "Agenda baru", deskripsi: "", negara: "Yogyakarta", durasi: 1, harga: "Info menyusul", foto: "", gaya: [] }),
         item: [
           { tipe: "foto", key: "foto", label: "Foto" },
@@ -205,12 +206,14 @@ const SKEMA: Record<KunciLanding, Bagian> = {
   },
   berita: {
     judul: "Berita terkini",
-    ket: "Kartu berita. Hanya tampil kalau ada minimal satu berita.",
+    ket: "Kartu berita terbaru. Belum ada berita = tampil pesan \"segera hadir\".",
     bisaDisembunyikan: true,
     sasaran: "berita",
     fields: [
       { tipe: "teks", key: "judul", label: "Judul bagian" },
       { tipe: "area", key: "subjudul", label: "Kalimat di bawah judul" },
+      { tipe: "teks", key: "kosongJudul", label: "Pesan saat kosong: judul", hint: "Tampil selama belum ada item." },
+      { tipe: "area", key: "kosongTeks", label: "Pesan saat kosong: kalimat" },
       {
         tipe: "daftar", key: "items", label: "Daftar berita", tambah: "Tambah berita", judulItem: "judul", fotoItem: "foto",
         buatBaru: () => ({ id: idBaru("brt"), judul: "Judul berita", ringkasan: "", tanggal: new Date().toISOString().slice(0, 10), foto: "", tautan: "" }),
@@ -227,12 +230,14 @@ const SKEMA: Record<KunciLanding, Bagian> = {
   },
   testimoni: {
     judul: "Testimoni pengunjung",
-    ket: "Kutipan pengunjung. Isi hanya dengan testimoni asli.",
+    ket: "Kutipan pengunjung. Isi hanya dengan testimoni asli. Belum ada = tampil pesan \"segera hadir\".",
     bisaDisembunyikan: true,
     sasaran: "testimoni",
     fields: [
       { tipe: "teks", key: "judul", label: "Judul bagian" },
       { tipe: "area", key: "subjudul", label: "Kalimat di bawah judul" },
+      { tipe: "teks", key: "kosongJudul", label: "Pesan saat kosong: judul", hint: "Tampil selama belum ada item." },
+      { tipe: "area", key: "kosongTeks", label: "Pesan saat kosong: kalimat" },
       {
         tipe: "daftar", key: "items", label: "Daftar testimoni", tambah: "Tambah testimoni", judulItem: "nama", fotoItem: "foto",
         buatBaru: () => ({ id: idBaru("tst"), nama: "Nama", asal: "Asal destinasi", kutipan: "", foto: "" }),
