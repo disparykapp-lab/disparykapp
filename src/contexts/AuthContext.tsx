@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
@@ -49,8 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [divisi, setDivisi] = useState<Divisi | null>(null);
   const [loading, setLoading] = useState(true);
   const [belumTerdaftar, setBelumTerdaftar] = useState(false);
+  /** id pengguna yang profilnya sudah dimuat, untuk mengenali event dari pengguna yang sama */
+  const userDimuat = useRef<string | null>(null);
 
-  const muatProfile = useCallback(async (userId: string) => {
+  const muatProfile = useCallback(async (userId: string): Promise<boolean> => {
     let { data, error } = await supabase
       .from("profiles")
       .select("*, divisi:divisi_id(*)")
@@ -61,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error(error);
       setProfile(null);
       setDivisi(null);
-      return;
+      return false;
     }
 
     // Belum ada profil dengan id ini — mungkin admin sudah mendaftarkan
@@ -80,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setBelumTerdaftar(false);
       setProfile(null);
       setDivisi(null);
-      return;
+      return false;
     }
 
     if (!data) {
@@ -89,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDivisi(null);
       await supabase.auth.signOut();
       setSession(null);
-      return;
+      return false;
     }
 
     if (!data.aktif) {
@@ -98,13 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setDivisi(null);
       await supabase.auth.signOut();
       setSession(null);
-      return;
+      return false;
     }
 
     const { divisi: divisiTerkait, ...profileSaja } = data as ProfileDenganDivisi;
     setBelumTerdaftar(false);
     setProfile(profileSaja);
     setDivisi(divisiTerkait);
+    return true;
   }, []);
 
   useEffect(() => {
@@ -114,18 +117,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(data.session);
       if (data.session?.user) {
-        await muatProfile(data.session.user.id);
+        if (await muatProfile(data.session.user.id)) userDimuat.current = data.session.user.id;
       }
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
-      if (newSession?.user) {
+      const userId = newSession?.user?.id ?? null;
+      // Pengguna sama (token diperbarui, kembali ke tab, sinyal dari tab lain): profil
+      // tidak berubah, jadi jangan tampilkan layar "memeriksa" yang membuang isi halaman.
+      if (userId && userId === userDimuat.current) return;
+      if (userId) {
         setLoading(true);
-        await muatProfile(newSession.user.id);
+        userDimuat.current = (await muatProfile(userId)) ? userId : null;
         setLoading(false);
       } else {
+        userDimuat.current = null;
         setProfile(null);
       }
     });
@@ -159,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     setModeDaftar(false);
+    userDimuat.current = null;
     await supabase.auth.signOut();
     setProfile(null);
     setDivisi(null);
