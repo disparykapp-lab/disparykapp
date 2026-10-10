@@ -45,9 +45,9 @@ export default function Berita({ isi, adaNewsletter }: { isi: IsiBerita; adaNews
           <BagianKosong ikon={<Newspaper size={28} aria-hidden="true" />} judul={isi.kosongJudul} teks={isi.kosongTeks} ajakNewsletter={adaNewsletter} />
         )}
 
-        <ul className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {isi.items.map((b) => (
-            <li key={b.id} data-berita className="list-none">
+            <li key={b.id} data-berita className="min-w-0 list-none">
               <article className="group flex h-full flex-col overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.05]">
@@ -56,8 +56,8 @@ export default function Berita({ isi, adaNewsletter }: { isi: IsiBerita; adaNews
                 </div>
                 <div className="flex flex-1 flex-col p-5">
                   <p className="label-kecil">{formatTanggal(b.tanggal)}</p>
-                  <h3 className="mt-2 font-lnd-serif text-[20px] font-bold leading-snug text-lnd-navy">{b.judul}</h3>
-                  <p className="mt-2 text-[14px] text-lnd-muted">{b.ringkasan}</p>
+                  <h3 className="mt-2 break-words font-lnd-serif text-[20px] font-bold leading-snug text-lnd-navy">{b.judul}</h3>
+                  <p className="mt-2 break-words text-[14px] text-lnd-muted">{b.ringkasan}</p>
                   {b.tautan && (
                     <a
                       href={b.tautan}
