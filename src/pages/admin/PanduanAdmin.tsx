@@ -309,6 +309,14 @@ export default function PanduanAdmin() {
           alamat utama langsung mengarahkan pengunjung ke halaman login. Kamu tetap bisa masuk
           dan mengedit landing seperti biasa. Nyalakan lagi kapan pun kamu siap.
         </Langkah>
+        <Langkah no={9}>
+          Item <strong>Destinasi, Berita, dan Agenda</strong> punya halaman detail sendiri
+          (<em>/destinasi/ID</em>, <em>/berita/ID</em>, <em>/agenda/ID</em>) yang terbuka saat
+          kartunya diklik di landing. Isi bagian <strong>"Halaman detail"</strong> di dalam
+          item (kosong = memakai teks singkat di kartu), lalu tekan{" "}
+          <strong>"Lihat halaman detail"</strong> untuk mengeceknya di pratinjau sebelum
+          disimpan.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

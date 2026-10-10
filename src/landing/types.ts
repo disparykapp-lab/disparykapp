@@ -76,6 +76,8 @@ export interface ItemPaket {
   foto: string;
   /** id gaya perjalanan yang cocok */
   gaya: string[];
+  /** Isi halaman detail `/agenda/:id`. Kosong = memakai deskripsi singkat. */
+  isiLengkap?: string;
 }
 
 /** Teks pengganti saat bagian dinyalakan tapi belum ada item. */
@@ -98,6 +100,8 @@ export interface ItemBerita {
   tanggal: string;
   foto: string;
   tautan: string;
+  /** Isi halaman detail `/berita/:id`. Kosong = memakai ringkasan. */
+  isiLengkap?: string;
 }
 
 export interface IsiBerita extends PesanKosong {

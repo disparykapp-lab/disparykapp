@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, CalendarDays, MapPin, Route } from "lucide-react";
 import BagianKosong from "./BagianKosong";
 import Foto from "./Foto";
 import SectionHeading from "./SectionHeading";
 import type { IsiPaket, ItemPaket } from "./types";
 import { gsap, prefersReducedMotion, useTilt } from "./efek";
+import { bukaDenganTransisi, gradienDefault } from "./transisi";
 
 /**
  * Agenda unggulan. Mobile: carousel snap satu kartu. Tablet/desktop: grid.
@@ -87,7 +89,7 @@ export default function Paket({
           className="tanpa-scrollbar mt-10 -mx-6 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-4 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3"
         >
           {isi.items.map((p) => (
-            <KartuPaket key={p.id} item={p} onInfo={onInfo} />
+            <KartuPaket key={p.id} item={p} />
           ))}
         </ul>
       </div>
@@ -95,15 +97,29 @@ export default function Paket({
   );
 }
 
-function KartuPaket({ item, onInfo }: { item: ItemPaket; onInfo: (p: string) => void }) {
+function KartuPaket({ item }: { item: ItemPaket }) {
   const kartu = useRef<HTMLElement>(null);
+  const fotoEl = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   useTilt(kartu, { maks: 12 });
+
+  function buka() {
+    bukaDenganTransisi(
+      fotoEl.current,
+      { foto: item.foto, gradien: gradienDefault(item.id), nama: item.judul, wilayah: item.negara },
+      () => navigate(`/agenda/${item.id}`)
+    );
+  }
 
   return (
     <li data-paket data-gaya={item.gaya.join(",")} className="group min-w-[85%] snap-center list-none md:min-w-0">
       <div style={{ perspective: 900 }}>
-        <article ref={kartu} className="kartu-3d relative overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
-          <div className="relative aspect-[3/2] overflow-hidden">
+        <article
+          ref={kartu}
+          onClick={buka}
+          className="kartu-3d relative cursor-pointer overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover"
+        >
+          <div ref={fotoEl} className="relative aspect-[3/2] overflow-hidden">
             <div className="lapis-depan absolute inset-0 transition-transform duration-500 group-hover:scale-[1.08]">
               <Foto src={item.foto} alt={item.judul} gradien="linear-gradient(160deg,#7fe0e6 0%,#1fb6c4 50%,#2d6b5a 100%)" />
             </div>
@@ -112,25 +128,24 @@ function KartuPaket({ item, onInfo }: { item: ItemPaket; onInfo: (p: string) => 
             </span>
           </div>
           <div className="lapis-teks relative p-5 pb-6">
-            <h3 className="font-lnd-serif text-[20px] font-bold leading-snug text-lnd-navy">{item.judul}</h3>
-            <p className="mt-2 line-clamp-2 text-[14px] text-lnd-muted">{item.deskripsi}</p>
-            <div className="mt-4 flex items-center justify-between gap-2 border-t border-lnd-line pt-3 text-[13px] text-lnd-ink">
+            <h3 className="line-clamp-2 break-words pr-10 font-lnd-serif text-[20px] font-bold leading-snug text-lnd-navy">{item.judul}</h3>
+            <p className="mt-2 line-clamp-2 break-words text-[14px] text-lnd-muted">{item.deskripsi}</p>
+            {/* pr-10: menyisakan ruang di kanan supaya teks (terutama harga) tidak tertutup tombol panah bulat */}
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-lnd-line pr-10 pt-3 text-[13px] text-lnd-ink">
               <span className="flex items-center gap-1.5">
-                <MapPin size={14} aria-hidden="true" className="text-lnd-merah" /> {item.negara}
+                <MapPin size={14} aria-hidden="true" className="shrink-0 text-lnd-merah" /> {item.negara}
               </span>
               <span className="flex items-center gap-1.5">
-                <Route size={14} aria-hidden="true" className="text-lnd-merah" /> {item.durasi} hari
+                <Route size={14} aria-hidden="true" className="shrink-0 text-lnd-merah" /> {item.durasi} hari
               </span>
-              <span className="font-semibold text-lnd-navy">{item.harga}</span>
+              <span className="break-words font-semibold text-lnd-navy">{item.harga}</span>
             </div>
-            <button
-              type="button"
-              aria-label={`Lihat ${item.judul}`}
-              onClick={() => onInfo("Segera hadir")}
+            <span
+              aria-hidden="true"
               className="absolute bottom-5 right-5 flex h-9 w-9 items-center justify-center rounded-full border border-lnd-line bg-white text-lnd-navy transition-colors group-hover:border-lnd-merah group-hover:bg-lnd-merah group-hover:text-white"
             >
               <ArrowUpRight size={16} aria-hidden="true" className="transition-transform duration-500 group-hover:-rotate-45" />
-            </button>
+            </span>
           </div>
           <div className="kilau" aria-hidden="true" />
         </article>

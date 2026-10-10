@@ -22,7 +22,8 @@ type Obj = Record<string, unknown>;
 type SumberPilihan = "kategori" | "gaya";
 
 type Field =
-  | { tipe: "teks" | "area" | "foto" | "tanggal" | "angka" | "ikon" | "csv"; key: string; label: string; hint?: string; lanjutan?: boolean }
+  | { tipe: "teks" | "foto" | "tanggal" | "angka" | "ikon" | "csv"; key: string; label: string; hint?: string; lanjutan?: boolean }
+  | { tipe: "area"; key: string; label: string; hint?: string; lanjutan?: boolean; baris?: number }
   | { tipe: "pilihSatu"; key: string; label: string; hint?: string; opsi: { nilai: string; label: string }[] }
   | { tipe: "pilihBanyak"; key: string; label: string; hint?: string; sumber: SumberPilihan }
   | { tipe: "subjudul"; key: string; label: string; hint?: string }
@@ -37,8 +38,9 @@ type Field =
       /** field yang dipakai sebagai judul ringkas item saat dilipat */
       judulItem: string;
       fotoItem?: string;
-      /** item destinasi: tampilkan tombol untuk membuka halaman detailnya di pratinjau */
-      pratinjauDetail?: boolean;
+      /** item punya halaman detail sendiri: tampilkan tombol untuk membukanya di pratinjau.
+       *  Nilainya nama halaman di alamat, mis. "destinasi" untuk /destinasi/:id. */
+      pratinjauDetail?: string;
     };
 
 const idBaru = (awalan: string) => `${awalan}-${Math.random().toString(36).slice(2, 7)}`;
@@ -127,7 +129,7 @@ const SKEMA: Record<KunciLanding, Bagian> = {
       { tipe: "teks", key: "tautanLabel", label: "Teks tautan di kanan judul" },
       {
         tipe: "daftar", key: "items", label: "Daftar destinasi", tambah: "Tambah destinasi", judulItem: "nama", fotoItem: "foto",
-        pratinjauDetail: true,
+        pratinjauDetail: "destinasi",
         buatBaru: () => ({
           id: idBaru("dst"), nama: "Destinasi baru", negara: "Yogyakarta", tagline: "", foto: "", tags: [],
           deskripsi: "", aktivitas: [], tips: "",
@@ -190,16 +192,24 @@ const SKEMA: Record<KunciLanding, Bagian> = {
       { tipe: "area", key: "kosongTeks", label: "Pesan saat kosong: kalimat" },
       {
         tipe: "daftar", key: "items", label: "Daftar agenda", tambah: "Tambah agenda", judulItem: "judul", fotoItem: "foto",
-        buatBaru: () => ({ id: idBaru("agd"), judul: "Agenda baru", deskripsi: "", negara: "Yogyakarta", durasi: 1, harga: "Info menyusul", foto: "", gaya: [] }),
+        pratinjauDetail: "agenda",
+        buatBaru: () => ({
+          id: idBaru("agd"), judul: "Agenda baru", deskripsi: "", negara: "Yogyakarta", durasi: 1, harga: "Info menyusul", foto: "", gaya: [],
+          isiLengkap: "",
+        }),
         item: [
-          { tipe: "foto", key: "foto", label: "Foto" },
+          { tipe: "subjudul", key: "_kartu", label: "Kartu di landing" },
+          { tipe: "foto", key: "foto", label: "Foto", hint: "Dipakai di kartu dan sebagai foto sampul halaman detail." },
           { tipe: "teks", key: "judul", label: "Judul agenda" },
-          { tipe: "area", key: "deskripsi", label: "Deskripsi" },
+          { tipe: "area", key: "deskripsi", label: "Deskripsi singkat", hint: "1–2 kalimat yang tampil di kartu. Kosong di halaman detail = memakai ini." },
           { tipe: "teks", key: "negara", label: "Lokasi" },
           { tipe: "angka", key: "durasi", label: "Durasi (hari)" },
           { tipe: "teks", key: "harga", label: "Harga / keterangan", hint: "Contoh: Gratis, atau Info menyusul" },
           { tipe: "pilihBanyak", key: "gaya", label: "Gaya yang cocok", sumber: "gaya" },
-          { tipe: "teks", key: "id", label: "ID (unik)", lanjutan: true },
+
+          { tipe: "subjudul", key: "_detail", label: "Halaman detail (saat kartu diklik)", hint: "Kosong = memakai deskripsi singkat di atas." },
+          { tipe: "area", key: "isiLengkap", label: "Isi lengkap", hint: "Boleh beberapa paragraf — pisahkan dengan baris kosong.", baris: 8 },
+          { tipe: "teks", key: "id", label: "ID (alamat halaman detail)", hint: "Dipakai di alamat /agenda/ID. Mengubahnya membuat tautan lama tidak berlaku.", lanjutan: true },
         ],
       },
     ],
@@ -216,14 +226,22 @@ const SKEMA: Record<KunciLanding, Bagian> = {
       { tipe: "area", key: "kosongTeks", label: "Pesan saat kosong: kalimat" },
       {
         tipe: "daftar", key: "items", label: "Daftar berita", tambah: "Tambah berita", judulItem: "judul", fotoItem: "foto",
-        buatBaru: () => ({ id: idBaru("brt"), judul: "Judul berita", ringkasan: "", tanggal: new Date().toISOString().slice(0, 10), foto: "", tautan: "" }),
+        pratinjauDetail: "berita",
+        buatBaru: () => ({
+          id: idBaru("brt"), judul: "Judul berita", ringkasan: "", tanggal: new Date().toISOString().slice(0, 10), foto: "", tautan: "",
+          isiLengkap: "",
+        }),
         item: [
+          { tipe: "subjudul", key: "_kartu", label: "Kartu di landing" },
           { tipe: "foto", key: "foto", label: "Foto" },
           { tipe: "teks", key: "judul", label: "Judul" },
-          { tipe: "area", key: "ringkasan", label: "Ringkasan" },
+          { tipe: "area", key: "ringkasan", label: "Ringkasan", hint: "1–2 kalimat singkat yang tampil di kartu. Kosong di halaman detail = memakai ini." },
           { tipe: "tanggal", key: "tanggal", label: "Tanggal" },
-          { tipe: "teks", key: "tautan", label: "Tautan (opsional)", hint: "Alamat lengkap, mis. https://... Kosongkan kalau tidak ada." },
-          { tipe: "teks", key: "id", label: "ID (unik)", lanjutan: true },
+
+          { tipe: "subjudul", key: "_detail", label: "Halaman detail (saat kartu diklik)", hint: "Kosong = memakai ringkasan di atas." },
+          { tipe: "area", key: "isiLengkap", label: "Isi lengkap berita", hint: "Boleh beberapa paragraf — pisahkan dengan baris kosong.", baris: 10 },
+          { tipe: "teks", key: "tautan", label: "Sumber asli (opsional)", hint: "Alamat lengkap, mis. https://... Ditampilkan sebagai tautan di halaman detail, bukan pengganti halaman detail." },
+          { tipe: "teks", key: "id", label: "ID (alamat halaman detail)", hint: "Dipakai di alamat /berita/ID. Mengubahnya membuat tautan lama tidak berlaku.", lanjutan: true },
         ],
       },
     ],
@@ -302,7 +320,7 @@ interface Draf {
 interface KonteksEditor {
   kunci: string;
   pilihan: Record<SumberPilihan, { id: string; label: string; icon: NamaIkon }[]>;
-  bukaDetail: (id: string) => void;
+  bukaDetail: (halaman: string, id: string) => void;
 }
 
 const Editor = createContext<KonteksEditor | null>(null);
@@ -392,8 +410,8 @@ export default function KelolaLanding() {
     else kirimKePratinjau({ tipe: PESAN_PRATINJAU, gulir: SKEMA[buka].sasaran });
   }
 
-  function bukaDetail(id: string) {
-    setJalur(`/destinasi/${id}`);
+  function bukaDetail(halaman: string, id: string) {
+    setJalur(`/${halaman}/${id}`);
     if (!lebar) setPratinjauBuka(true);
   }
 
@@ -692,7 +710,7 @@ function PanelPratinjau({
         transform: `scale(${skala})`,
         transformOrigin: "top left",
       };
-  const namaJalur = jalur === "/" ? "Beranda landing" : `Detail: ${jalur.replace("/destinasi/", "")}`;
+  const namaJalur = jalur === "/" ? "Beranda landing" : `Detail: ${jalur.replace(/^\/(destinasi|berita|agenda)\//, "")}`;
 
   return (
     <aside
@@ -840,7 +858,7 @@ function FieldView({ field, nilai, onUbah }: { field: Field; nilai: Obj; onUbah:
       return (
         <div>
           <Label htmlFor={id} label={field.label} hint={field.hint} />
-          <textarea id={id} rows={3} value={String(nilaiField ?? "")} onChange={(e) => set(e.target.value)} className={kelasInput} />
+          <textarea id={id} rows={field.baris ?? 3} value={String(nilaiField ?? "")} onChange={(e) => set(e.target.value)} className={kelasInput} />
         </div>
       );
     case "csv":
@@ -938,7 +956,7 @@ function DaftarField({ field, nilai, onUbah }: { field: Extract<Field, { tipe: "
                   {field.pratinjauDetail && (
                     <button
                       type="button"
-                      onClick={() => bukaDetail(String(item.id ?? ""))}
+                      onClick={() => bukaDetail(field.pratinjauDetail!, String(item.id ?? ""))}
                       className="flex items-center gap-1 rounded-md border border-brand-masuk bg-white px-3 py-1.5 font-semibold text-brand-masuk"
                     >
                       <Eye size={13} aria-hidden="true" /> Lihat halaman detail
