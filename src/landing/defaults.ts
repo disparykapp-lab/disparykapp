@@ -43,9 +43,9 @@ export const BAWAAN: Isi = {
       { id: "malioboro", nama: "Malioboro", negara: "Yogyakarta", tagline: "Jalan legendaris penuh kuliner dan kerajinan", foto: "", tags: ["kota", "budaya"] },
       { id: "keraton", nama: "Keraton", negara: "Yogyakarta", tagline: "Pusat budaya dan tradisi Kesultanan", foto: "", tags: ["budaya"] },
       { id: "tamansari", nama: "Taman Sari", negara: "Yogyakarta", tagline: "Bekas taman istana dengan sejarah yang kaya", foto: "", tags: ["budaya", "kota"] },
-      { id: "prambanan", nama: "Prambanan", negara: "Sleman", tagline: "Kompleks candi Hindu yang megah", foto: "", tags: ["budaya", "event"] },
-      { id: "kaliurang", nama: "Kaliurang", negara: "Sleman", tagline: "Udara sejuk di lereng Gunung Merapi", foto: "", tags: ["alam", "berkelanjutan"] },
-      { id: "parangtritis", nama: "Parangtritis", negara: "Bantul", tagline: "Pantai selatan dengan pemandangan matahari terbenam", foto: "", tags: ["alam", "event"] },
+      { id: "kotagede", nama: "Kotagede", negara: "Kotagede", tagline: "Sentra kerajinan perak dan rumah joglo bersejarah", foto: "", tags: ["budaya", "kota"] },
+      { id: "gembiraloka", nama: "Kebun Binatang Gembira Loka", negara: "Kotagede", tagline: "Konservasi satwa dan wisata keluarga di tengah kota", foto: "", tags: ["alam", "berkelanjutan"] },
+      { id: "tugujogja", nama: "Tugu Yogyakarta", negara: "Jetis", tagline: "Monumen ikonik penanda jantung Kota Yogyakarta", foto: "", tags: ["kota", "event"] },
     ]).map(lengkapiDetail),
   },
   gaya: {

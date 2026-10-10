@@ -40,35 +40,35 @@ export const DETAIL_BAWAAN: Record<string, DetailDestinasi> = {
       { icon: "users", judul: "Kampung wisata", teks: "Gang-gang permukiman dengan mural dan kerajinan warga." },
     ],
   },
-  prambanan: {
+  kotagede: {
     deskripsi:
-      "Candi Prambanan adalah kompleks candi Hindu terbesar di Indonesia yang dibangun pada abad ke-9 dan diakui sebagai Warisan Dunia UNESCO. Tiga candi utamanya menjulang tinggi, dan di malam tertentu menjadi latar pertunjukan Sendratari Ramayana.",
+      "Kotagede adalah bekas pusat Kerajaan Mataram Islam yang kini dikenal sebagai sentra kerajinan perak. Gang-gang sempitnya menyimpan rumah joglo tua, bekas benteng keraton, dan bengkel perak turun-temurun.",
     aktivitas: [
-      { icon: "landmark", judul: "Candi Siwa", teks: "Candi utama setinggi puluhan meter dengan relief Ramayana." },
-      { icon: "ticket", judul: "Sendratari Ramayana", teks: "Pertunjukan tari dengan latar candi saat malam." },
-      { icon: "camera", judul: "Senja di candi", teks: "Siluet candi saat matahari terbenam yang memukau." },
+      { icon: "camera", judul: "Rumah joglo tua", teks: "Arsitektur Jawa kuno yang sebagian masih dihuni warga." },
+      { icon: "luggage", judul: "Belanja perak", teks: "Perhiasan dan suvenir perak buatan tangan pengrajin lokal." },
+      { icon: "landmark", judul: "Situs Mataram Islam", teks: "Jejak bekas keraton dan makam raja-raja Mataram." },
     ],
-    tips: "Datang pagi untuk udara yang lebih sejuk dan suasana yang lebih tenang.",
+    tips: "Jelajahi gang-gang kecilnya dengan jalan kaki untuk menemukan sudut-sudut bersejarah.",
   },
-  kaliurang: {
+  gembiraloka: {
     deskripsi:
-      "Kaliurang adalah kawasan wisata sejuk di lereng selatan Gunung Merapi. Hutan pinus, jalur trekking, dan panorama Merapi di pagi hari menjadikannya tempat favorit untuk melepas penat dari keramaian kota.",
+      "Kebun Binatang Gembira Loka adalah taman konservasi satwa di tengah Kota Yogyakarta, jadi tujuan wisata keluarga sekaligus sarana edukasi tentang keragaman hayati.",
     aktivitas: [
-      { icon: "compass", judul: "Lava tour", teks: "Naik jip menyusuri jejak erupsi Merapi." },
-      { icon: "trees", judul: "Hutan & trekking", teks: "Jalur hijau dengan udara pegunungan yang segar." },
-      { icon: "utensils", judul: "Jadah tempe", teks: "Camilan khas Kaliurang yang wajib dicoba." },
+      { icon: "camera", judul: "Melihat satwa", teks: "Ratusan jenis satwa dari berbagai belahan dunia." },
+      { icon: "users", judul: "Wisata keluarga", teks: "Wahana dan area bermain yang ramah anak." },
+      { icon: "trees", judul: "Susur perahu", teks: "Menyusuri danau buatan di tengah taman." },
     ],
-    tips: "Bawa jaket. Pantau status Merapi dari sumber resmi sebelum berangkat.",
+    tips: "Datang pagi hari supaya lebih sejuk dan satwa lebih aktif.",
   },
-  parangtritis: {
+  tugujogja: {
     deskripsi:
-      "Parangtritis adalah pantai paling terkenal di pesisir selatan Yogyakarta, lekat dengan legenda Ratu Pantai Selatan. Hamparan pasir luas dan langit senja menjadikannya tempat terbaik menutup hari.",
+      "Tugu Yogyakarta adalah monumen ikonik penanda jantung Kota Yogyakarta, berdiri di persimpangan jalan yang selalu ramai dan jadi latar foto favorit wisatawan.",
     aktivitas: [
-      { icon: "umbrella", judul: "Matahari terbenam", teks: "Langit jingga di garis Samudra Hindia." },
-      { icon: "compass", judul: "Andong & ATV", teks: "Menyusuri bibir pantai dengan cara yang seru." },
-      { icon: "mountain", judul: "Gumuk pasir", teks: "Bukit pasir Parangkusumo yang langka di Asia Tenggara." },
+      { icon: "camera", judul: "Foto ikonik", teks: "Salah satu spot foto paling dicari di Yogyakarta." },
+      { icon: "utensils", judul: "Kuliner sekitar", teks: "Angkringan dan kafe di sekitar kawasan Tugu." },
+      { icon: "compass", judul: "Sumbu filosofi", teks: "Titik utara garis imajiner Tugu–Keraton–Laut Selatan." },
     ],
-    tips: "Ombak selatan besar dan berbahaya. Hindari berenang dan patuhi rambu petugas.",
+    tips: "Paling ramai dan fotogenik saat malam hari dengan lampu kota.",
   },
 };
 
