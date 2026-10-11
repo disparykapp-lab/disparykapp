@@ -7,6 +7,7 @@ import Foto from "./Foto";
 import GaleriDestinasi from "./GaleriDestinasi";
 import HeartButton from "./HeartButton";
 import FooterLanding from "./FooterLanding";
+import WidgetCuaca from "./WidgetCuaca";
 import { IkonNama } from "./ikon";
 import type { ItemDestinasi, NamaIkon } from "./types";
 import { gsap, keAtasLangsung, prefersReducedMotion, useLenis } from "./efek";
@@ -289,6 +290,7 @@ function Detail({
             >
               <Navigation size={16} aria-hidden="true" /> Petunjuk Arah
             </a>
+            <WidgetCuaca kodeWilayah={item.kodeWilayahBmkg} />
           </aside>
         </div>
       </section>

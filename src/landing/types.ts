@@ -47,6 +47,8 @@ export interface ItemDestinasi {
   tips?: string;
   /** Foto tambahan untuk galeri di halaman detail (selain foto utama). */
   galeri?: string[];
+  /** Kode wilayah BMKG (kelurahan, format 4 segmen mis. "34.71.05.1001") untuk widget cuaca di halaman detail. */
+  kodeWilayahBmkg?: string;
 }
 
 export interface AktivitasDestinasi {

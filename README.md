@@ -112,6 +112,7 @@ npm run dev
 - Wishlist destinasi tersimpan di localStorage perangkat (tidak ke database).
 - Form newsletter hanya validasi di browser; email **tidak** disimpan atau dikirim ke mana pun.
 - Pengaturan gerak: kalau pengguna mengaktifkan *reduced motion*, animasi dimatikan dan konten tetap tampil.
+- **Cuaca (opsional per destinasi):** halaman detail destinasi bisa menampilkan prakiraan cuaca 3 hari dari [API publik BMKG](https://data.bmkg.go.id/prakiraan-cuaca/) (`api.bmkg.go.id/publik/prakiraan-cuaca`, gratis, tanpa API key, CORS diizinkan) kalau admin mengisi kode wilayah kelurahannya di item destinasi. Dipanggil langsung dari browser pengunjung (bukan lewat server kita) dan dicache di `sessionStorage` 1 jam. Kalau kode belum diisi atau BMKG gagal dihubungi, widget-nya cukup disembunyikan.
 
 Sumber foto bawaan: belum ada. Setiap foto memakai gradien placeholder sampai admin mengunggah foto asli (berlisensi) lewat editor. Pastikan foto yang diunggah bukan hasil hotlink.
 

@@ -329,6 +329,16 @@ export default function PanduanAdmin() {
           unggah beberapa foto sekaligus untuk ditampilkan sebagai galeri yang bisa diperbesar
           pengunjung (foto mengembang jadi layar penuh, bisa digeser/panah antar foto).
         </Langkah>
+        <Langkah no={12}>
+          Masih di Destinasi, field <strong>"Kode wilayah BMKG (cuaca)"</strong> (di dalam
+          "Pengaturan teknis") opsional — isi kodenya supaya halaman detail menampilkan
+          prakiraan cuaca 3 hari dari BMKG. Format 4 segmen, mis. <em>34.71.05.1001</em>; cari
+          kode kelurahan tujuan lewat{" "}
+          <a href="https://data.bmkg.go.id/prakiraan-cuaca/" target="_blank" rel="noopener noreferrer" className="underline">
+            data.bmkg.go.id/prakiraan-cuaca
+          </a>
+          . Kosongkan kalau tidak tahu kodenya — cuaca cukup disembunyikan, bukan error.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

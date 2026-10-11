@@ -156,6 +156,10 @@ const SKEMA: Record<KunciLanding, Bagian> = {
           },
           { tipe: "area", key: "tips", label: "Tips berkunjung", hint: "Opsional. Contoh: Datang pagi agar tidak ramai." },
           { tipe: "galeriFoto", key: "galeri", label: "Galeri foto", hint: "Foto tambahan (selain foto utama) yang tampil sebagai galeri di halaman detail. Bisa unggah beberapa sekaligus." },
+          {
+            tipe: "teks", key: "kodeWilayahBmkg", label: "Kode wilayah BMKG (cuaca)", lanjutan: true,
+            hint: "Opsional, untuk menampilkan prakiraan cuaca di halaman detail. Format 4 segmen, mis. 34.71.05.1001 (provinsi.kota/kabupaten.kecamatan.kelurahan). Kosongkan kalau tidak tahu kodenya — cuaca tidak ditampilkan.",
+          },
           { tipe: "teks", key: "id", label: "ID (alamat halaman detail)", hint: "Dipakai di alamat /destinasi/ID. Mengubahnya membuat tautan lama tidak berlaku.", lanjutan: true },
         ],
       },
