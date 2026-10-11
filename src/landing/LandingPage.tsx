@@ -33,7 +33,6 @@ export default function LandingPage() {
   const [tirai, setTirai] = useState(() => !prefersReducedMotion());
 
   const root = useRef<HTMLDivElement>(null);
-  const bilahProgres = useRef<HTMLDivElement>(null);
   const tiraiEl = useRef<HTMLDivElement>(null);
 
   useLenis();
@@ -66,20 +65,6 @@ export default function LandingPage() {
     });
   }, []);
 
-  // Progress bar scroll di atas layar.
-  useLayoutEffect(() => {
-    const bar = bilahProgres.current;
-    if (!bar) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        bar,
-        { scaleX: 0 },
-        { scaleX: 1, ease: "none", scrollTrigger: { trigger: document.documentElement, start: "top top", end: "bottom bottom", scrub: true } }
-      );
-    }, bar);
-    return () => ctx.revert();
-  }, []);
-
   // Pesan singkat (mis. "Segera hadir") hilang setelah 2,2 detik.
   useEffect(() => {
     if (!toast) return;
@@ -104,8 +89,6 @@ export default function LandingPage() {
       </a>
 
       {tirai && <div ref={tiraiEl} className="tirai-intro" aria-hidden="true" style={{ clipPath: "inset(0% 0% 0% 0%)" }} />}
-
-      <div ref={bilahProgres} aria-hidden="true" className="fixed inset-x-0 top-0 z-[55] h-[3px] origin-left bg-lnd-merah" style={{ transform: "scaleX(0)" }} />
 
       <Navbar isi={k.navbar.isi} sudahMasuk={sudahMasuk} tersedia={bagianTersedia(k)} />
 
