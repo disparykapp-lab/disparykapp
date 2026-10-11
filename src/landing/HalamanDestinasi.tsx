@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Lightbulb, MapPin, Navigation } from "lucide-r
 import { useAuth } from "../contexts/AuthContext";
 import "./landing.css";
 import Foto from "./Foto";
+import GaleriDestinasi from "./GaleriDestinasi";
 import HeartButton from "./HeartButton";
 import FooterLanding from "./FooterLanding";
 import { IkonNama } from "./ikon";
@@ -291,6 +292,8 @@ function Detail({
           </aside>
         </div>
       </section>
+
+      <GaleriDestinasi foto={item.foto} galeri={item.galeri ?? []} nama={item.nama} />
 
       {/* AKTIVITAS */}
       {aktivitas.length > 0 && (

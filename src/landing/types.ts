@@ -45,6 +45,8 @@ export interface ItemDestinasi {
   deskripsi?: string;
   aktivitas?: AktivitasDestinasi[];
   tips?: string;
+  /** Foto tambahan untuk galeri di halaman detail (selain foto utama). */
+  galeri?: string[];
 }
 
 export interface AktivitasDestinasi {

@@ -22,7 +22,7 @@ type Obj = Record<string, unknown>;
 type SumberPilihan = "kategori" | "gaya";
 
 type Field =
-  | { tipe: "teks" | "foto" | "tanggal" | "angka" | "ikon" | "csv"; key: string; label: string; hint?: string; lanjutan?: boolean }
+  | { tipe: "teks" | "foto" | "tanggal" | "angka" | "ikon" | "csv" | "galeriFoto"; key: string; label: string; hint?: string; lanjutan?: boolean }
   | { tipe: "area"; key: string; label: string; hint?: string; lanjutan?: boolean; baris?: number }
   | { tipe: "pilihSatu"; key: string; label: string; hint?: string; opsi: { nilai: string; label: string }[] }
   | { tipe: "pilihBanyak"; key: string; label: string; hint?: string; sumber: SumberPilihan }
@@ -132,7 +132,7 @@ const SKEMA: Record<KunciLanding, Bagian> = {
         pratinjauDetail: "destinasi",
         buatBaru: () => ({
           id: idBaru("dst"), nama: "Destinasi baru", negara: "Yogyakarta", tagline: "", foto: "", tags: [],
-          deskripsi: "", aktivitas: [], tips: "",
+          deskripsi: "", aktivitas: [], tips: "", galeri: [],
         }),
         item: [
           { tipe: "subjudul", key: "_kartu", label: "Kartu di landing" },
@@ -155,6 +155,7 @@ const SKEMA: Record<KunciLanding, Bagian> = {
             ],
           },
           { tipe: "area", key: "tips", label: "Tips berkunjung", hint: "Opsional. Contoh: Datang pagi agar tidak ramai." },
+          { tipe: "galeriFoto", key: "galeri", label: "Galeri foto", hint: "Foto tambahan (selain foto utama) yang tampil sebagai galeri di halaman detail. Bisa unggah beberapa sekaligus." },
           { tipe: "teks", key: "id", label: "ID (alamat halaman detail)", hint: "Dipakai di alamat /destinasi/ID. Mengubahnya membuat tautan lama tidak berlaku.", lanjutan: true },
         ],
       },
@@ -863,6 +864,8 @@ function FieldView({ field, nilai, onUbah }: { field: Field; nilai: Obj; onUbah:
       );
     case "csv":
       return <CsvField id={id} field={field} nilai={Array.isArray(nilaiField) ? (nilaiField as string[]) : []} onUbah={set} />;
+    case "galeriFoto":
+      return <GaleriFotoField label={field.label} hint={field.hint} nilai={Array.isArray(nilaiField) ? (nilaiField as string[]) : []} onUbah={set} />;
     case "angka":
       return (
         <div>
@@ -1112,6 +1115,62 @@ function FotoField({ label, hint, url, onUbah }: { label: string; hint?: string;
           )}
         </div>
       </div>
+      {galat && <p className="mt-1 text-xs text-red-600">{galat}</p>}
+    </div>
+  );
+}
+
+/** Galeri foto: beberapa foto sekaligus, tiap foto bisa dihapus satu-satu. */
+function GaleriFotoField({ label, hint, nilai, onUbah }: { label: string; hint?: string; nilai: string[]; onUbah: (v: string[]) => void }) {
+  const { kunci } = useEditor();
+  const [memuat, setMemuat] = useState(false);
+  const [galat, setGalat] = useState<string | null>(null);
+
+  async function unggah(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (files.length === 0) return;
+    if (files.some((f) => !f.type.startsWith("image/"))) {
+      setGalat("Semua file harus berupa gambar (JPG, PNG, atau WebP).");
+      return;
+    }
+    setMemuat(true);
+    setGalat(null);
+    try {
+      const urlBaru: string[] = [];
+      for (const f of files) urlBaru.push(await unggahFotoLanding(f, kunci));
+      onUbah([...nilai, ...urlBaru]);
+    } catch (err) {
+      setGalat(err instanceof Error ? err.message : "Gagal mengunggah foto.");
+    } finally {
+      setMemuat(false);
+    }
+  }
+
+  return (
+    <div>
+      <Label label={nilai.length > 0 ? `${label} (${nilai.length})` : label} hint={hint} />
+      {nilai.length > 0 && (
+        <div className="mb-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+          {nilai.map((url, i) => (
+            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+              <img src={url} alt="" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => onUbah(nilai.filter((_, j) => j !== i))}
+                aria-label={`Hapus foto galeri ke-${i + 1}`}
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white"
+              >
+                <X size={12} aria-hidden="true" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <label className="inline-flex min-h-[40px] cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-brand-text">
+        {memuat ? "Mengunggah..." : "+ Tambah foto"}
+        <input type="file" accept="image/*" multiple onChange={unggah} disabled={memuat} className="sr-only" />
+      </label>
       {galat && <p className="mt-1 text-xs text-red-600">{galat}</p>}
     </div>
   );

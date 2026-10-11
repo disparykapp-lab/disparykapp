@@ -317,6 +317,11 @@ export default function PanduanAdmin() {
           <strong>"Lihat halaman detail"</strong> untuk mengeceknya di pratinjau sebelum
           disimpan.
         </Langkah>
+        <Langkah no={10}>
+          Khusus Destinasi, ada field <strong>"Galeri foto"</strong> di bagian halaman detail —
+          unggah beberapa foto sekaligus untuk ditampilkan sebagai galeri yang bisa diperbesar
+          pengunjung (foto mengembang jadi layar penuh, bisa digeser/panah antar foto).
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📅 Kelola Kalender Konten">

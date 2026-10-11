@@ -41,8 +41,9 @@ export function bukaDenganTransisi(
     left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;border-radius:16px;
     background:${data.gradien};`;
 
+  let img: HTMLImageElement | null = null;
   if (data.foto) {
-    const img = document.createElement("img");
+    img = document.createElement("img");
     img.src = data.foto;
     img.alt = "";
     img.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;";
@@ -65,24 +66,25 @@ export function bukaDenganTransisi(
   document.body.appendChild(el);
   lapisan = el;
 
-  gsap
-    .timeline({
-      onComplete: () => {
-        cadangan = window.setTimeout(tutupTransisi, 4000);
-        lanjut();
-      },
-    })
-    .to(sumber, { scale: 0.96, duration: 0.15, ease: "power2.out" })
-    .to(el, {
-      left: 0,
-      top: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      borderRadius: 0,
-      duration: 0.85,
-      ease: "expo.inOut",
-    })
-    .to(gelap, { opacity: 1, duration: 0.6 }, "<0.25")
+  const tl = gsap.timeline({
+    onComplete: () => {
+      cadangan = window.setTimeout(tutupTransisi, 4000);
+      lanjut();
+    },
+  });
+  tl.to(sumber, { scale: 0.96, duration: 0.15, ease: "power2.out" }).to(el, {
+    left: 0,
+    top: 0,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    borderRadius: 0,
+    duration: 0.85,
+    ease: "expo.inOut",
+  });
+  // Foto di dalam ikut membesar lebih jauh dari bingkainya — efek "mendorong
+  // masuk" ke dalam foto, bukan cuma kotaknya yang melebar.
+  if (img) tl.fromTo(img, { scale: 1 }, { scale: 1.22, duration: 0.85, ease: "power2.in" }, "<");
+  tl.to(gelap, { opacity: 1, duration: 0.6 }, "<0.25")
     .fromTo(teks.querySelector('[data-t="wilayah"]'), { opacity: 0, y: 16 }, { opacity: 0.9, y: 0, duration: 0.5 }, "-=0.45")
     .fromTo(teks.querySelector('[data-t="nama"]'), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.4")
     .set(sumber, { scale: 1 });
