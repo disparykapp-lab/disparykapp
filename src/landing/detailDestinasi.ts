@@ -60,6 +60,76 @@ export const DETAIL_BAWAAN: Record<string, DetailDestinasi> = {
     ],
     tips: "Datang pagi hari supaya lebih sejuk dan satwa lebih aktif.",
   },
+  beringharjo: {
+    deskripsi:
+      "Pasar Beringharjo adalah salah satu pasar tradisional tertua di Yogyakarta, berdiri sejak 1925 di ujung selatan Malioboro. Lantai dasarnya dipenuhi kios batik dan kain, sementara los belakang terkenal dengan jamu racikan tradisional.",
+    aktivitas: [
+      { icon: "luggage", judul: "Belanja batik", teks: "Ratusan kios batik dan kain dengan harga bisa ditawar." },
+      { icon: "leaf", judul: "Jamu gendong", teks: "Racikan jamu tradisional segar dari los jamu." },
+      { icon: "utensils", judul: "Kuliner pasar", teks: "Jajanan pasar khas Jogja di lantai dasar." },
+    ],
+    tips: "Datang pagi hari untuk suasana pasar yang lebih segar dan tidak terlalu ramai.",
+  },
+  vredeburg: {
+    deskripsi:
+      "Benteng Vredeburg awalnya dibangun Belanda untuk mengawasi Keraton, kini menjadi museum sejarah perjuangan kemerdekaan dengan diorama dan koleksi benda bersejarah, persis di seberang Istana Kepresidenan Gedung Agung.",
+    aktivitas: [
+      { icon: "camera", judul: "Diorama sejarah", teks: "Rangkaian diorama perjalanan kemerdekaan Indonesia." },
+      { icon: "landmark", judul: "Arsitektur benteng", teks: "Bastion dan parit khas benteng peninggalan kolonial." },
+      { icon: "ticket", judul: "Pameran temporer", teks: "Ruang pamer yang kerap menggelar acara seni dan budaya." },
+    ],
+    tips: "Letaknya persis di ujung selatan Malioboro, gampang dijangkau jalan kaki.",
+  },
+  tamanpintar: {
+    deskripsi:
+      "Taman Pintar adalah wahana wisata edukasi di tengah kota, berisi alat peraga sains interaktif, planetarium, dan area bermain yang dirancang untuk menumbuhkan rasa ingin tahu anak-anak.",
+    aktivitas: [
+      { icon: "compass", judul: "Alat peraga sains", teks: "Puluhan wahana interaktif yang bisa dicoba langsung." },
+      { icon: "camera", judul: "Planetarium", teks: "Pertunjukan simulasi langit dan luar angkasa." },
+      { icon: "users", judul: "Area kreativitas", teks: "Zona kerajinan dan edukasi untuk anak usia dini." },
+    ],
+    tips: "Siapkan waktu minimal 2-3 jam karena wahananya cukup banyak.",
+  },
+  alunalunkidul: {
+    deskripsi:
+      "Alun-Alun Kidul (Alkid) adalah lapangan di sisi selatan Keraton yang ramai menjelang malam — sepeda hias berlampu, angkringan, dan mitos masangin (berjalan lurus dengan mata tertutup di antara dua pohon beringin) jadi daya tariknya.",
+    aktivitas: [
+      { icon: "compass", judul: "Sepeda hias", teks: "Keliling alun-alun dengan sepeda berlampu warna-warni." },
+      { icon: "camera", judul: "Masangin", teks: "Mitos berjalan lurus mata tertutup di antara dua beringin kembar." },
+      { icon: "utensils", judul: "Kuliner malam", teks: "Angkringan dan jajanan kaki lima di sekelilingnya." },
+    ],
+    tips: "Paling hidup mulai petang hingga malam hari.",
+  },
+  prawirotaman: {
+    deskripsi:
+      "Prawirotaman mulai dikenal sebagai kawasan turis sejak era backpacker 1970-an. Kini jalan-jalannya dipenuhi kafe, toko suvenir, galeri seni, dan penginapan dengan suasana yang santai dan ramah pejalan kaki.",
+    aktivitas: [
+      { icon: "utensils", judul: "Kafe & kuliner", teks: "Beragam kafe dan restoran dengan suasana santai." },
+      { icon: "luggage", judul: "Belanja suvenir", teks: "Toko batik, kerajinan, dan oleh-oleh khas." },
+      { icon: "compass", judul: "Jalan kaki santai", teks: "Gang-gang kampung yang nyaman dijelajahi tanpa kendaraan." },
+    ],
+    tips: "Cocok untuk jalan kaki sore sambil mampir dari satu kafe ke kafe lain.",
+  },
+  kotabaru: {
+    deskripsi:
+      "Kotabaru adalah permukiman bergaya kota taman peninggalan kolonial Belanda yang dibangun awal abad ke-20, kini jadi kawasan cagar budaya dengan deretan rumah tua, gereja, dan museum.",
+    aktivitas: [
+      { icon: "trees", judul: "Jalan kaki & sepeda", teks: "Menyusuri jalan-jalan rindang berisi rumah-rumah tua." },
+      { icon: "landmark", judul: "Gereja heritage", teks: "Bangunan ibadah bersejarah dengan arsitektur kolonial." },
+      { icon: "utensils", judul: "Kafe & resto heritage", teks: "Beberapa rumah tua kini beralih fungsi jadi kafe dan restoran." },
+    ],
+    tips: "Nikmati suasananya pagi atau sore hari saat udara masih sejuk.",
+  },
+  pakualaman: {
+    deskripsi:
+      "Puro Pakualaman adalah kediaman resmi Adipati Paku Alam, pemimpin Kadipaten Pakualaman yang berdiri sejak 1813. Kompleksnya menyimpan koleksi pusaka dan arsitektur Jawa yang masih terawat.",
+    aktivitas: [
+      { icon: "landmark", judul: "Bangsal pendopo", teks: "Arsitektur Jawa klasik tempat upacara adat digelar." },
+      { icon: "camera", judul: "Koleksi pusaka", teks: "Benda-benda bersejarah milik Kadipaten Pakualaman." },
+      { icon: "compass", judul: "Perpustakaan Puro", teks: "Koleksi naskah kuno dan literatur budaya Jawa." },
+    ],
+    tips: "Kunjungan biasanya mengikuti jadwal/izin tertentu — cek dulu sebelum datang.",
+  },
   tugujogja: {
     deskripsi:
       "Tugu Yogyakarta adalah monumen ikonik penanda jantung Kota Yogyakarta, berdiri di persimpangan jalan yang selalu ramai dan jadi latar foto favorit wisatawan.",

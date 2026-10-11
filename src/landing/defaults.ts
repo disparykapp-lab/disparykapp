@@ -46,6 +46,13 @@ export const BAWAAN: Isi = {
       { id: "kotagede", nama: "Kotagede", negara: "Kotagede", tagline: "Sentra kerajinan perak dan rumah joglo bersejarah", foto: "", tags: ["budaya", "kota"] },
       { id: "gembiraloka", nama: "Kebun Binatang Gembira Loka", negara: "Kotagede", tagline: "Konservasi satwa dan wisata keluarga di tengah kota", foto: "", tags: ["alam", "berkelanjutan"] },
       { id: "tugujogja", nama: "Tugu Yogyakarta", negara: "Jetis", tagline: "Monumen ikonik penanda jantung Kota Yogyakarta", foto: "", tags: ["kota", "event"] },
+      { id: "beringharjo", nama: "Pasar Beringharjo", negara: "Gondomanan", tagline: "Pasar tradisional legendaris penjual batik dan jamu", foto: "", tags: ["kota", "budaya"] },
+      { id: "vredeburg", nama: "Museum Benteng Vredeburg", negara: "Gondomanan", tagline: "Museum perjuangan di bekas benteng kolonial dekat Malioboro", foto: "", tags: ["budaya", "event"] },
+      { id: "tamanpintar", nama: "Taman Pintar", negara: "Gondomanan", tagline: "Taman edukasi sains untuk anak dan keluarga", foto: "", tags: ["kota", "event"] },
+      { id: "alunalunkidul", nama: "Alun-Alun Kidul", negara: "Kraton", tagline: "Lapangan selatan Keraton yang hidup saat malam", foto: "", tags: ["kota", "event"] },
+      { id: "prawirotaman", nama: "Kampung Wisata Prawirotaman", negara: "Mergangsan", tagline: "Kampung turis dengan kafe, galeri, dan penginapan", foto: "", tags: ["kota", "budaya"] },
+      { id: "kotabaru", nama: "Kotabaru", negara: "Gondokusuman", tagline: "Kawasan cagar budaya peninggalan arsitektur kolonial", foto: "", tags: ["budaya", "kota"] },
+      { id: "pakualaman", nama: "Puro Pakualaman", negara: "Pakualaman", tagline: "Istana Kadipaten Pakualaman yang masih berfungsi", foto: "", tags: ["budaya"] },
     ]).map(lengkapiDetail),
   },
   gaya: {
