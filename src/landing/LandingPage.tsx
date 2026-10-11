@@ -127,7 +127,6 @@ export default function LandingPage() {
               sorotId={sorotId}
               wishlist={wishlist}
               onWishlist={toggleWishlist}
-              onInfo={setToast}
             />
           )}
           {k.gaya.tampil && <Gaya isi={k.gaya.isi} aktif={gayaAktif} onPilih={setGayaAktif} />}

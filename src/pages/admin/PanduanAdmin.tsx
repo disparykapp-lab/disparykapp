@@ -18,28 +18,28 @@ export default function PanduanAdmin() {
           Isi nama, email Google, divisi, dan jabatan (opsional), lalu simpan. Pegawai bisa
           langsung "Masuk dengan Google" setelah ini — tidak perlu langkah lain.
         </Langkah>
-        <Langkah no={4}>
+        <Langkah no={3}>
           Tiap pegawai bisa diubah divisi dan perannya (Pegawai/Admin) langsung dari daftar.
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={4}>
           Daftar pegawai dikelompokkan otomatis per divisi (accordion, tekan untuk buka/tutup),
           dan ada kolom pencarian di atas untuk mencari nama/email/jabatan dengan cepat.
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={5}>
           Tombol "Aktifkan/Nonaktifkan" untuk menonaktifkan sementara (pegawai nonaktif tidak
           bisa absen atau login, tapi datanya tetap tersimpan).
         </Langkah>
-        <Langkah no={7}>
+        <Langkah no={6}>
           Tekan kartu pegawai untuk buka detail profilnya: foto, tanggal lahir, dan asal
           sekolah/kampus (diisi pegawai sendiri lewat Profil Saya, jadi di sini hanya tampil,
           tidak bisa diedit admin).
         </Langkah>
-        <Langkah no={8}>
+        <Langkah no={7}>
           Di bagian yang sama, admin bisa atur <strong>Masa Magang</strong> (tanggal mulai &amp;
           selesai) untuk pegawai yang berstatus magang/PKL. Setelah disimpan, pegawai itu akan
           melihat progress bar persentase magangnya sendiri di Beranda &amp; Profil Saya.
         </Langkah>
-        <Langkah no={9}>
+        <Langkah no={8}>
           Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
           absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
         </Langkah>
@@ -305,11 +305,18 @@ export default function PanduanAdmin() {
           persis.
         </Langkah>
         <Langkah no={8}>
+          Beranda cuma menampilkan <strong>4 destinasi teratas</strong> di bagian "Destinasi
+          Populer" (urutan sesuai daftar di sini — pakai ↑ Naik/↓ Turun untuk memilih mana
+          yang tampil). Sisanya tetap bisa dibuka lewat tautan{" "}
+          <strong>"Lihat Semua Destinasi"</strong>, yang membuka halaman daftar lengkap
+          (<em>/destinasi</em>) dengan filter kategori sendiri.
+        </Langkah>
+        <Langkah no={9}>
           Di bagian atas halaman ada sakelar <strong>"Landing page"</strong>. Kalau dimatikan,
           alamat utama langsung mengarahkan pengunjung ke halaman login. Kamu tetap bisa masuk
           dan mengedit landing seperti biasa. Nyalakan lagi kapan pun kamu siap.
         </Langkah>
-        <Langkah no={9}>
+        <Langkah no={10}>
           Item <strong>Destinasi, Berita, dan Agenda</strong> punya halaman detail sendiri
           (<em>/destinasi/ID</em>, <em>/berita/ID</em>, <em>/agenda/ID</em>) yang terbuka saat
           kartunya diklik di landing. Isi bagian <strong>"Halaman detail"</strong> di dalam
@@ -317,7 +324,7 @@ export default function PanduanAdmin() {
           <strong>"Lihat halaman detail"</strong> untuk mengeceknya di pratinjau sebelum
           disimpan.
         </Langkah>
-        <Langkah no={10}>
+        <Langkah no={11}>
           Khusus Destinasi, ada field <strong>"Galeri foto"</strong> di bagian halaman detail —
           unggah beberapa foto sekaligus untuk ditampilkan sebagai galeri yang bisa diperbesar
           pengunjung (foto mengembang jadi layar penuh, bisa digeser/panah antar foto).

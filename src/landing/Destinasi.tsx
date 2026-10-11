@@ -1,5 +1,5 @@
-import { useEffect, useRef, type MouseEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import Foto from "./Foto";
 import HeartButton from "./HeartButton";
@@ -14,28 +14,54 @@ interface Props {
   sorotId: string | null;
   wishlist: Set<string>;
   onWishlist: (id: string) => boolean;
-  onInfo: (pesan: string) => void;
 }
+
+/** Berapa banyak destinasi yang tampil di beranda — sisanya ada di halaman "Semua Destinasi". */
+const BATAS_UTAMA = 4;
 
 function cocok(tags: string[], kategori: string | null): boolean {
   return !kategori || tags.includes(kategori);
 }
 
-export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWishlist, onInfo }: Props) {
+/** id destinasi yang tampil di kartu beranda: 4 teratas yang cocok kategori aktif (urut sesuai daftar). */
+function idTampilUtama(items: ItemDestinasi[], kategori: string | null): Set<string> {
+  return new Set(
+    items
+      .filter((d) => cocok(d.tags, kategori))
+      .slice(0, BATAS_UTAMA)
+      .map((d) => d.id)
+  );
+}
+
+export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWishlist }: Props) {
   const scope = useRef<HTMLElement>(null);
   const grid = useRef<HTMLUListElement>(null);
   // Pembanding nilai sebelumnya: efek filter hanya jalan saat kategori benar-benar berganti
   // (bukan saat mount, termasuk saat StrictMode menjalankan efek dua kali).
   const sebelumnya = useRef(kategoriAktif);
 
-  // Filter kategori: kartu yang tidak cocok memudar, lalu kartu lain bergeser dengan GSAP Flip.
+  // Terapkan batas 4 teratas langsung saat mount, tanpa animasi (supaya tidak ada
+  // kedipan "13 kartu lalu tiba-tiba jadi 4").
+  useLayoutEffect(() => {
+    const el = grid.current;
+    if (!el) return;
+    const tampil = idTampilUtama(isi.items, kategoriAktif);
+    el.querySelectorAll<HTMLElement>("[data-kartu]").forEach((k) => {
+      k.style.display = tampil.has(k.dataset.id ?? "") ? "" : "none";
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Filter kategori: kartu yang tidak termasuk 4 teratas (sesuai kategori baru) memudar,
+  // lalu kartu lain bergeser dengan GSAP Flip.
   useEffect(() => {
     if (sebelumnya.current === kategoriAktif) return;
     sebelumnya.current = kategoriAktif;
     const el = grid.current;
     if (!el) return;
     const kartu = Array.from(el.querySelectorAll<HTMLElement>("[data-kartu]"));
-    const cocokKe = (k: HTMLElement) => cocok((k.dataset.tags ?? "").split(","), kategoriAktif);
+    const tampilBaru = idTampilUtama(isi.items, kategoriAktif);
+    const cocokKe = (k: HTMLElement) => tampilBaru.has(k.dataset.id ?? "");
 
     if (prefersReducedMotion()) {
       kartu.forEach((k) => (k.style.display = cocokKe(k) ? "" : "none"));
@@ -63,7 +89,8 @@ export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWis
     }
   }, [kategoriAktif]);
 
-  // Sorot kartu hasil pencarian: pulsa dan diberi ring sebentar.
+  // Sorot kartu hasil pencarian: pulsa dan diberi ring sebentar — kartu tetap ada di DOM
+  // (cuma disembunyikan via display:none), jadi ini tetap jalan walau bukan salah satu dari 4.
   useEffect(() => {
     if (!sorotId) return;
     const el = document.getElementById(`destinasi-${sorotId}`);
@@ -109,10 +136,10 @@ export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWis
           judul={isi.judul}
           subjudul={isi.subjudul}
           aksi={
-            <button type="button" onClick={() => onInfo("Segera hadir")} className="link-lnd">
+            <Link to="/destinasi" className="link-lnd">
               {isi.tautanLabel}
               <ArrowUpRight size={16} aria-hidden="true" />
-            </button>
+            </Link>
           }
         />
 
@@ -134,7 +161,7 @@ export default function Destinasi({ isi, kategoriAktif, sorotId, wishlist, onWis
   );
 }
 
-function KartuDestinasi({
+export function KartuDestinasi({
   item,
   aktif,
   onWishlist,
@@ -161,7 +188,7 @@ function KartuDestinasi({
   }
 
   return (
-    <li data-kartu data-tags={tags} id={`destinasi-${item.id}`} className="group list-none">
+    <li data-kartu data-id={item.id} data-tags={tags} id={`destinasi-${item.id}`} className="group list-none">
       <div style={{ perspective: 900 }}>
         <article ref={kartu} onClick={buka} className="kartu-3d relative cursor-pointer overflow-hidden rounded-lnd bg-white shadow-lnd transition-shadow duration-300 hover:shadow-lnd-hover">
           <div ref={fotoEl} className="relative aspect-square overflow-hidden rounded-t-lnd">
