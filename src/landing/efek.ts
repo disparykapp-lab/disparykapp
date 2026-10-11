@@ -93,28 +93,16 @@ export function useTilt<T extends HTMLElement>(ref: RefObject<T | null>, opsi: O
 }
 
 /**
- * Tombol magnetik: bergeser mengikuti kursor di dalam radius 60px dengan kekuatan
- * 0.3; teks di `[data-magnetic-inner]` bergeser lebih jauh. Klik memunculkan riak.
+ * Riak (ripple) singkat di titik klik tombol. Tidak lagi mengikuti kursor —
+ * dulu ada efek "magnetik" lewat listener pointermove di seluruh window, tapi
+ * itu menjalankan tween GSAP di setiap gerakan mouse manapun di halaman dan
+ * terasa berat di desktop (mouse presisi tinggi), jadi dibuang.
  */
 export function useMagnetic<T extends HTMLElement>(ref: RefObject<T | null>): void {
   useEffect(() => {
     const el = ref.current;
     if (!el || prefersReducedMotion() || isCoarsePointer()) return;
-    const inner = el.querySelector<HTMLElement>("[data-magnetic-inner]");
 
-    const onMove = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      const dekat = Math.abs(dx) < r.width / 2 + 60 && Math.abs(dy) < r.height / 2 + 60;
-      if (!dekat) {
-        gsap.to(el, { x: 0, y: 0, duration: 0.8, ease: "elastic.out(1, 0.4)" });
-        if (inner) gsap.to(inner, { x: 0, y: 0, duration: 0.8, ease: "elastic.out(1, 0.4)" });
-        return;
-      }
-      gsap.to(el, { x: dx * 0.3, y: dy * 0.3, duration: 0.4, ease: "power3.out" });
-      if (inner) gsap.to(inner, { x: dx * 0.15, y: dy * 0.15, duration: 0.4, ease: "power3.out" });
-    };
     const onClick = (e: MouseEvent) => {
       const r = el.getBoundingClientRect();
       const riak = document.createElement("span");
@@ -127,12 +115,8 @@ export function useMagnetic<T extends HTMLElement>(ref: RefObject<T | null>): vo
       gsap.to(riak, { scale: 6, opacity: 0, duration: 0.7, ease: "power2.out", onComplete: () => riak.remove() });
     };
 
-    window.addEventListener("pointermove", onMove);
     el.addEventListener("click", onClick);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      el.removeEventListener("click", onClick);
-    };
+    return () => el.removeEventListener("click", onClick);
   }, [ref]);
 }
 
