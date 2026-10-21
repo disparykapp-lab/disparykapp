@@ -478,6 +478,13 @@ interface BarisLog {
   profiles: { nama: string } | null;
 }
 
+interface BarisLoginAdmin {
+  user_id: string;
+  nama: string;
+  email: string;
+  last_sign_in_at: string | null;
+}
+
 const LABEL_AKSI: Record<string, string> = {
   set_absensi: "Buat/ubah absensi",
   hapus_absensi: "Hapus absensi",
@@ -486,7 +493,9 @@ const LABEL_AKSI: Record<string, string> = {
 
 function PanelLog() {
   const [rows, setRows] = useState<BarisLog[]>([]);
+  const [login, setLogin] = useState<BarisLoginAdmin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingLogin, setLoadingLogin] = useState(true);
 
   useEffect(() => {
     supabase
@@ -498,27 +507,65 @@ function PanelLog() {
         setRows((data as BarisLog[]) ?? []);
         setLoading(false);
       });
+
+    supabase.rpc("super_admin_login_admin").then(({ data }) => {
+      setLogin((data as BarisLoginAdmin[]) ?? []);
+      setLoadingLogin(false);
+    });
   }, []);
 
-  if (loading) return <Loading teks="Memuat log..." />;
-
   return (
-    <div className="flex flex-col gap-2">
-      {rows.map((r) => (
-        <details key={r.id} className="rounded-xl bg-white p-3 text-sm shadow-sm">
-          <summary className="cursor-pointer">
-            <strong className="text-brand-text">{r.profiles?.nama ?? "?"}</strong> ·{" "}
-            {LABEL_AKSI[r.aksi] ?? r.aksi} ·{" "}
-            <span className="text-xs text-gray-400">{formatTanggal(r.dibuat_at, "d MMM yyyy HH:mm")}</span>
-          </summary>
-          {r.detail && (
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-50 p-2 text-[11px] text-gray-600">
-              {JSON.stringify(r.detail, null, 2)}
-            </pre>
-          )}
-        </details>
-      ))}
-      {rows.length === 0 && <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">Belum ada aktivitas.</p>}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold text-brand-text">Login Terakhir Admin</p>
+        {loadingLogin ? (
+          <Loading teks="Memuat info login..." />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {login.map((a) => (
+              <div key={a.user_id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm shadow-sm">
+                <div>
+                  <p className="font-semibold text-brand-text">{a.nama}</p>
+                  <p className="text-xs text-gray-500">{a.email}</p>
+                </div>
+                <span className="shrink-0 text-xs text-gray-500">
+                  {a.last_sign_in_at ? formatTanggal(a.last_sign_in_at, "d MMM yyyy HH:mm") : "Belum pernah login"}
+                </span>
+              </div>
+            ))}
+            {login.length === 0 && (
+              <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">Belum ada admin.</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-xs font-semibold text-brand-text">Riwayat Aksi Super Admin</p>
+        {loading ? (
+          <Loading teks="Memuat log..." />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {rows.map((r) => (
+              <details key={r.id} className="rounded-xl bg-white p-3 text-sm shadow-sm">
+                <summary className="cursor-pointer">
+                  <strong className="text-brand-text">{r.profiles?.nama ?? "?"}</strong> ·{" "}
+                  {LABEL_AKSI[r.aksi] ?? r.aksi} ·{" "}
+                  <span className="text-xs text-gray-400">{formatTanggal(r.dibuat_at, "d MMM yyyy HH:mm")}</span>
+                </summary>
+                {r.detail && (
+                  <pre className="mt-2 overflow-x-auto rounded-lg bg-gray-50 p-2 text-[11px] text-gray-600">
+                    {JSON.stringify(r.detail, null, 2)}
+                  </pre>
+                )}
+              </details>
+            ))}
+            {rows.length === 0 && (
+              <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">Belum ada aktivitas.</p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

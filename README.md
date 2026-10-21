@@ -93,6 +93,9 @@ npm run dev
        dicek `is_super_admin()` di sisi database, dan tiap aksi tercatat di tabel
        `log_super_admin`. Tidak mengubah tampilan akun super admin di mata admin lain —
        role-nya tetap terlihat "Admin" biasa.
+   22. `0023_login_admin.sql` — tab "Log Aktivitas" di menu Super Admin menampilkan juga waktu
+       login terakhir tiap admin (diambil dari `auth.users.last_sign_in_at` bawaan Supabase
+       Auth lewat RPC `super_admin_login_admin`, bukan tabel/trigger baru).
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
