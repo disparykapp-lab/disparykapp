@@ -19,9 +19,12 @@ export interface Divisi {
   created_at: string;
 }
 
+export type TipeNaskahAi = "naskah" | "pertanyaan";
+
 export interface NaskahAi {
   id: string;
   user_id: string;
+  tipe: TipeNaskahAi;
   jenis_acara: string | null;
   nama_acara: string | null;
   lokasi: string | null;
@@ -30,6 +33,7 @@ export interface NaskahAi {
   poin_penting: string;
   gaya: string;
   panjang: string;
+  jumlah_pertanyaan: number | null;
   platform_tujuan: string | null;
   model: string;
   hasil: string;

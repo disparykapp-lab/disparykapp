@@ -5,6 +5,10 @@
 // > Secrets, atau `supabase secrets set OPENAI_API_KEY=sk-...`) — TIDAK PERNAH
 // dikirim ke browser.
 //
+// Dua mode (field `tipe` di payload):
+//   - "naskah"     : naskah liputan (default, perilaku lama)
+//   - "pertanyaan" : daftar pertanyaan wawancara
+//
 // Supabase otomatis menolak request tanpa JWT valid (default, tidak di-deploy
 // dengan --no-verify-jwt), jadi pemanggil sudah pasti pengguna yang login.
 // Di bawah kita cek lagi fitur_naskah_ai/admin, supaya sejalan dengan gerbang
@@ -18,6 +22,7 @@ const CORS_HEADERS = {
 };
 
 interface Payload {
+  tipe?: "naskah" | "pertanyaan";
   jenisAcara?: string;
   namaAcara?: string;
   lokasi?: string;
@@ -25,11 +30,12 @@ interface Payload {
   narasumber?: string;
   poinPenting: string;
   gaya: string;
-  panjang: string;
+  panjang?: string;
+  jumlahPertanyaan?: number;
   platformTujuan?: string;
 }
 
-const LABEL_GAYA: Record<string, string> = {
+const LABEL_GAYA_NASKAH: Record<string, string> = {
   berita: "naskah berita televisi/radio yang formal dan lugas",
   siaran_pers: "siaran pers resmi instansi pemerintah",
   caption: "caption media sosial yang ringan dan menarik, boleh pakai emoji secukupnya",
@@ -42,7 +48,12 @@ const LABEL_PANJANG: Record<string, string> = {
   panjang: "panjang dan detail, sekitar 300-450 kata",
 };
 
-function susunPrompt(p: Payload): string {
+const LABEL_GAYA_WAWANCARA: Record<string, string> = {
+  formal: "formal dan sopan, cocok untuk wawancara resmi dengan pejabat/narasumber senior",
+  santai: "santai dan mengalir seperti obrolan, cocok untuk konten media sosial",
+};
+
+function susunPromptNaskah(p: Payload): string {
   const baris: string[] = [];
   if (p.jenisAcara) baris.push(`Jenis acara: ${p.jenisAcara}`);
   if (p.namaAcara) baris.push(`Nama acara: ${p.namaAcara}`);
@@ -52,8 +63,8 @@ function susunPrompt(p: Payload): string {
   if (p.platformTujuan) baris.push(`Tujuan publikasi: ${p.platformTujuan}`);
   baris.push(`Poin-poin penting/kronologi kegiatan:\n${p.poinPenting}`);
 
-  const gaya = LABEL_GAYA[p.gaya] ?? LABEL_GAYA.berita;
-  const panjang = LABEL_PANJANG[p.panjang] ?? LABEL_PANJANG.sedang;
+  const gaya = LABEL_GAYA_NASKAH[p.gaya] ?? LABEL_GAYA_NASKAH.berita;
+  const panjang = LABEL_PANJANG[p.panjang ?? "sedang"] ?? LABEL_PANJANG.sedang;
 
   return [
     `Kamu adalah penulis naskah liputan untuk Dinas Pariwisata Kota Yogyakarta.`,
@@ -64,6 +75,31 @@ function susunPrompt(p: Payload): string {
     ...baris,
     ``,
     `Tulis naskahnya langsung, tanpa basa-basi pembuka seperti "Berikut naskahnya:".`,
+  ].join("\n");
+}
+
+function susunPromptPertanyaan(p: Payload): string {
+  const baris: string[] = [];
+  if (p.jenisAcara) baris.push(`Jenis acara: ${p.jenisAcara}`);
+  if (p.namaAcara) baris.push(`Nama acara: ${p.namaAcara}`);
+  if (p.lokasi) baris.push(`Lokasi: ${p.lokasi}`);
+  if (p.tanggal) baris.push(`Tanggal: ${p.tanggal}`);
+  if (p.narasumber) baris.push(`Narasumber yang akan diwawancara: ${p.narasumber}`);
+  baris.push(`Topik/poin yang ingin digali:\n${p.poinPenting}`);
+
+  const gaya = LABEL_GAYA_WAWANCARA[p.gaya] ?? LABEL_GAYA_WAWANCARA.formal;
+  const jumlah = Math.min(Math.max(p.jumlahPertanyaan ?? 5, 3), 10);
+
+  return [
+    `Kamu adalah jurnalis yang menyiapkan daftar pertanyaan wawancara liputan untuk Dinas Pariwisata Kota Yogyakarta.`,
+    `Buat ${jumlah} pertanyaan wawancara, gaya ${gaya}, berbahasa Indonesia.`,
+    `Urutkan dari pembuka yang ringan ke pertanyaan yang lebih mendalam. Tiap pertanyaan singkat, jelas, dan terbuka (tidak dijawab ya/tidak saja).`,
+    `Jangan mengarang fakta spesifik dalam pertanyaan (mis. angka/tanggal) yang tidak ada di data berikut.`,
+    ``,
+    `Data liputan:`,
+    ...baris,
+    ``,
+    `Tulis sebagai daftar bernomor (1. 2. 3. dst), tanpa basa-basi pembuka seperti "Berikut daftarnya:".`,
   ].join("\n");
 }
 
@@ -105,7 +141,7 @@ Deno.serve(async (req) => {
 
     const body = (await req.json()) as Payload;
     if (!body.poinPenting || body.poinPenting.trim().length < 5) {
-      return json({ error: "Isi poin-poin penting kegiatan dulu (minimal beberapa kata)." }, 400);
+      return json({ error: "Isi poin-poin/topik dulu (minimal beberapa kata)." }, 400);
     }
 
     const apiKey = Deno.env.get("OPENAI_API_KEY");
@@ -113,7 +149,7 @@ Deno.serve(async (req) => {
       return json({ error: "OPENAI_API_KEY belum diset di secret Edge Function." }, 500);
     }
 
-    const prompt = susunPrompt(body);
+    const prompt = body.tipe === "pertanyaan" ? susunPromptPertanyaan(body) : susunPromptNaskah(body);
 
     const resp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -135,12 +171,12 @@ Deno.serve(async (req) => {
     }
 
     const hasil = await resp.json();
-    const naskah = hasil.choices?.[0]?.message?.content?.trim();
-    if (!naskah) {
+    const teksHasil = hasil.choices?.[0]?.message?.content?.trim();
+    if (!teksHasil) {
       return json({ error: "OpenAI tidak mengembalikan hasil." }, 502);
     }
 
-    return json({ hasil: naskah, model: "gpt-4o-mini" }, 200);
+    return json({ hasil: teksHasil, model: "gpt-4o-mini" }, 200);
   } catch (e) {
     console.error(e);
     return json({ error: "Terjadi kesalahan tak terduga." }, 500);

@@ -132,20 +132,29 @@ Sumber foto bawaan: belum ada. Setiap foto memakai gradien placeholder sampai ad
 
 ## Fitur Naskah AI (opsional)
 
-Menu **Naskah AI** (`/naskah-ai`) membantu pegawai membuat naskah liputan lewat kolom-kolom
-terstruktur (jenis acara, lokasi, poin kegiatan, gaya naskah, dst — bukan prompt bebas), yang
-dirangkai jadi prompt dan dikirim ke OpenAI oleh **Edge Function**, bukan langsung dari browser.
-Ini **wajib** supaya API key OpenAI tidak pernah sampai ke kode yang bisa dibaca pengunjung
-(jangan pernah taruh API key AI apa pun di variabel `VITE_...` — itu ikut ter-bundle ke JS publik).
+Menu **Naskah AI** (`/naskah-ai`) punya dua slide — geser ke kanan atau tekan tab di atas untuk
+pindah:
+- **📝 Naskah**: naskah liputan lewat kolom-kolom terstruktur (jenis acara, lokasi, poin
+  kegiatan, gaya naskah, dst — bukan prompt bebas).
+- **🎤 Pertanyaan Wawancara**: daftar pertanyaan wawancara siap pakai dari topik + narasumber.
+
+Keduanya dirangkai jadi prompt dan dikirim ke OpenAI oleh **Edge Function**, bukan langsung dari
+browser. Ini **wajib** supaya API key OpenAI tidak pernah sampai ke kode yang bisa dibaca
+pengunjung (jangan pernah taruh API key AI apa pun di variabel `VITE_...` — itu ikut ter-bundle
+ke JS publik).
 
 Setup (sekali di awal, opsional — kalau tidak di-setup, menunya sendiri hanya muncul untuk
 divisi yang diaktifkan lewat *Kelola → Divisi*, jadi aman dibiarkan kalau belum dipakai):
 
-1. Jalankan `0024_naskah_ai.sql` lalu `0025_riwayat_naskah_ai_bersama.sql` di SQL Editor (kolom
-   `divisi.fitur_naskah_ai`, tabel riwayat `naskah_ai`, dan RPC `super_admin_hapus_naskah_ai`).
-2. Deploy Edge Function `supabase/functions/naskah-ai/index.ts`:
+1. Jalankan berurutan di SQL Editor: `0024_naskah_ai.sql`, `0025_riwayat_naskah_ai_bersama.sql`,
+   `0026_pertanyaan_wawancara_ai.sql` (kolom `divisi.fitur_naskah_ai`, tabel riwayat `naskah_ai`
+   dengan kolom `tipe`, dan RPC `super_admin_hapus_naskah_ai`).
+2. Deploy Edge Function `supabase/functions/naskah-ai/index.ts` (satu function menangani kedua
+   slide lewat field `tipe` di payload — kalau sudah pernah deploy untuk fitur Naskah, **deploy
+   ulang** dengan isi file yang terbaru supaya slide Pertanyaan Wawancara ikut berfungsi):
    - **Lewat Dashboard** (tidak perlu install apa pun): Supabase Dashboard → **Edge Functions** →
-     *Create a new function* → nama `naskah-ai` → tempel isi file `supabase/functions/naskah-ai/index.ts` → Deploy.
+     *Create a new function* (atau buka function `naskah-ai` yang sudah ada → Edit) → tempel isi
+     file `supabase/functions/naskah-ai/index.ts` → Deploy.
    - **Atau lewat CLI**: `supabase functions deploy naskah-ai`.
 3. **Isi API key OpenAI sebagai secret** (bukan di `.env`): Dashboard → **Edge Functions** →
    **Secrets** → tambah `OPENAI_API_KEY` = `sk-...` (ambil dari [platform.openai.com](https://platform.openai.com/api-keys)).
