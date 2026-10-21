@@ -96,6 +96,11 @@ npm run dev
    22. `0023_login_admin.sql` — tab "Log Aktivitas" di menu Super Admin menampilkan juga waktu
        login terakhir tiap admin (diambil dari `auth.users.last_sign_in_at` bawaan Supabase
        Auth lewat RPC `super_admin_login_admin`, bukan tabel/trigger baru).
+   23. `0027_ucapan_ulang_tahun.sql` — tabel `ucapan_ulang_tahun`. Di beranda: kalau hari ini
+       ulang tahun pengguna sendiri (dari `profiles.tanggal_lahir` yang sudah ada), tampil
+       kartu animasi + daftar ucapan yang masuk; kalau hari ini ulang tahun rekan **sedivisi**,
+       tampil kartu pengingat dengan kolom kirim ucapan langsung (satu ucapan per orang per
+       hari, dicegah lewat constraint unik).
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

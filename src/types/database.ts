@@ -10,6 +10,15 @@ export type PlatformKonten =
   | "website";
 export type StatusKonten = "ide" | "draft" | "dijadwalkan" | "tayang" | "batal";
 
+export interface UcapanUlangTahun {
+  id: string;
+  dari_user_id: string;
+  untuk_user_id: string;
+  tanggal: string;
+  pesan: string;
+  created_at: string;
+}
+
 export interface Divisi {
   id: string;
   nama: string;

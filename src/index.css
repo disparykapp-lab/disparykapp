@@ -150,6 +150,41 @@ html {
   animation: melayang-pesawat 3s ease-in-out infinite;
 }
 
+@keyframes balon-ultah {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+.balon-ultah {
+  display: inline-block;
+  animation: balon-ultah 2.6s ease-in-out infinite;
+}
+
+@keyframes confetti-ultah {
+  0% {
+    transform: translateY(-6px) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(70px) rotate(200deg);
+    opacity: 0;
+  }
+}
+
+.confetti-ultah {
+  position: absolute;
+  top: 0;
+  animation: confetti-ultah 2.4s ease-in infinite;
+}
+
 @keyframes muncul-checklist {
   0% {
     transform: scale(0.3);
