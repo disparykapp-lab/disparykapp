@@ -21,7 +21,7 @@ export default function HeaderHub() {
     <div className="relative -mx-4 -mt-4 overflow-hidden rounded-b-[2rem] bg-brand-masuk text-white shadow-md">
       <video
         ref={videoRef}
-        src="/video_banner.mp4"
+        src="/video_banner1.mp4"
         autoPlay
         loop
         muted
