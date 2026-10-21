@@ -162,7 +162,7 @@ export default function Profil() {
             </>
           )}
           <p className="text-[11px] text-gray-400">
-            Tanggal masa magang diatur oleh admin lewat Kelola &gt; Pegawai.
+            Tanggal masa magang diatur oleh admin.
           </p>
         </div>
       )}
