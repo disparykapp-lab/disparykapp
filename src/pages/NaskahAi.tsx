@@ -3,7 +3,7 @@ import HeaderHalaman from "../components/HeaderHalaman";
 import Loading from "../components/Loading";
 import { useAuth } from "../contexts/AuthContext";
 import { formatTanggal } from "../lib/tanggal";
-import { buatNaskahAi, ambilRiwayatNaskahAi, type FormNaskahAi } from "../lib/naskahAi";
+import { buatNaskahAi, ambilRiwayatNaskahAi, superAdminHapusNaskahAi, type FormNaskahAi } from "../lib/naskahAi";
 import type { NaskahAi } from "../types/database";
 
 const GAYA_OPSI = [
@@ -32,8 +32,9 @@ const FORM_KOSONG: FormNaskahAi = {
 };
 
 export default function NaskahAi() {
-  const { profile } = useAuth();
-  const isAdmin = profile?.role === "admin";
+  const { superAdmin } = useAuth();
+  const [menghapusId, setMenghapusId] = useState<string | null>(null);
+  const [errorRiwayat, setErrorRiwayat] = useState<string | null>(null);
 
   const [form, setForm] = useState<FormNaskahAi>(FORM_KOSONG);
   const [membuat, setMembuat] = useState(false);
@@ -82,6 +83,20 @@ export default function NaskahAi() {
       setTimeout(() => setDisalin(false), 2000);
     } catch {
       // clipboard API bisa ditolak browser/izin — abaikan, teks masih bisa diseleksi manual
+    }
+  }
+
+  async function hapusRiwayat(id: string, judul: string) {
+    if (!window.confirm(`Hapus riwayat naskah "${judul}"? Tidak bisa dibatalkan.`)) return;
+    setMenghapusId(id);
+    setErrorRiwayat(null);
+    try {
+      await superAdminHapusNaskahAi(id);
+      await muatRiwayat();
+    } catch (e) {
+      setErrorRiwayat(e instanceof Error ? e.message : "Gagal menghapus riwayat.");
+    } finally {
+      setMenghapusId(null);
     }
   }
 
@@ -210,17 +225,32 @@ export default function NaskahAi() {
       )}
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-semibold text-brand-text">Riwayat{isAdmin ? " (semua pegawai)" : " Saya"}</p>
+        <p className="text-sm font-semibold text-brand-text">Riwayat</p>
+        {errorRiwayat && <p className="text-sm text-red-600">{errorRiwayat}</p>}
         {loadingRiwayat ? (
           <Loading teks="Memuat riwayat..." />
         ) : (
           <div className="flex flex-col gap-2">
             {riwayat.map((r) => (
               <details key={r.id} className="rounded-xl bg-white p-3 text-sm shadow-sm">
-                <summary className="cursor-pointer">
-                  <strong className="text-brand-text">{r.nama_acara || r.jenis_acara || "Naskah"}</strong>
-                  {isAdmin && r.profiles?.nama && <span className="text-xs text-gray-400"> · oleh {r.profiles.nama}</span>}
-                  <span className="block text-xs text-gray-400">{formatTanggal(r.created_at, "d MMM yyyy HH:mm")}</span>
+                <summary className="flex cursor-pointer items-start justify-between gap-2">
+                  <span>
+                    <strong className="text-brand-text">{r.nama_acara || r.jenis_acara || "Naskah"}</strong>
+                    {r.profiles?.nama && <span className="text-xs text-gray-400"> · oleh {r.profiles.nama}</span>}
+                    <span className="block text-xs text-gray-400">{formatTanggal(r.created_at, "d MMM yyyy HH:mm")}</span>
+                  </span>
+                  {superAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        void hapusRiwayat(r.id, r.nama_acara || r.jenis_acara || "Naskah");
+                      }}
+                      disabled={menghapusId === r.id}
+                      className="shrink-0 rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-600 disabled:opacity-60"
+                    >
+                      {menghapusId === r.id ? "..." : "Hapus"}
+                    </button>
+                  )}
                 </summary>
                 <p className="mt-2 whitespace-pre-wrap rounded-lg bg-gray-50 p-2 text-xs text-gray-700">{r.hasil}</p>
               </details>

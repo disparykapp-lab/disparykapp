@@ -80,3 +80,9 @@ export async function ambilRiwayatNaskahAi(): Promise<(NaskahAi & { profiles: { 
   if (error) throw new Error(error.message);
   return (data as (NaskahAi & { profiles: { nama: string } | null })[]) ?? [];
 }
+
+/** Hapus satu baris riwayat naskah AI siapa saja — khusus super admin. */
+export async function superAdminHapusNaskahAi(id: string): Promise<void> {
+  const { error } = await supabase.rpc("super_admin_hapus_naskah_ai", { p_id: id });
+  if (error) throw new Error(error.message);
+}

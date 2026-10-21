@@ -489,6 +489,7 @@ const LABEL_AKSI: Record<string, string> = {
   set_absensi: "Buat/ubah absensi",
   hapus_absensi: "Hapus absensi",
   set_flag_super_admin: "Ubah status super admin",
+  hapus_naskah_ai: "Hapus riwayat naskah AI",
 };
 
 function PanelLog() {

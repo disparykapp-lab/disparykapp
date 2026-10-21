@@ -141,7 +141,8 @@ Ini **wajib** supaya API key OpenAI tidak pernah sampai ke kode yang bisa dibaca
 Setup (sekali di awal, opsional — kalau tidak di-setup, menunya sendiri hanya muncul untuk
 divisi yang diaktifkan lewat *Kelola → Divisi*, jadi aman dibiarkan kalau belum dipakai):
 
-1. Jalankan `0024_naskah_ai.sql` di SQL Editor (kolom `divisi.fitur_naskah_ai` + tabel riwayat `naskah_ai`).
+1. Jalankan `0024_naskah_ai.sql` lalu `0025_riwayat_naskah_ai_bersama.sql` di SQL Editor (kolom
+   `divisi.fitur_naskah_ai`, tabel riwayat `naskah_ai`, dan RPC `super_admin_hapus_naskah_ai`).
 2. Deploy Edge Function `supabase/functions/naskah-ai/index.ts`:
    - **Lewat Dashboard** (tidak perlu install apa pun): Supabase Dashboard → **Edge Functions** →
      *Create a new function* → nama `naskah-ai` → tempel isi file `supabase/functions/naskah-ai/index.ts` → Deploy.
@@ -154,7 +155,10 @@ divisi yang diaktifkan lewat *Kelola → Divisi*, jadi aman dibiarkan kalau belu
 5. Pakai model `gpt-4o-mini` (murah, cukup untuk naskah liputan) — hardcoded di Edge Function, ganti baris `model:` di dalamnya kalau mau model lain.
 
 Tiap naskah yang dibuat otomatis tersimpan ke tabel `naskah_ai` (siapa yang membuat, isian
-formnya, hasilnya) sebagai riwayat sekaligus log pemakaian — admin bisa lihat punya semua orang, pegawai biasa cuma lihat punya sendiri.
+formnya, hasilnya) sebagai riwayat **bersama** — semua pegawai yang bisa akses menu ini saling
+melihat riwayat naskah satu sama lain, bukan cuma punya sendiri. Cuma **super admin** yang bisa
+menghapus baris riwayat siapa pun, lewat tombol "Hapus" yang muncul khusus untuk mereka; aksi
+hapusnya tercatat juga di log super admin (lihat bagian "Kontrol khusus super admin" di atas).
 
 ## Deploy ke Render
 
