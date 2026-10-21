@@ -484,7 +484,7 @@ function PanelLog() {
   useEffect(() => {
     supabase
       .from("log_super_admin")
-      .select("*, profiles:oleh_user_id(nama)")
+      .select("*, profiles(nama)")
       .order("dibuat_at", { ascending: false })
       .limit(100)
       .then(({ data }) => {
