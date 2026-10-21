@@ -182,6 +182,29 @@ export default function PanduanAdmin() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="👑 Super Admin">
+        <Langkah no={1}>
+          Menu ini cuma muncul di Kelola kalau akunmu ditandai <strong>super admin</strong> —
+          tingkatan tambahan di atas admin biasa, tidak terlihat admin lain (role yang tampil
+          tetap "Admin" seperti biasa).
+        </Langkah>
+        <Langkah no={2}>
+          <strong>Koreksi Absensi:</strong> pilih pegawai dan tanggal, lalu atur langsung jam
+          masuk/pulang, mode (Di Kantor/Dinas Luar), status, akurasi GPS, IP, dan keterangan —
+          baik untuk mengubah data yang sudah ada maupun membuat baris baru untuk tanggal yang
+          belum pernah diabsen. Ini menggantikan koreksi manual lewat SQL Editor.
+        </Langkah>
+        <Langkah no={3}>
+          <strong>Akses Super Admin:</strong> jadikan atau cabut status super admin untuk akun
+          admin lain. Cuma akun dengan role admin yang bisa ditandai.
+        </Langkah>
+        <Langkah no={4}>
+          <strong>Log Aktivitas:</strong> semua koreksi absensi dan perubahan status super admin
+          tercatat di sini (siapa, apa, kapan) — tidak bisa dihapus lewat aplikasi, sebagai jejak
+          audit untuk kekuatan menu ini.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="📊 Rekap Semua Pegawai">
         <Langkah no={1}>Buka menu Rekap — pilih sendiri tanggal mulai &amp; akhir lalu tekan "Terapkan" (atau pakai tombol cepat "Minggu ini"/"Bulan ini"). Sebagai admin kamu juga bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
         <Langkah no={2}>Pilih "Semua Pegawai" untuk lihat ringkasan semua orang sekaligus.</Langkah>

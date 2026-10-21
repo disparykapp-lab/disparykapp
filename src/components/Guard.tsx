@@ -31,6 +31,18 @@ export function RequireAdmin() {
   return <Outlet />;
 }
 
+export function RequireSuperAdmin() {
+  const { superAdmin, loading } = useAuth();
+
+  if (loading) return <Loading teks="Memeriksa akses..." />;
+
+  if (!superAdmin) {
+    return <Navigate to="/kelola" replace />;
+  }
+
+  return <Outlet />;
+}
+
 export function RequireFiturKalender() {
   const { bisaKalenderKonten, loading } = useAuth();
 

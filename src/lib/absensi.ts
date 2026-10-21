@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Absensi, ModeAbsen } from "../types/database";
+import type { Absensi, ModeAbsen, StatusAbsen } from "../types/database";
 
 export function tanggalHariIniWIB(): string {
   const sekarang = new Date();
@@ -89,6 +89,62 @@ export async function kirimKlarifikasiAbsensi(tanggal: string, catatan: string, 
     p_catatan: catatan,
     p_bukti_url: buktiUrl || null,
   });
+  if (error) throw new Error(error.message);
+}
+
+/** Field yang bisa diatur super admin untuk satu baris absensi — lihat super_admin_set_absensi() di 0022. */
+export interface ParamSuperAdminAbsensi {
+  userId: string;
+  tanggal: string;
+  masukAt: string | null;
+  masukMode: ModeAbsen | null;
+  masukAkurasi: number | null;
+  masukIp: string | null;
+  masukLat: number | null;
+  masukLng: number | null;
+  keluarAt: string | null;
+  keluarMode: ModeAbsen | null;
+  keluarAkurasi: number | null;
+  keluarIp: string | null;
+  keluarLat: number | null;
+  keluarLng: number | null;
+  status: StatusAbsen;
+  catatanKlarifikasi: string | null;
+}
+
+/** Buat atau timpa satu baris absensi siapa saja — khusus super admin. */
+export async function superAdminSetAbsensi(p: ParamSuperAdminAbsensi): Promise<Absensi> {
+  const { data, error } = await supabase.rpc("super_admin_set_absensi", {
+    p_user_id: p.userId,
+    p_tanggal: p.tanggal,
+    p_masuk_at: p.masukAt,
+    p_masuk_mode: p.masukMode,
+    p_masuk_akurasi: p.masukAkurasi,
+    p_masuk_ip: p.masukIp,
+    p_masuk_lat: p.masukLat,
+    p_masuk_lng: p.masukLng,
+    p_keluar_at: p.keluarAt,
+    p_keluar_mode: p.keluarMode,
+    p_keluar_akurasi: p.keluarAkurasi,
+    p_keluar_ip: p.keluarIp,
+    p_keluar_lat: p.keluarLat,
+    p_keluar_lng: p.keluarLng,
+    p_status: p.status,
+    p_catatan_klarifikasi: p.catatanKlarifikasi,
+  });
+  if (error) throw new Error(error.message);
+  return data as Absensi;
+}
+
+/** Hapus satu baris absensi secara permanen — khusus super admin. */
+export async function superAdminHapusAbsensi(id: string): Promise<void> {
+  const { error } = await supabase.rpc("super_admin_hapus_absensi", { p_id: id });
+  if (error) throw new Error(error.message);
+}
+
+/** Jadikan/cabut status super admin akun lain (harus sudah role admin) — khusus super admin. */
+export async function superAdminSetFlag(userId: string, nilai: boolean): Promise<void> {
+  const { error } = await supabase.rpc("super_admin_set_flag", { p_user_id: userId, p_nilai: nilai });
   if (error) throw new Error(error.message);
 }
 

@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PresenceProvider } from "./contexts/PresenceContext";
-import { RequireAdmin, RequireAuth, RequireFiturKalender } from "./components/Guard";
+import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireSuperAdmin } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
@@ -26,6 +26,7 @@ import FotoAbsensi from "./pages/admin/FotoAbsensi";
 import DistribusiUndangan from "./pages/admin/DistribusiUndangan";
 import DistribusiPerPetugas from "./pages/admin/DistribusiPerPetugas";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
+import SuperAdmin from "./pages/admin/SuperAdmin";
 
 // Landing (GSAP + Lenis) dimuat terpisah: pengguna aplikasi tidak perlu mengunduhnya.
 const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
@@ -107,6 +108,10 @@ export default function App() {
                 <Route path="/kelola/landing" element={<KelolaLanding />} />
                 <Route path="/kelola/tugas" element={<KelolaTugas />} />
                 <Route path="/kelola/panduan" element={<PanduanAdmin />} />
+              </Route>
+
+              <Route element={<RequireSuperAdmin />}>
+                <Route path="/kelola/super-admin" element={<SuperAdmin />} />
               </Route>
             </Route>
           </Route>

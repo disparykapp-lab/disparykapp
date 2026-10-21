@@ -83,11 +83,16 @@ npm run dev
        satu baris per bagian) dan bucket Storage publik `landing` untuk foto landing. Pengunjung
        tanpa login boleh membaca; hanya admin yang boleh menulis.
    20. `0021_super_admin.sql` — kolom `profiles.super_admin` (default `false`), penanda
-       tambahan di atas role "admin" biasa. Belum dipakai di tampilan manapun — role tetap
-       `'admin'` seperti biasa, jadi tidak mengubah apa pun yang sudah ada; tinggal dipakai
-       nanti untuk fitur khusus super admin. Set lewat SQL Editor:
+       tambahan di atas role "admin" biasa. Set lewat SQL Editor:
        `update profiles set super_admin = true where email = '...';` (tidak perlu mematikan
        trigger seperti langkah "Buat admin pertama" di bawah).
+   21. `0022_kontrol_super_admin.sql` — menu **Kelola → Super Admin** (cuma tampil untuk akun
+       `super_admin = true`, lihat poin di atas): koreksi bebas data absensi siapa saja
+       (jam, status, mode, GPS, IP — menggantikan koreksi manual lewat SQL Editor), kelola
+       siapa saja yang jadi super admin, dan log aktivitas super admin. Semua lewat RPC yang
+       dicek `is_super_admin()` di sisi database, dan tiap aksi tercatat di tabel
+       `log_super_admin`. Tidak mengubah tampilan akun super admin di mata admin lain —
+       role-nya tetap terlihat "Admin" biasa.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

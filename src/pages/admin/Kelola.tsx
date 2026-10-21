@@ -4,6 +4,7 @@ import HeaderHalaman from "../../components/HeaderHalaman";
 import IconTile from "../../components/IconTile";
 import KartuOnline from "../../components/KartuOnline";
 import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../contexts/AuthContext";
 import { cekRetensiAbsensi, type StatusRetensi } from "../../lib/retensi";
 
 const MENU = [
@@ -18,6 +19,7 @@ const MENU = [
 ];
 
 export default function Kelola() {
+  const { superAdmin } = useAuth();
   const [retensi, setRetensi] = useState<StatusRetensi | null>(null);
   const [undanganBelum, setUndanganBelum] = useState(0);
 
@@ -60,6 +62,7 @@ export default function Kelola() {
         {MENU.map((m) => (
           <IconTile key={m.to} to={m.to} iconSrc={m.iconSrc} label={m.label} />
         ))}
+        {superAdmin && <IconTile to="/kelola/super-admin" icon="👑" warna="bg-amber-500" label="Super Admin" />}
       </div>
     </div>
   );
