@@ -164,7 +164,7 @@ export default function Beranda() {
             {bisaKalenderKonten && (
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
             )}
-            {bisaNaskahAi && <IconTile to="/naskah-ai" icon="📰" warna="bg-purple-500" label="Naskah AI" />}
+            {bisaNaskahAi && <IconTile to="/naskah-ai" iconSrc="/icon_naskahai.png" label="Naskah AI" />}
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
             <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
           </div>
