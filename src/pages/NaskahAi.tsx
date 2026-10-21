@@ -191,9 +191,12 @@ export default function NaskahAi() {
         >
           {membuat ? "Membuat naskah..." : "✨ Buat Naskah"}
         </button>
+        <p className="text-center text-[11px] text-gray-400">Powered by RAFAEL AI</p>
       </div>
 
-      {hasilTerakhir && (
+      {membuat && <LoadingAi />}
+
+      {!membuat && hasilTerakhir && (
         <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-brand-text">Hasil</p>
@@ -202,6 +205,7 @@ export default function NaskahAi() {
             </button>
           </div>
           <p className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-sm text-brand-text">{hasilTerakhir.hasil}</p>
+          <p className="text-right text-[11px] text-gray-400">✨ Powered by RAFAEL AI</p>
         </div>
       )}
 
@@ -237,5 +241,37 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
       <span className="text-xs font-semibold text-brand-text">{label}</span>
       {children}
     </label>
+  );
+}
+
+const PESAN_AI = [
+  "Membaca poin-poin kegiatan...",
+  "Menyusun kronologi acara...",
+  "Merangkai kalimat...",
+  "Menghaluskan gaya bahasa...",
+  "Menyelesaikan naskah...",
+];
+
+function LoadingAi() {
+  const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % PESAN_AI.length), 1700);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-xl bg-white p-6 text-center shadow-sm">
+      <div className="kilau-ai h-2 w-full max-w-[220px] rounded-full" />
+      <div className="flex items-center gap-2 text-sm font-medium text-brand-text">
+        <span className="flex gap-1" aria-hidden="true">
+          <span className="titik-ai h-2 w-2 rounded-full bg-purple-500" style={{ animationDelay: "0s" }} />
+          <span className="titik-ai h-2 w-2 rounded-full bg-purple-500" style={{ animationDelay: "0.15s" }} />
+          <span className="titik-ai h-2 w-2 rounded-full bg-purple-500" style={{ animationDelay: "0.3s" }} />
+        </span>
+        {PESAN_AI[i]}
+      </div>
+      <p className="text-[11px] text-gray-400">✨ Powered by RAFAEL AI</p>
+    </div>
   );
 }

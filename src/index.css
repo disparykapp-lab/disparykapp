@@ -46,6 +46,38 @@ html {
   animation: denyut-mendesak 1.6s ease-in-out infinite;
 }
 
+@keyframes kilau-ai {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.kilau-ai {
+  background: linear-gradient(90deg, #ede9fe, #ddd6fe, #c4b5fd, #ddd6fe, #ede9fe);
+  background-size: 300% 100%;
+  animation: kilau-ai 2.4s linear infinite;
+}
+
+@keyframes titik-ai {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-5px);
+    opacity: 1;
+  }
+}
+
+.titik-ai {
+  animation: titik-ai 1.1s ease-in-out infinite;
+}
+
 @keyframes melayang-pesawat {
   0%,
   100% {
