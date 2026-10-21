@@ -61,29 +61,22 @@ function KartuUlangTahunSendiri({ userId, nama }: { userId: string; nama: string
 
   return (
     <section className="relative overflow-hidden rounded-2xl bg-white p-5 text-center shadow-sm">
-      <span className="confetti-ultah left-[15%] text-lg" style={{ animationDelay: "0s" }} aria-hidden="true">
-        🎉
-      </span>
-      <span className="confetti-ultah left-[45%] text-base" style={{ animationDelay: "0.6s" }} aria-hidden="true">
-        🎊
-      </span>
-      <span className="confetti-ultah left-[75%] text-lg" style={{ animationDelay: "1.2s" }} aria-hidden="true">
-        ✨
-      </span>
+      <img
+        src="/icon_kucing_kiri.png"
+        alt=""
+        aria-hidden="true"
+        className="kucing-ultah-kiri pointer-events-none absolute left-0 top-1/2 h-20 w-20 object-contain sm:h-24 sm:w-24"
+      />
+      <img
+        src="/icon_kucing_kanan.png"
+        alt=""
+        aria-hidden="true"
+        className="kucing-ultah-kanan pointer-events-none absolute right-0 top-1/2 h-20 w-20 object-contain sm:h-24 sm:w-24"
+      />
 
-      <div className="flex items-center justify-center gap-2 text-2xl">
-        <span className="balon-ultah" style={{ animationDelay: "0s" }}>
-          🎈
-        </span>
-        <span className="balon-ultah" style={{ animationDelay: "0.3s" }}>
-          🎂
-        </span>
-        <span className="balon-ultah" style={{ animationDelay: "0.6s" }}>
-          🎈
-        </span>
-      </div>
-      <h2 className="mt-2 text-lg font-bold text-brand-text">Selamat Ulang Tahun, {nama}!</h2>
-      <p className="text-xs text-gray-500">Semoga sehat selalu dan makin semangat kerjanya 🎉</p>
+      <img src="/icon_kue.png" alt="" aria-hidden="true" className="kue-ultah mx-auto h-16 w-16 object-contain" />
+      <h2 className="relative mt-2 px-16 text-lg font-bold text-brand-text sm:px-20">Selamat Ulang Tahun, {nama}!</h2>
+      <p className="relative px-16 text-xs text-gray-500 sm:px-20">Semoga sehat selalu dan makin semangat kerjanya 🎉</p>
 
       {ucapan.length > 0 && (
         <div className="mt-4 flex flex-col gap-2 border-t border-gray-100 pt-3 text-left">

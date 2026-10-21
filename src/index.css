@@ -185,6 +185,48 @@ html {
   animation: confetti-ultah 2.4s ease-in infinite;
 }
 
+@keyframes kucing-ultah-kiri {
+  0%,
+  100% {
+    transform: translateY(-50%) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(calc(-50% - 8px)) rotate(4deg);
+  }
+}
+
+.kucing-ultah-kiri {
+  animation: kucing-ultah-kiri 1.8s ease-in-out infinite;
+}
+
+@keyframes kucing-ultah-kanan {
+  0%,
+  100% {
+    transform: translateY(-50%) rotate(4deg);
+  }
+  50% {
+    transform: translateY(calc(-50% - 8px)) rotate(-4deg);
+  }
+}
+
+.kucing-ultah-kanan {
+  animation: kucing-ultah-kanan 1.8s ease-in-out infinite;
+}
+
+@keyframes kue-ultah {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+.kue-ultah {
+  animation: kue-ultah 1.6s ease-in-out infinite;
+}
+
 @keyframes muncul-checklist {
   0% {
     transform: scale(0.3);
