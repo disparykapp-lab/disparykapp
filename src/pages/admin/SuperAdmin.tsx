@@ -54,17 +54,23 @@ function defaultHariIni() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/** "2026-10-08" + "07:30" -> ISO dengan offset WIB tetap (+07:00, tidak ada DST). */
+/** "2026-10-08" + "07:30:45" (atau "07:30") -> ISO dengan offset WIB tetap (+07:00, tidak ada DST). */
 function keIsoWib(tanggal: string, jam: string): string | null {
   if (!jam) return null;
-  return `${tanggal}T${jam}:00+07:00`;
+  const jamLengkap = jam.length === 5 ? `${jam}:00` : jam;
+  return `${tanggal}T${jamLengkap}+07:00`;
 }
 
-/** ISO/timestamptz -> "07:30" buat ditampilkan di <input type="time">. */
+/** ISO/timestamptz -> "07:30:45" buat ditampilkan di <input type="time" step="1">. */
 function keJamInput(iso: string | null): string {
   if (!iso) return "";
   const d = new Date(iso);
-  const jam = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" });
+  const jam = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Asia/Jakarta",
+  });
   return jam;
 }
 
@@ -361,6 +367,7 @@ function SesiForm({
       <div className="grid grid-cols-2 gap-2">
         <input
           type="time"
+          step="1"
           value={jam}
           onChange={(e) => onJam(e.target.value)}
           className="rounded-lg border border-gray-300 p-2 text-sm"
