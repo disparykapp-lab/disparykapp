@@ -90,11 +90,13 @@ export default function PanduanAdmin() {
           Tiap divisi punya checklist <strong>"Fitur"</strong> di bagian bawah kartunya — centang{" "}
           <strong>"Kalender Konten"</strong> untuk mengizinkan semua pegawai di divisi itu memakai
           menu Kalender Konten. Contoh: centang untuk divisi Pemasaran kalau merekalah yang
-          mengurus media sosial.
+          mengurus media sosial. Centang <strong>"Naskah AI"</strong> dengan cara yang sama untuk
+          mengizinkan divisi memakai menu Naskah AI (perlu Edge Function & API key OpenAI sudah
+          disiapkan — lihat README bagian "Fitur Naskah AI").
         </Langkah>
         <Catatan>
-          Admin selalu bisa memakai Kalender Konten apa pun centangan divisinya. Pegawai biasa
-          hanya melihat menu "Kalender" di navigasi bawah kalau divisinya sudah dicentang.
+          Admin selalu bisa memakai Kalender Konten dan Naskah AI apa pun centangan divisinya.
+          Pegawai biasa hanya melihat menunya di navigasi bawah kalau divisinya sudah dicentang.
         </Catatan>
       </Bagian>
 

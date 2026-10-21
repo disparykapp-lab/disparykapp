@@ -54,3 +54,15 @@ export function RequireFiturKalender() {
 
   return <Outlet />;
 }
+
+export function RequireFiturNaskahAi() {
+  const { bisaNaskahAi, loading } = useAuth();
+
+  if (loading) return <Loading teks="Memeriksa akses..." />;
+
+  if (!bisaNaskahAi) {
+    return <Navigate to="/beranda" replace />;
+  }
+
+  return <Outlet />;
+}

@@ -15,6 +15,24 @@ export interface Divisi {
   nama: string;
   aktif: boolean;
   fitur_kalender_konten: boolean;
+  fitur_naskah_ai: boolean;
+  created_at: string;
+}
+
+export interface NaskahAi {
+  id: string;
+  user_id: string;
+  jenis_acara: string | null;
+  nama_acara: string | null;
+  lokasi: string | null;
+  tanggal: string | null;
+  narasumber: string | null;
+  poin_penting: string;
+  gaya: string;
+  panjang: string;
+  platform_tujuan: string | null;
+  model: string;
+  hasil: string;
   created_at: string;
 }
 

@@ -14,7 +14,7 @@ import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
 import type { Absensi } from "../types/database";
 
 export default function Beranda() {
-  const { profile, bisaKalenderKonten } = useAuth();
+  const { profile, bisaKalenderKonten, bisaNaskahAi } = useAuth();
   const isAdmin = profile?.role === "admin";
   const [absensi, setAbsensi] = useState<Absensi | null>(null);
   const [loading, setLoading] = useState(true);
@@ -164,6 +164,7 @@ export default function Beranda() {
             {bisaKalenderKonten && (
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
             )}
+            {bisaNaskahAi && <IconTile to="/naskah-ai" icon="📰" warna="bg-purple-500" label="Naskah AI" />}
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
             <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
           </div>

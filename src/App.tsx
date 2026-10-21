@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PresenceProvider } from "./contexts/PresenceContext";
-import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireSuperAdmin } from "./components/Guard";
+import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireFiturNaskahAi, RequireSuperAdmin } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
@@ -27,6 +27,7 @@ import DistribusiUndangan from "./pages/admin/DistribusiUndangan";
 import DistribusiPerPetugas from "./pages/admin/DistribusiPerPetugas";
 import PanduanAdmin from "./pages/admin/PanduanAdmin";
 import SuperAdmin from "./pages/admin/SuperAdmin";
+import NaskahAi from "./pages/NaskahAi";
 
 // Landing (GSAP + Lenis) dimuat terpisah: pengguna aplikasi tidak perlu mengunduhnya.
 const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
@@ -94,6 +95,10 @@ export default function App() {
                 <Route path="/kalender" element={<Kalender />} />
                 <Route path="/kalender/baru" element={<KontenForm />} />
                 <Route path="/kalender/:id/edit" element={<KontenForm />} />
+              </Route>
+
+              <Route element={<RequireFiturNaskahAi />}>
+                <Route path="/naskah-ai" element={<NaskahAi />} />
               </Route>
 
               <Route element={<RequireAdmin />}>

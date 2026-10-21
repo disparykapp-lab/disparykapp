@@ -6,6 +6,7 @@ import type { Divisi as DivisiType } from "../../types/database";
 
 const FITUR_TERSEDIA: { key: keyof DivisiType & string; label: string }[] = [
   { key: "fitur_kalender_konten", label: "Kalender Konten" },
+  { key: "fitur_naskah_ai", label: "Naskah AI" },
 ];
 
 export default function Divisi() {

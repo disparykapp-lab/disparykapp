@@ -130,6 +130,32 @@ npm run dev
 
 Sumber foto bawaan: belum ada. Setiap foto memakai gradien placeholder sampai admin mengunggah foto asli (berlisensi) lewat editor. Pastikan foto yang diunggah bukan hasil hotlink.
 
+## Fitur Naskah AI (opsional)
+
+Menu **Naskah AI** (`/naskah-ai`) membantu pegawai membuat naskah liputan lewat kolom-kolom
+terstruktur (jenis acara, lokasi, poin kegiatan, gaya naskah, dst — bukan prompt bebas), yang
+dirangkai jadi prompt dan dikirim ke OpenAI oleh **Edge Function**, bukan langsung dari browser.
+Ini **wajib** supaya API key OpenAI tidak pernah sampai ke kode yang bisa dibaca pengunjung
+(jangan pernah taruh API key AI apa pun di variabel `VITE_...` — itu ikut ter-bundle ke JS publik).
+
+Setup (sekali di awal, opsional — kalau tidak di-setup, menunya sendiri hanya muncul untuk
+divisi yang diaktifkan lewat *Kelola → Divisi*, jadi aman dibiarkan kalau belum dipakai):
+
+1. Jalankan `0024_naskah_ai.sql` di SQL Editor (kolom `divisi.fitur_naskah_ai` + tabel riwayat `naskah_ai`).
+2. Deploy Edge Function `supabase/functions/naskah-ai/index.ts`:
+   - **Lewat Dashboard** (tidak perlu install apa pun): Supabase Dashboard → **Edge Functions** →
+     *Create a new function* → nama `naskah-ai` → tempel isi file `supabase/functions/naskah-ai/index.ts` → Deploy.
+   - **Atau lewat CLI**: `supabase functions deploy naskah-ai`.
+3. **Isi API key OpenAI sebagai secret** (bukan di `.env`): Dashboard → **Edge Functions** →
+   **Secrets** → tambah `OPENAI_API_KEY` = `sk-...` (ambil dari [platform.openai.com](https://platform.openai.com/api-keys)).
+   Lewat CLI: `supabase secrets set OPENAI_API_KEY=sk-...`. Key ini cuma bisa dibaca oleh Edge
+   Function di server Supabase, tidak pernah dikirim ke browser pengunjung.
+4. Aktifkan lewat *Kelola → Divisi* → centang "Naskah AI" untuk divisi yang boleh memakai (admin selalu bisa akses tanpa perlu dicentang).
+5. Pakai model `gpt-4o-mini` (murah, cukup untuk naskah liputan) — hardcoded di Edge Function, ganti baris `model:` di dalamnya kalau mau model lain.
+
+Tiap naskah yang dibuat otomatis tersimpan ke tabel `naskah_ai` (siapa yang membuat, isian
+formnya, hasilnya) sebagai riwayat sekaligus log pemakaian — admin bisa lihat punya semua orang, pegawai biasa cuma lihat punya sendiri.
+
 ## Deploy ke Render
 
 1. Push repo ini ke GitHub.
