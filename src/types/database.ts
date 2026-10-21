@@ -23,6 +23,8 @@ export interface Profile {
   nama: string;
   email: string;
   role: Role;
+  /** Penanda tambahan di atas role "admin", belum dipakai di tampilan manapun — disiapkan untuk fitur khusus mendatang. */
+  super_admin: boolean;
   divisi_id: string | null;
   jabatan: string | null;
   foto_url: string | null;

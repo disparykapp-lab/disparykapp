@@ -13,6 +13,8 @@ interface AuthState {
   belumTerdaftar: boolean;
   /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
   bisaKalenderKonten: boolean;
+  /** true untuk admin yang ditandai super_admin; belum dipakai di tampilan manapun */
+  superAdmin: boolean;
   loginGoogle: () => Promise<void>;
   /** Login Google untuk mengisi form pendaftaran (/daftar); sesi tanpa profil tidak di-logout otomatis */
   daftarGoogle: () => Promise<void>;
@@ -182,6 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, muatProfile]);
 
   const bisaKalenderKonten = profile?.role === "admin" || !!divisi?.fitur_kalender_konten;
+  const superAdmin = profile?.role === "admin" && profile?.super_admin === true;
 
   const value = useMemo(
     () => ({
@@ -191,6 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       belumTerdaftar,
       bisaKalenderKonten,
+      superAdmin,
       loginGoogle,
       daftarGoogle,
       logout,
@@ -203,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       belumTerdaftar,
       bisaKalenderKonten,
+      superAdmin,
       loginGoogle,
       daftarGoogle,
       logout,
