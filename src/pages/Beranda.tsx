@@ -162,7 +162,7 @@ export default function Beranda() {
             )}
             <IconTile to="/rekap" iconSrc="/icon_rekap.png" label="Rekap" />
             {bisaKalenderKonten && (
-              <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender" />
+              <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender Konten" />
             )}
             {bisaNaskahAi && <IconTile to="/naskah-ai" iconSrc="/icon_naskahai.png" label="Naskah AI" />}
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}

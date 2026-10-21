@@ -90,9 +90,9 @@ export default function NaskahAi() {
       <HeaderHalaman judul="Naskah AI" kembaliKe="/beranda" />
 
       <div className="rounded-xl bg-blue-50 p-3 text-xs text-blue-900">
-        Isi kolom di bawah (bukan nulis prompt sendiri) — AI akan merangkainya jadi naskah
-        liputan. Jangan masukkan fakta/kutipan yang tidak kamu yakini benar, karena AI akan
-        menulis persis berdasarkan apa yang kamu isi.
+        Isi kolom di bawah — AI akan merangkainya jadi naskah liputan. Jangan masukkan
+        fakta/kutipan yang tidak kamu yakini benar, karena AI akan menulis persis berdasarkan
+        apa yang kamu isi.
       </div>
 
       <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm">
