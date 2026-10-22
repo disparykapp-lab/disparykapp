@@ -101,6 +101,9 @@ npm run dev
        kartu animasi + daftar ucapan yang masuk; kalau hari ini ulang tahun rekan **sedivisi**,
        tampil kartu pengingat dengan kolom kirim ucapan langsung (satu ucapan per orang per
        hari, dicegah lewat constraint unik).
+   24. `0028_game_coret_tebak.sql` — game tebak gambar multipemain "Coret Tebak" (lihat bagian
+       **Game Coret Tebak** di bawah). Membuat tabel `game_*`, fungsi RPC `game_*`, bank kata 7
+       tema, dan menambahkan tabel game ke publikasi Realtime.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
@@ -174,6 +177,33 @@ melihat riwayat naskah satu sama lain, bukan cuma punya sendiri. Cuma **super ad
 menghapus baris riwayat siapa pun, lewat tombol "Hapus" yang muncul khusus untuk mereka; aksi
 hapusnya tercatat juga di log super admin (lihat bagian "Kontrol khusus super admin" di atas).
 
+## Game Coret Tebak
+
+Menu **Coret Tebak** di Beranda (`/game`): tebak gambar multipemain 2–10 orang — lobi, buat
+room (tema, waktu 60/90/120 dtk, 1–5 ronde, publik/privat), ruang tunggu, pilih kata, menggambar
+& menebak, reveal, lalu podium juara. Desain & alurnya mengikuti
+`Brief_Aset_Visual_Game_Tebak_Gambar.md`; semua gambar dipotong dari satu lembar aset
+"Lembar Aset Game Coret Tebak.png" (latar buram dibuang otomatis dengan model segmentasi) ke
+`src/features/game/assets/`. Lembar sumbernya sendiri (2,3 MB) sengaja tidak di-commit karena
+tidak dipakai saat aplikasi berjalan — kalau ditaruh di `public/`, ia ikut ter-deploy percuma.
+
+Cara kerjanya (penting kalau mau mengubah):
+- **Server yang memegang aturan.** Kata jawaban ada di tabel `game_rahasia` yang cuma bisa
+  dibaca penggambar giliran itu; penilaian tebakan, skor, dan pergantian fase semua di fungsi
+  SQL `SECURITY DEFINER`. Klien tidak pernah menerima jawaban sebelum reveal.
+- **Waktu dari jam server.** Tiap pemain memanggil `game_detak` tiap ~5 dtk; fungsi itu yang
+  memajukan fase kalau tenggat lewat, jadi permainan tetap jalan walau penggambar menutup
+  tab. Respons detak juga dipakai klien untuk mengoreksi jam HP yang meleset.
+- **Coretan kanvas tidak disimpan**: dikirim langsung antar-pemain lewat Realtime Broadcast
+  (channel `coret-tebak:<room_id>`). Pemain yang tersambung ulang otomatis meminta gambar
+  terbaru ke penggambar. Channel broadcast ini publik, jadi secara teknis pengguna login yang
+  usil bisa mengirim coretan palsu — klien hanya menerima coretan dari id penggambar giliran
+  itu, dan untuk game internal kantor risiko ini dianggap wajar.
+- Kode & aset game dimuat **lazy** (chunk `GamePage`), tidak menambah unduhan awal aplikasi absensi.
+- Bank kata ada di tabel `game_kata` (tema: umum, jogja, kuliner, hewan, wisata, kantor,
+  aktivitas) — tambah kata cukup `insert into game_kata (tema, kata) values (...)`.
+- Uji logika (normalisasi tebakan, skor, peringkat, transisi fase): `npm test`.
+
 ## Deploy ke Render
 
 1. Push repo ini ke GitHub.
@@ -195,8 +225,10 @@ src/
   pages/          # Beranda, Absen, Rekap, Kalender, KontenForm
   landing/        # Landing page publik (/): bagian-bagian, efek GSAP/Lenis, skema isi
   pages/admin/    # Kelola: Pegawai, Divisi, Pengaturan, Tinjau Absensi, Landing Page
+  features/game/  # Game Coret Tebak (lazy): komponen layar, kanvas, logika, aset WebP
   types/          # tipe tabel database
 supabase/migrations/  # SQL: skema, RLS, RPC, storage (jalankan berurutan)
+tests/            # uji logika murni (npm test, pakai node --test)
 ```
 
 ## Catatan penting: batasan anti-pemalsuan lokasi

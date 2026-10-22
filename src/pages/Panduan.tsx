@@ -161,6 +161,34 @@ export default function Panduan() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="🎨 Game Coret Tebak">
+        <p className="text-sm text-gray-600">
+          Game tebak gambar untuk 2–10 pemain, buka lewat menu "Coret Tebak" di Beranda.
+        </p>
+        <Langkah no={1}>
+          Tekan <strong>"Buat Room"</strong>, pilih tema, waktu menggambar, jumlah ronde, maksimal
+          pemain, dan publik/privat. Bagikan <strong>kode room</strong> (atau tombol bagikan link)
+          ke rekan kerja. Room publik juga muncul di daftar lobi.
+        </Langkah>
+        <Langkah no={2}>
+          Rekan bergabung lewat daftar lobi, kolom <strong>"Kode room"</strong>, atau link. Host
+          menekan <strong>"Mulai"</strong> kalau sudah ada minimal 2 pemain.
+        </Langkah>
+        <Langkah no={3}>
+          Pemain bergiliran menggambar: pilih 1 dari 3 kata, lalu gambar di kanvas. Pemain lain
+          mengetik tebakan. Huruf petunjuk terbuka pelan-pelan seiring waktu.
+        </Langkah>
+        <Langkah no={4}>
+          Tebakan salah terlihat semua pemain. Tebakan <strong>"hampir benar"</strong> cuma
+          terlihat olehmu (kolomnya bergoyang). Tebakan benar tidak ditampilkan ke pemain lain —
+          mereka cuma melihat "kamu menebak benar".
+        </Langkah>
+        <Langkah no={5}>
+          Makin cepat menebak, makin besar poinnya. Setelah semua giliran selesai, juara 1–3
+          tampil di podium. Host bisa langsung "Main Lagi".
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="💡 Tips Supaya Absen Lancar">
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-600">
           <li>Aktifkan GPS/Lokasi di HP sebelum membuka aplikasi.</li>

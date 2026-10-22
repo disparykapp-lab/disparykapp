@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { PresenceProvider } from "./contexts/PresenceContext";
 import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireFiturNaskahAi, RequireSuperAdmin } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
+import Loading from "./components/Loading";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import Beranda from "./pages/Beranda";
@@ -31,6 +32,8 @@ import NaskahAi from "./pages/NaskahAi";
 
 // Landing (GSAP + Lenis) dimuat terpisah: pengguna aplikasi tidak perlu mengunduhnya.
 const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
+// Game Coret Tebak juga terpisah: aset & kodenya baru diunduh saat menu game dibuka.
+const GamePage = lazy(() => import("./features/game/GamePage"));
 
 export default function App() {
   return (
@@ -90,6 +93,14 @@ export default function App() {
               <Route path="/profil" element={<Profil />} />
               <Route path="/tugas" element={<Tugas />} />
               <Route path="/tugas-undangan" element={<TugasUndangan />} />
+              <Route
+                path="/game/*"
+                element={
+                  <Suspense fallback={<Loading teks="Memuat game..." />}>
+                    <GamePage />
+                  </Suspense>
+                }
+              />
 
               <Route element={<RequireFiturKalender />}>
                 <Route path="/kalender" element={<Kalender />} />
