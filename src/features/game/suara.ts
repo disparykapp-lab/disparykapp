@@ -12,12 +12,23 @@ export function suaraNyala(): boolean {
   }
 }
 
+const pendengar = new Set<(nyala: boolean) => void>();
+
+/** Satu tombol speaker mengatur efek suara sekaligus musik latar. */
 export function aturSuara(nyala: boolean) {
   try {
     localStorage.setItem(KUNCI, nyala ? "1" : "0");
   } catch {
     // penyimpanan diblokir (mode privat) — abaikan
   }
+  pendengar.forEach((f) => f(nyala));
+}
+
+export function dengarSuara(f: (nyala: boolean) => void): () => void {
+  pendengar.add(f);
+  return () => {
+    pendengar.delete(f);
+  };
 }
 
 function nada(frek: number, mulai: number, durasi: number, tipe: OscillatorType = "sine", volume = 0.18) {

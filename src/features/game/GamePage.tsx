@@ -4,12 +4,14 @@ import Loading from "../../components/Loading";
 import "./game.css";
 import { ASET } from "./assets";
 import { gabungRoom } from "./api";
+import { useMusikLatar } from "./musik";
 import AturRoom from "./komponen/AturRoom";
 import HalamanRoom from "./komponen/HalamanRoom";
 import Lobi from "./komponen/Lobi";
 
 /** Game "Coret Tebak" — dimuat lazy dari App.tsx supaya bundel absensi tidak membesar. */
 export default function GamePage() {
+  useMusikLatar(ASET.musik);
   return (
     <div className="coret-tebak ct-latar -mx-4 -mt-4 min-h-screen px-4 pb-10 pt-4">
       <Routes>

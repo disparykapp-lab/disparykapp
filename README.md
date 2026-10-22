@@ -200,6 +200,11 @@ Cara kerjanya (penting kalau mau mengubah):
   usil bisa mengirim coretan palsu — klien hanya menerima coretan dari id penggambar giliran
   itu, dan untuk game internal kantor risiko ini dianggap wajar.
 - Kode & aset game dimuat **lazy** (chunk `GamePage`), tidak menambah unduhan awal aplikasi absensi.
+- **Musik latar** `src/features/game/assets/backsound_game.mp3` (128 kbps, ±2,4 MB) diputar
+  berulang selama di halaman `/game*`, volume 30%. Browser memblokir audio sebelum ada
+  interaksi, jadi musik mulai pada ketukan pertama; tombol speaker game mematikan musik
+  sekaligus efek suara. Ganti lagunya cukup timpa file itu (jangan taruh di `dist/` — folder
+  itu dikosongkan setiap build).
 - Bank kata ada di tabel `game_kata` (tema: umum, jogja, kuliner, hewan, wisata, kantor,
   aktivitas) — tambah kata cukup `insert into game_kata (tema, kata) values (...)`.
 - Uji logika (normalisasi tebakan, skor, peringkat, transisi fase): `npm test`.

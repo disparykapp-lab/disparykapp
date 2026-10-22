@@ -187,6 +187,10 @@ export default function Panduan() {
           Makin cepat menebak, makin besar poinnya. Setelah semua giliran selesai, juara 1–3
           tampil di podium. Host bisa langsung "Main Lagi".
         </Langkah>
+        <Langkah no={6}>
+          Selama di halaman game ada musik latar (mulai setelah kamu menyentuh layar pertama
+          kali). Tombol speaker 🔊 di pojok kanan atas mematikan musik sekaligus efek suaranya.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="💡 Tips Supaya Absen Lancar">

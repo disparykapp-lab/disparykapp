@@ -31,6 +31,7 @@ export const ASET = {
   },
   ornamen: { gunungan: u("ornamen-gunungan") },
   latar: { jalan: u("latar-jalan") },
+  musik: new URL("./assets/backsound_game.mp3", import.meta.url).href,
 };
 
 /** Avatar kartun tetap untuk pemain tanpa foto profil (dipilih dari id, jadi selalu sama). */
