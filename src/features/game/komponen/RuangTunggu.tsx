@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Crown, Lock, Globe } from "lucide-react";
+import { Copy, Lock, Globe } from "lucide-react";
 import { ASET } from "../assets";
 import { temaById } from "../tema";
 import type { StateRoom } from "../useRoom";
@@ -70,7 +70,7 @@ export default function RuangTunggu({ s, linkRoom }: { s: StateRoom; linkRoom: s
                 <div className="min-w-0">
                   <p className="flex items-center gap-1 truncate text-sm font-semibold">
                     {p.profiles?.nama ?? "Pemain"}
-                    {p.user_id === room.host_id && <Crown size={13} className="shrink-0 text-[var(--ct-emas)]" aria-label="Host" />}
+                    {p.user_id === room.host_id && <img src={ASET.ui.mahkota} alt="Host" title="Host" className="h-3.5 w-auto shrink-0" />}
                   </p>
                   <p className="text-[11px] text-slate-400">{p.user_id === s.saya ? "Kamu" : on ? "Siap" : "Offline"}</p>
                 </div>

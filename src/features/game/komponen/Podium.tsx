@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ASET } from "../assets";
 import { peringkat } from "../logika";
 import { temaById } from "../tema";
@@ -46,7 +46,7 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
       </div>
 
       <section className="ct-kartu relative overflow-hidden px-2 pb-0 pt-6">
-        <img src={ASET.ornamen.gunungan} alt="" className="absolute right-2 top-2 h-16 w-auto opacity-30" />
+        <img src={ASET.dekorasi.gunungan} alt="" className="absolute right-2 top-2 h-16 w-auto opacity-30" />
         <div className="mx-auto flex max-w-sm items-end justify-center gap-2">
           {BALOK.map((b) => {
             const juara = diBalok(b.posisiKe);
@@ -55,7 +55,7 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
                 {juara && (
                   <div className="ct-jatuh relative mb-1 flex flex-col items-center" style={{ animationDelay: `${b.tunda + 500}ms` }}>
                     {b.posisiKe === 1 && (
-                      <Mahkota className="ct-mahkota absolute -top-7 z-10 h-8 w-auto" style={{ animationDelay: `${b.tunda + 1100}ms` }} />
+                      <img src={ASET.ui.mahkota} alt="" aria-hidden="true" className="ct-mahkota absolute -top-7 z-10 h-8 w-auto" style={{ animationDelay: `${b.tunda + 1100}ms` }} />
                     )}
                     <Avatar userId={juara.user_id} foto={juara.profiles?.foto_url} nama={juara.profiles?.nama ?? ""} ukuran={b.posisiKe === 1 ? 64 : 52} />
                     <p className="mt-1 max-w-full truncate text-xs font-bold">{juara.profiles?.nama?.split(" ")[0]}</p>
@@ -75,7 +75,9 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
       </section>
 
       <section className="ct-kartu flex flex-col gap-1 p-3">
-        <h2 className="mb-1 text-sm font-semibold text-slate-500">Skor akhir</h2>
+        <h2 className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-slate-500">
+          <img src={ASET.ui.piala} alt="" aria-hidden="true" className="h-5 w-5" /> Skor akhir
+        </h2>
         {urut.map((p, i) => (
           <div
             key={p.user_id}
@@ -110,19 +112,3 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
   );
 }
 
-/** Mahkota juara: emas, garis indigo tebal, permata indigo (gaya STYLE LOCK di brief). */
-function Mahkota({ className, style }: { className?: string; style?: CSSProperties }) {
-  return (
-    <svg viewBox="0 0 64 50" className={className} style={style} aria-hidden="true">
-      <g stroke="#1B1F3B" strokeWidth="3" strokeLinejoin="round">
-        <path d="M7 40 L4 15 L19 27 L32 9 L45 27 L60 15 L57 40 Z" fill="#F5B82E" />
-        <rect x="7" y="36" width="50" height="9" rx="3" fill="#E8A21B" />
-        <circle cx="4" cy="13" r="4" fill="#F5B82E" />
-        <circle cx="32" cy="7" r="4" fill="#F5B82E" />
-        <circle cx="60" cy="13" r="4" fill="#F5B82E" />
-        <circle cx="32" cy="27" r="4.5" fill="#2B3A8C" />
-      </g>
-      <path d="M12 20 L14 33" stroke="#FFF6E5" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
-    </svg>
-  );
-}

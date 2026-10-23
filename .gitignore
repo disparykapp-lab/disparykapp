@@ -26,3 +26,6 @@ client_secret_*.json
 *.njsproj
 *.sln
 *.sw?
+
+# File sumber aset game resolusi penuh (dioptimalkan ke src/features/game/assets/)
+aset-game-sumber/

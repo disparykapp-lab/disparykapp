@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { CheckCircle2, Clock, Pencil, Send } from "lucide-react";
+import { Clock, Send } from "lucide-react";
 import { ASET } from "../assets";
 import { infoRonde, jumlahHuruf, kotakPetunjuk, peringkat } from "../logika";
 import { bunyikan, getar } from "../suara";
@@ -117,7 +117,7 @@ export default function LayarMain({ s }: { s: StateRoom }) {
     <div className="flex flex-col gap-3">
       {/* status giliran + waktu */}
       <div className="ct-kartu flex items-center gap-2 px-3 py-2">
-        <Pencil size={16} className="shrink-0 text-[var(--ct-biru)]" />
+        <img src={ASET.ui.pensil} alt="" aria-hidden="true" className="h-5 w-5 shrink-0" />
         <p className="min-w-0 flex-1 truncate text-sm">
           {room.status === "reveal" ? (
             "Hasil giliran"
@@ -129,7 +129,7 @@ export default function LayarMain({ s }: { s: StateRoom }) {
           <span className="text-slate-400"> · Ronde {ronde.ronde}/{ronde.total}</span>
         </p>
         <span className={`flex items-center gap-1 font-bold tabular-nums ${kritis ? "ct-waktu-kritis text-[var(--ct-merah)]" : ""}`}>
-          <Clock size={15} /> {Math.ceil(sisa)}
+          {kritis ? <img src={ASET.lencana.api} alt="" aria-hidden="true" className="h-5 w-5" /> : <Clock size={15} />} {Math.ceil(sisa)}
         </span>
       </div>
       <div className="-mt-2 h-2 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
@@ -353,7 +353,7 @@ function StripPemain({ s, urut }: { s: StateRoom; urut: Urut }) {
             <div key={p.user_id} className="flex items-center gap-2 px-1 text-sm">
               <span className="w-5 text-center text-xs text-slate-400">{p.posisi}</span>
               <span className="min-w-0 flex-1 truncate font-semibold">{p.profiles?.nama}</span>
-              {p.sudah_benar && <CheckCircle2 size={15} className="text-[var(--ct-hijau)]" />}
+              {p.sudah_benar && <img src={ASET.ui.checklist} alt="Sudah benar" className="h-4 w-4" />}
               <span className="font-bold tabular-nums">{p.skor}</span>
             </div>
           ))}

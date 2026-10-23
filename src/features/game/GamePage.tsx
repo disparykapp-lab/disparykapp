@@ -48,7 +48,7 @@ function GabungLewatLink() {
   if (!error) return <Loading teks="Bergabung ke room..." />;
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <img src={ASET.wajah.kalah} alt="" className="h-32 w-auto" />
+      <img src={ASET.wajah.kaget} alt="" className="h-32 w-auto" />
       <p className="font-semibold">{error}</p>
       <button type="button" onClick={() => navigate("/game", { replace: true })} className="ct-tombol">
         Ke Lobi

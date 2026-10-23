@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
-import { Info, LogOut, Share2, Volume2, VolumeX, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ASET, avatarCadangan } from "../assets";
 import { aturSuara, suaraNyala } from "../suara";
 
@@ -31,7 +31,7 @@ export function Avatar({
       />
       {lencana && (
         <img
-          src={lencana === "benar" ? ASET.ikon.benar : ASET.ikon.gambar}
+          src={lencana === "benar" ? ASET.ui.checklist : ASET.ui.pensil}
           alt={lencana === "benar" ? "Sudah menebak benar" : "Sedang menggambar"}
           className="ct-membal absolute -bottom-1 -right-1 drop-shadow"
           style={{ width: ukuran * 0.45, height: ukuran * 0.45 }}
@@ -44,14 +44,11 @@ export function Avatar({
 export function SlotKosong({ ukuran = 44 }: { ukuran?: number }) {
   return (
     <span
-      className="flex shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-400"
+      className="flex shrink-0 items-center justify-center rounded-full bg-slate-100"
       style={{ width: ukuran, height: ukuran }}
       aria-hidden="true"
     >
-      <svg viewBox="0 0 24 24" width={ukuran * 0.55} height={ukuran * 0.55} fill="currentColor">
-        <circle cx="12" cy="8" r="4.5" />
-        <path d="M3.5 21c0-4.4 3.8-7.5 8.5-7.5s8.5 3.1 8.5 7.5z" />
-      </svg>
+      <img src={ASET.ui.tamu} alt="" className="object-contain opacity-80" style={{ width: ukuran * 0.6, height: ukuran * 0.6 }} />
     </span>
   );
 }
@@ -63,15 +60,22 @@ function TombolIkon({ onClick, label, children }: { onClick: () => void; label: 
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--ct-indigo)] shadow transition active:scale-95"
+      className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white shadow transition active:scale-95"
     >
       {children}
     </button>
   );
 }
 
-/** Bilah atas: logo + suara + bagikan + aturan + keluar. */
-export function Kepala({ onKeluar, linkBagikan }: { onKeluar: () => void; linkBagikan?: string }) {
+function Ikon({ src, redup = false }: { src: string; redup?: boolean }) {
+  return <img src={src} alt="" aria-hidden="true" className={`h-6 w-6 object-contain ${redup ? "opacity-40" : ""}`} />;
+}
+
+/**
+ * Bilah atas: logo + suara + bagikan + aturan + keluar. `keBeranda` = tombol keluar
+ * memakai ikon rumah (di lobi, karena tombolnya kembali ke Beranda aplikasi).
+ */
+export function Kepala({ onKeluar, linkBagikan, keBeranda = false }: { onKeluar: () => void; linkBagikan?: string; keBeranda?: boolean }) {
   const [suara, setSuara] = useState(suaraNyala());
   const [aturan, setAturan] = useState(false);
   const [disalin, setDisalin] = useState(false);
@@ -103,18 +107,19 @@ export function Kepala({ onKeluar, linkBagikan }: { onKeluar: () => void; linkBa
             }}
             label={suara ? "Matikan suara" : "Nyalakan suara"}
           >
-            {suara ? <Volume2 size={19} /> : <VolumeX size={19} />}
+            <Ikon src={ASET.ui.speaker} redup={!suara} />
+            {!suara && <img src={ASET.ui.xMerah} alt="" aria-hidden="true" className="absolute -bottom-0.5 -right-0.5 h-4 w-4" />}
           </TombolIkon>
           {linkBagikan && (
             <TombolIkon onClick={() => void bagikan()} label="Bagikan link room">
-              <Share2 size={18} />
+              <Ikon src={ASET.ui.tautan} />
             </TombolIkon>
           )}
           <TombolIkon onClick={() => setAturan(true)} label="Aturan main">
-            <Info size={19} />
+            <Ikon src={ASET.ui.info} />
           </TombolIkon>
-          <TombolIkon onClick={onKeluar} label="Keluar">
-            <LogOut size={18} />
+          <TombolIkon onClick={onKeluar} label={keBeranda ? "Kembali ke Beranda" : "Keluar"}>
+            <Ikon src={keBeranda ? ASET.ui.rumah : ASET.ui.keluar} />
           </TombolIkon>
         </div>
       </header>

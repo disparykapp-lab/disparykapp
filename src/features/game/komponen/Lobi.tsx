@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, RefreshCw, Users } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { ASET } from "../assets";
 import { ambilRoomLobi, gabungRoom, type RoomLobi } from "../api";
 import { temaById } from "../tema";
@@ -51,7 +51,7 @@ export default function Lobi() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Kepala onKeluar={() => navigate("/beranda")} />
+      <Kepala onKeluar={() => navigate("/beranda")} keBeranda />
 
       <section className="ct-kartu relative overflow-hidden">
         <img src={ASET.latar.jalan} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25 blur-[1px]" />
@@ -63,7 +63,7 @@ export default function Lobi() {
               <p className="text-sm text-slate-600">Main bareng rekan kantor, 2–10 pemain.</p>
             </div>
             <button type="button" onClick={() => navigate("/game/baru")} className="ct-tombol w-full">
-              <Plus size={20} /> Buat Room
+              <img src={ASET.ui.tambah} alt="" aria-hidden="true" className="h-6 w-6 rounded-full bg-white" /> Buat Room
             </button>
             <form onSubmit={kirimKode} className="flex gap-2">
               <input
@@ -121,7 +121,7 @@ export default function Lobi() {
                       ))}
                     </div>
                     <span className="ml-1 flex items-center gap-0.5 text-xs text-slate-500">
-                      <Users size={12} /> {r.pemain.length}/{r.maks_pemain}
+                      <img src={ASET.ui.grup} alt="" aria-hidden="true" className="h-3.5 w-auto" /> {r.pemain.length}/{r.maks_pemain}
                     </span>
                   </div>
                 </div>

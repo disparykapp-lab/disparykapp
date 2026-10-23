@@ -182,10 +182,12 @@ hapusnya tercatat juga di log super admin (lihat bagian "Kontrol khusus super ad
 Menu **Coret Tebak** di Beranda (`/game`): tebak gambar multipemain 2–10 orang — lobi, buat
 room (tema, waktu 60/90/120 dtk, 1–5 ronde, publik/privat), ruang tunggu, pilih kata, menggambar
 & menebak, reveal, lalu podium juara. Desain & alurnya mengikuti
-`Brief_Aset_Visual_Game_Tebak_Gambar.md`; semua gambar dipotong dari satu lembar aset
-"Lembar Aset Game Coret Tebak.png" (latar buram dibuang otomatis dengan model segmentasi) ke
-`src/features/game/assets/`. Lembar sumbernya sendiri (2,3 MB) sengaja tidak di-commit karena
-tidak dipakai saat aplikasi berjalan — kalau ditaruh di `public/`, ia ikut ter-deploy percuma.
+`Brief_Aset_Visual_Game_Tebak_Gambar.md`. Gambar aslinya (PNG transparan 2000 px, ±91 MB)
+ada di folder `aset-game-sumber/` yang **tidak di-commit** (masuk `.gitignore`); yang dipakai
+aplikasi adalah versi WebP kecilnya di `src/features/game/assets/` (dipangkas margin
+transparannya dan diperkecil ke ±3× ukuran tampil, total ±0,6 MB). Kalau mengganti gambar,
+optimalkan dulu ke WebP dengan ukuran serupa — jangan taruh PNG 2000 px langsung, dan jangan
+taruh di `dist/` (folder itu dikosongkan setiap build).
 
 Cara kerjanya (penting kalau mau mengubah):
 - **Server yang memegang aturan.** Kata jawaban ada di tabel `game_rahasia` yang cuma bisa

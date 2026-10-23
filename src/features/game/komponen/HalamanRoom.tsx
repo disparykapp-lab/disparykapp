@@ -37,7 +37,7 @@ export default function HalamanRoom() {
   if (s.ditutup) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <img src={ASET.wajah.kalah} alt="" className="h-32 w-auto" />
+        <img src={ASET.wajah.kaget} alt="" className="h-32 w-auto" />
         <p className="ct-judul text-xl">Room sudah ditutup</p>
         <p className="text-sm text-slate-500">Kembali ke lobi…</p>
       </div>

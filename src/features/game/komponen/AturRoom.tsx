@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Globe, Lock, Minus, Plus } from "lucide-react";
+import { ASET } from "../assets";
 import { buatRoom } from "../api";
 import { DAFTAR_TEMA } from "../tema";
 import { Kepala } from "./bersama";
@@ -30,7 +31,9 @@ export default function AturRoom() {
   return (
     <div className="flex flex-col gap-4">
       <Kepala onKeluar={() => navigate("/game")} />
-      <h1 className="ct-judul text-2xl text-[var(--ct-indigo)]">Atur Room</h1>
+      <h1 className="ct-judul flex items-center gap-2 text-2xl text-[var(--ct-indigo)]">
+        <img src={ASET.ui.gear} alt="" aria-hidden="true" className="h-7 w-7" /> Atur Room
+      </h1>
 
       <Bagian judul="Tema kata">
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">

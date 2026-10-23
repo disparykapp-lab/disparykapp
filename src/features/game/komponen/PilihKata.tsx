@@ -15,7 +15,7 @@ export function PilihKata({
 
   return (
     <div className="flex flex-col items-center gap-3 p-4 text-center">
-      <img src={ASET.wajah.pikir} alt="" className="h-20 w-auto" />
+      <img src={ASET.maskot.melukis} alt="" className="ct-napas h-24 w-auto" />
       <p className="ct-judul text-xl text-[var(--ct-indigo)]">Pilih kata untuk digambar</p>
       <p className="text-sm text-slate-500">Dipilihkan acak dalam {Math.ceil(sisa)} detik</p>
       <div className="ct-kartu-kata grid w-full gap-2 sm:grid-cols-3">
