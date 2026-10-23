@@ -58,7 +58,7 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
                       <img src={ASET.ui.mahkota} alt="" aria-hidden="true" className="ct-mahkota absolute -top-7 z-10 h-8 w-auto" style={{ animationDelay: `${b.tunda + 1100}ms` }} />
                     )}
                     <Avatar userId={juara.user_id} foto={juara.profiles?.foto_url} nama={juara.profiles?.nama ?? ""} ukuran={b.posisiKe === 1 ? 64 : 52} />
-                    <p className="mt-1 max-w-full truncate text-xs font-bold">{juara.profiles?.nama?.split(" ")[0]}</p>
+                    <p className="mt-1 line-clamp-2 max-w-full break-words text-center text-[11px] font-bold leading-tight">{juara.profiles?.nama}</p>
                     <p className="text-xs font-bold text-[var(--ct-biru)]">{juara.skor}</p>
                   </div>
                 )}
@@ -86,7 +86,7 @@ export default function Podium({ s, onKeluar }: { s: StateRoom; onKeluar: () => 
           >
             <span className="w-6 text-center font-bold text-slate-400">{p.posisi}</span>
             <Avatar userId={p.user_id} foto={p.profiles?.foto_url} nama={p.profiles?.nama ?? ""} ukuran={32} />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold">{p.profiles?.nama}</span>
+            <span className="line-clamp-2 min-w-0 flex-1 break-words text-sm font-semibold leading-tight">{p.profiles?.nama}</span>
             <span className="font-bold tabular-nums">{p.skor}</span>
           </div>
         ))}

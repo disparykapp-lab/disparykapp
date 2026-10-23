@@ -30,18 +30,21 @@ export default function Reveal({ s }: { s: StateRoom }) {
             className="ct-naik-masuk flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-1.5"
             style={{ animationDelay: `${i * 120}ms` }}
           >
-            <Avatar userId={p.user_id} foto={p.profiles?.foto_url} nama={p.profiles?.nama ?? ""} ukuran={30} />
-            <span className="flex-1 truncate text-left text-sm font-semibold">
-              {p.profiles?.nama}
-              {p.user_id === room.penggambar_id && (
-                <img src={ASET.ui.pensil} alt="penggambar" title="Penggambar" className="ml-1 inline h-4 w-4 align-[-2px]" />
-              )}
-            </span>
-            {p.user_id === pertamaId && <img src={ASET.poin.lima_puluh} alt="Bonus tercepat +50" title="Bonus tercepat" className="h-5 w-auto" />}
-            {p.user_id === room.penggambar_id && bonusSemua && (
-              <img src={ASET.poin.seratus} alt="Bonus semua benar +100" title="Bonus semua penebak benar" className="h-5 w-auto" />
+            <Avatar
+              userId={p.user_id}
+              foto={p.profiles?.foto_url}
+              nama={p.profiles?.nama ?? ""}
+              ukuran={30}
+              lencana={p.user_id === room.penggambar_id ? "gambar" : null}
+            />
+            <span className="line-clamp-2 min-w-0 flex-1 break-words text-left text-sm font-semibold leading-tight">{p.profiles?.nama}</span>
+            {p.user_id === pertamaId && (
+              <img src={ASET.poin.lima_puluh} alt="Bonus tercepat +50" title="Bonus tercepat" className="h-5 w-auto shrink-0" />
             )}
-            <span className="font-bold text-[var(--ct-hijau)]">+{p.poin_giliran}</span>
+            {p.user_id === room.penggambar_id && bonusSemua && (
+              <img src={ASET.poin.seratus} alt="Bonus semua benar +100" title="Bonus semua penebak benar" className="h-5 w-auto shrink-0" />
+            )}
+            <span className="shrink-0 font-bold text-[var(--ct-hijau)]">+{p.poin_giliran}</span>
           </li>
         ))}
       </ul>

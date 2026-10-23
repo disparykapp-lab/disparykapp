@@ -110,6 +110,18 @@ export function kotakPetunjuk(pola: string): (string | null)[] {
   return [...pola].map((c) => (c === " " ? null : c === "_" ? "" : c));
 }
 
+/**
+ * Nama pendek untuk tempat sempit. Biasanya kata pertama, tapi kalau kata pertama
+ * cuma awalan pendek (mis. "Ni Wayan …", "I Made …", "M. Rizky …") ambil dua kata,
+ * supaya tidak tampil "Ni" saja.
+ */
+export function namaPendek(nama: string): string {
+  const kata = nama.trim().split(/\s+/).filter(Boolean);
+  if (kata.length === 0) return "";
+  if (kata.length > 1 && kata[0].replace(/\./g, "").length <= 3) return `${kata[0]} ${kata[1]}`;
+  return kata[0];
+}
+
 export function jumlahHuruf(pola: string): number {
   return [...pola].filter((c) => c !== " ").length;
 }

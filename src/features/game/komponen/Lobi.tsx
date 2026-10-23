@@ -100,17 +100,19 @@ export default function Lobi() {
           </div>
         )}
 
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {room.map((r) => {
             const tema = temaById(r.tema);
             const penuh = r.pemain.length >= r.maks_pemain;
             return (
-              <div key={r.id} className="ct-kartu ct-naik-masuk flex items-center gap-3 p-3">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl" style={{ background: tema.warna }}>
-                  <img src={tema.gambar} alt="" className="h-11 w-11 object-contain" loading="lazy" />
+              <div key={r.id} className="ct-kartu ct-naik-masuk flex min-w-0 items-center gap-2.5 p-3 sm:gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14" style={{ background: tema.warna }}>
+                  <img src={tema.gambar} alt="" className="h-9 w-9 object-contain sm:h-11 sm:w-11" loading="lazy" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">Room {r.host_nama ?? "tanpa nama"}</p>
+                  <p className="line-clamp-2 break-words font-semibold leading-tight" title={`Room ${r.host_nama ?? ""}`}>
+                    {r.host_nama ?? "Tanpa nama"}
+                  </p>
                   <p className="text-xs text-slate-500">
                     {tema.label} · {r.waktu_gambar} dtk · {r.jumlah_ronde} ronde
                   </p>
@@ -129,7 +131,7 @@ export default function Lobi() {
                   type="button"
                   disabled={penuh || bergabung === r.kode}
                   onClick={() => void gabung(r.kode)}
-                  className="ct-tombol ct-tombol-hijau min-h-[40px] px-4 text-sm"
+                  className="ct-tombol ct-tombol-hijau min-h-[40px] shrink-0 px-3 text-sm sm:px-4"
                 >
                   {penuh ? "Penuh" : bergabung === r.kode ? "..." : "Gabung"}
                 </button>

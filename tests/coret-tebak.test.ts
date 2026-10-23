@@ -7,6 +7,7 @@ import {
   infoRonde,
   jarakEdit,
   kotakPetunjuk,
+  namaPendek,
   nilaiTebakan,
   normalTebakan,
   peringkat,
@@ -99,4 +100,13 @@ test("transisi fase", () => {
 test("kotak petunjuk", () => {
   assert.deepEqual(kotakPetunjuk("t__u"), ["t", "", "", "u"]);
   assert.deepEqual(kotakPetunjuk("__ _"), ["", "", null, ""]);
+});
+
+test("nama pendek: awalan pendek ikut kata kedua", () => {
+  assert.equal(namaPendek("Afrisabil Rifky Ardana"), "Afrisabil");
+  assert.equal(namaPendek("NI WAYAN ADVENSIA NADINE PALAMBA"), "NI WAYAN");
+  assert.equal(namaPendek("I Made Sudarsana"), "I Made");
+  assert.equal(namaPendek("M. Rizky"), "M. Rizky");
+  assert.equal(namaPendek("Ani"), "Ani", "satu kata pendek tetap dipakai");
+  assert.equal(namaPendek("  Budi   Santoso "), "Budi");
 });

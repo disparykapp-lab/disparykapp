@@ -38,7 +38,7 @@ export default function RuangTunggu({ s, linkRoom }: { s: StateRoom; linkRoom: s
           <img src={tema.gambar} alt="" className="h-12 w-12 object-contain" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="ct-judul text-lg">Tema {tema.label}</p>
+          <p className="ct-judul text-base leading-tight sm:text-lg">Tema {tema.label}</p>
           <p className="text-xs text-slate-500">
             {room.waktu_gambar} dtk/giliran · {room.jumlah_ronde} ronde ·{" "}
             {room.publik ? (
@@ -66,12 +66,14 @@ export default function RuangTunggu({ s, linkRoom }: { s: StateRoom; linkRoom: s
             const on = s.online(p.user_id);
             return (
               <li key={p.user_id} className="ct-membal flex items-center gap-2 rounded-2xl bg-slate-50 p-2">
-                <Avatar userId={p.user_id} foto={p.profiles?.foto_url} nama={p.profiles?.nama ?? ""} redup={!on} />
+                <span className="relative shrink-0">
+                  <Avatar userId={p.user_id} foto={p.profiles?.foto_url} nama={p.profiles?.nama ?? ""} ukuran={40} redup={!on} />
+                  {p.user_id === room.host_id && (
+                    <img src={ASET.ui.mahkota} alt="Host" title="Host" className="absolute -top-2.5 left-1/2 h-4 w-auto -translate-x-1/2 -rotate-6" />
+                  )}
+                </span>
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1 truncate text-sm font-semibold">
-                    {p.profiles?.nama ?? "Pemain"}
-                    {p.user_id === room.host_id && <img src={ASET.ui.mahkota} alt="Host" title="Host" className="h-3.5 w-auto shrink-0" />}
-                  </p>
+                  <p className="line-clamp-2 break-words text-[13px] font-semibold leading-tight">{p.profiles?.nama ?? "Pemain"}</p>
                   <p className="text-[11px] text-slate-400">{p.user_id === s.saya ? "Kamu" : on ? "Siap" : "Offline"}</p>
                 </div>
               </li>

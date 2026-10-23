@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Clock, Send } from "lucide-react";
 import { ASET } from "../assets";
-import { infoRonde, jumlahHuruf, kotakPetunjuk, peringkat } from "../logika";
+import { infoRonde, jumlahHuruf, kotakPetunjuk, namaPendek, peringkat } from "../logika";
 import { bunyikan, getar } from "../suara";
 import type { StateRoom } from "../useRoom";
 import { Avatar } from "./bersama";
@@ -31,7 +31,7 @@ export default function LayarMain({ s }: { s: StateRoom }) {
   const total = room.status === "menggambar" ? room.waktu_gambar : room.status === "memilih" ? 10 : 6;
   const ronde = infoRonde(room.urutan.length, room.jumlah_ronde, room.giliran_ke);
   const namaPenggambar = s.namaPemain(room.penggambar_id);
-  const namaDepanPenggambar = namaPenggambar.split(" ")[0];
+  const namaSingkatPenggambar = namaPendek(namaPenggambar);
   const saya = s.aktif.find((p) => p.user_id === s.saya);
   const urut = useMemo(() => peringkat(s.aktif), [s.aktif]);
 
@@ -49,10 +49,10 @@ export default function LayarMain({ s }: { s: StateRoom }) {
     statusSebelum.current = room.status;
     if (room.status === "memilih" && lama !== "memilih") {
       bunyikan("giliran");
-      setSpanduk(room.penggambar_id === s.saya ? "Giliranmu menggambar!" : `Giliran ${namaPenggambar} menggambar!`);
+      setSpanduk(room.penggambar_id === s.saya ? "Giliranmu menggambar!" : `Giliran ${namaSingkatPenggambar} menggambar!`);
     }
     if (room.status === "reveal" && lama === "menggambar" && !s.aktif.some((p) => p.sudah_benar)) bunyikan("habis");
-  }, [room.status, room.giliran_ke, room.penggambar_id, s.saya, namaPenggambar, s.aktif]);
+  }, [room.status, room.giliran_ke, room.penggambar_id, s.saya, namaSingkatPenggambar, s.aktif]);
 
   useEffect(() => {
     if (!spanduk) return;
@@ -118,16 +118,20 @@ export default function LayarMain({ s }: { s: StateRoom }) {
       {/* status giliran + waktu */}
       <div className="ct-kartu flex items-center gap-2 px-3 py-2">
         <img src={ASET.ui.pensil} alt="" aria-hidden="true" className="h-5 w-5 shrink-0" />
-        <p className="min-w-0 flex-1 truncate text-sm">
-          {room.status === "reveal" ? (
-            "Hasil giliran"
-          ) : (
-            <>
-              <b>{s.sayaPenggambar ? "Kamu" : namaDepanPenggambar}</b> {room.status === "memilih" ? "memilih kata" : "menggambar"}
-            </>
-          )}
-          <span className="text-slate-400"> · Ronde {ronde.ronde}/{ronde.total}</span>
-        </p>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-sm">
+            {room.status === "reveal" ? (
+              "Hasil giliran"
+            ) : (
+              <>
+                <b>{s.sayaPenggambar ? "Kamu" : namaSingkatPenggambar}</b> {room.status === "memilih" ? "memilih kata" : "menggambar"}
+              </>
+            )}
+          </p>
+          <p className="text-[11px] text-slate-400">
+            Ronde {ronde.ronde}/{ronde.total}
+          </p>
+        </div>
         <span className={`flex items-center gap-1 font-bold tabular-nums ${kritis ? "ct-waktu-kritis text-[var(--ct-merah)]" : ""}`}>
           {kritis ? <img src={ASET.lencana.api} alt="" aria-hidden="true" className="h-5 w-5" /> : <Clock size={15} />} {Math.ceil(sisa)}
         </span>
@@ -269,22 +273,24 @@ function Petunjuk({ pola, kataPenggambar }: { pola: string; kataPenggambar: stri
       </p>
     );
   }
-  const kotak = kotakPetunjuk(pola);
+  // dikelompokkan per kata: kalau tidak muat satu baris, pindah barisnya di antara kata
+  const kata: { h: string; i: number }[][] = [[]];
+  kotakPetunjuk(pola).forEach((h, i) => (h === null ? kata.push([]) : kata[kata.length - 1].push({ h, i })));
   return (
-    <div className="ct-kartu flex flex-wrap items-end justify-center gap-1 px-3 py-2" aria-label={`Petunjuk: ${jumlahHuruf(pola)} huruf`}>
-      {kotak.map((h, i) =>
-        h === null ? (
-          <span key={i} className="w-3" />
-        ) : (
-          <span
-            key={`${i}-${h}`}
-            className={`flex h-8 w-6 items-center justify-center border-b-[3px] border-[var(--ct-tinta)] text-lg font-bold uppercase ${h ? "ct-huruf-buka text-[var(--ct-biru)]" : ""}`}
-          >
-            {h}
-          </span>
-        )
-      )}
-      <span className="ml-2 self-center rounded-full bg-[var(--ct-indigo)] px-2 py-0.5 text-xs font-bold text-white">{jumlahHuruf(pola)}</span>
+    <div className="ct-kartu flex flex-wrap items-end justify-center gap-x-3 gap-y-2 px-3 py-2" aria-label={`Petunjuk: ${jumlahHuruf(pola)} huruf`}>
+      {kata.map((huruf, k) => (
+        <span key={k} className="flex gap-0.5 sm:gap-1">
+          {huruf.map(({ h, i }) => (
+            <span
+              key={`${i}-${h}`}
+              className={`flex h-8 w-5 items-center justify-center border-b-[3px] border-[var(--ct-tinta)] text-base font-bold uppercase sm:w-6 sm:text-lg ${h ? "ct-huruf-buka text-[var(--ct-biru)]" : ""}`}
+            >
+              {h}
+            </span>
+          ))}
+        </span>
+      ))}
+      <span className="self-center rounded-full bg-[var(--ct-indigo)] px-2 py-0.5 text-xs font-bold text-white">{jumlahHuruf(pola)}</span>
     </div>
   );
 }
@@ -342,7 +348,7 @@ function StripPemain({ s, urut }: { s: StateRoom; urut: Urut }) {
               redup={!s.online(p.user_id)}
               lencana={lencanaPemain(s, p.user_id, p.sudah_benar)}
             />
-            <span className="max-w-[56px] truncate text-[11px] font-semibold">{p.profiles?.nama?.split(" ")[0]}</span>
+            <span className="max-w-[64px] truncate text-[11px] font-semibold">{namaPendek(p.profiles?.nama ?? "")}</span>
             <span className="text-[11px] font-bold tabular-nums text-[var(--ct-biru)]">{p.skor}</span>
           </span>
         ))}
@@ -352,7 +358,7 @@ function StripPemain({ s, urut }: { s: StateRoom; urut: Urut }) {
           {urut.map((p) => (
             <div key={p.user_id} className="flex items-center gap-2 px-1 text-sm">
               <span className="w-5 text-center text-xs text-slate-400">{p.posisi}</span>
-              <span className="min-w-0 flex-1 truncate font-semibold">{p.profiles?.nama}</span>
+              <span className="line-clamp-2 min-w-0 flex-1 break-words font-semibold leading-tight">{p.profiles?.nama}</span>
               {p.sudah_benar && <img src={ASET.ui.checklist} alt="Sudah benar" className="h-4 w-4" />}
               <span className="font-bold tabular-nums">{p.skor}</span>
             </div>
