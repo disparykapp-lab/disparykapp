@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { RefreshCw } from "lucide-react";
+import { ChevronRight, RefreshCw } from "lucide-react";
 import { ASET } from "../assets";
 import { ambilRoomLobi, gabungRoom, type RoomLobi } from "../api";
 import { aksiRoom, statusMatch } from "../logika";
@@ -150,7 +150,10 @@ export default function Lobi() {
   );
 }
 
-/** Kartu room di lobi: ketuk kartu untuk detail; tombol kanan = aksi cepat (gabung/lanjutkan). */
+/**
+ * Kartu room di lobi: ketuk kartu di mana saja untuk detail; tombol kanan = aksi
+ * cepat (gabung/lanjutkan). Match orang lain yang sudah jalan tidak punya tombol.
+ */
 function KartuRoom({
   r,
   bergabung,
@@ -193,16 +196,18 @@ function KartuRoom({
           </span>
         </div>
       </div>
-      <button
-        type="button"
-        disabled={aksi === "penuh" || bergabung}
-        onClick={() => (aksi === "berjalan" ? onDetail() : onAksi())}
-        className={`ct-tombol relative z-10 min-h-[40px] shrink-0 px-3 text-sm sm:px-4 ${
-          aksi === "gabung" ? "ct-tombol-hijau" : aksi === "berjalan" ? "ct-tombol-putih" : ""
-        }`}
-      >
-        {bergabung ? "..." : aksi === "lanjut" ? "Lanjutkan" : aksi === "gabung" ? "Gabung" : aksi === "penuh" ? "Penuh" : "Detail"}
-      </button>
+      {aksi === "berjalan" ? (
+        <ChevronRight aria-hidden="true" size={22} className="pointer-events-none shrink-0 text-slate-400" />
+      ) : (
+        <button
+          type="button"
+          disabled={aksi === "penuh" || bergabung}
+          onClick={onAksi}
+          className={`ct-tombol relative z-10 min-h-[40px] shrink-0 px-3 text-sm sm:px-4 ${aksi === "gabung" ? "ct-tombol-hijau" : ""}`}
+        >
+          {bergabung ? "..." : aksi === "lanjut" ? "Lanjutkan" : aksi === "gabung" ? "Gabung" : "Penuh"}
+        </button>
+      )}
     </div>
   );
 }

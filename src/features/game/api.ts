@@ -151,7 +151,24 @@ export interface RoomLobi {
 export async function ambilRoomLobi(): Promise<RoomLobi[]> {
   const { data, error } = await supabase.rpc("game_daftar_lobi");
   cekError(error);
-  return (data as RoomLobi[]) ?? [];
+  // Versi lama fungsi ini (0028, sebelum 0029 dijalankan) hanya mengirim room yang
+  // menunggu beserta pemain online-nya, tanpa status/skor — lengkapi nilai bawaannya
+  // supaya room menunggu tetap tampil "Gabung", bukan dikira sedang main.
+  return ((data as Partial<RoomLobi>[] | null) ?? []).map((r) => ({
+    ...(r as RoomLobi),
+    publik: r.publik ?? true,
+    status: r.status ?? "menunggu",
+    giliran_ke: r.giliran_ke ?? 0,
+    total_giliran: r.total_giliran ?? 0,
+    host_id: r.host_id ?? "",
+    penggambar_nama: r.penggambar_nama ?? null,
+    saya_anggota: r.saya_anggota ?? false,
+    pemain: ((r.pemain ?? []) as Partial<PemainLobi>[]).map((p) => ({
+      ...(p as PemainLobi),
+      skor: p.skor ?? 0,
+      online: p.online ?? true,
+    })),
+  }));
 }
 
 export async function ambilRoom(roomId: string) {
