@@ -483,6 +483,8 @@ interface BarisLoginAdmin {
   nama: string;
   email: string;
   last_sign_in_at: string | null;
+  /** Login Google atau sesi terakhir diperpanjang (aplikasi dibuka) — lihat 0030. Belum ada sebelum 0030 dijalankan. */
+  terakhir_aktif?: string | null;
 }
 
 const LABEL_AKSI: Record<string, string> = {
@@ -518,22 +520,25 @@ function PanelLog() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold text-brand-text">Login Terakhir Admin</p>
+        <p className="text-xs font-semibold text-brand-text">Terakhir Aktif Admin</p>
         {loadingLogin ? (
           <Loading teks="Memuat info login..." />
         ) : (
           <div className="flex flex-col gap-2">
-            {login.map((a) => (
-              <div key={a.user_id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm shadow-sm">
-                <div>
-                  <p className="font-semibold text-brand-text">{a.nama}</p>
-                  <p className="text-xs text-gray-500">{a.email}</p>
+            {login.map((a) => {
+              const waktu = a.terakhir_aktif ?? a.last_sign_in_at;
+              return (
+                <div key={a.user_id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm shadow-sm">
+                  <div>
+                    <p className="font-semibold text-brand-text">{a.nama}</p>
+                    <p className="text-xs text-gray-500">{a.email}</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-gray-500">
+                    {waktu ? formatTanggal(waktu, "d MMM yyyy HH:mm") : "Belum pernah login"}
+                  </span>
                 </div>
-                <span className="shrink-0 text-xs text-gray-500">
-                  {a.last_sign_in_at ? formatTanggal(a.last_sign_in_at, "d MMM yyyy HH:mm") : "Belum pernah login"}
-                </span>
-              </div>
-            ))}
+              );
+            })}
             {login.length === 0 && (
               <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">Belum ada admin.</p>
             )}

@@ -107,6 +107,9 @@ npm run dev
    25. `0029_lobi_status_match.sql` — lobi game juga menampilkan room publik yang **sedang main**
        (status, ronde, siapa yang menggambar) dan room yang sedang kamu ikuti ("Room Kamu" +
        tombol Lanjutkan), dengan skor & status online tiap pemain untuk detail room.
+   26. `0030_aktif_terakhir_admin.sql` — Log Aktivitas Super Admin menampilkan **terakhir aktif**
+       tiap admin (login Google atau sesi yang diperpanjang saat aplikasi dibuka), bukan hanya
+       login pertama — admin yang tidak pernah logout sebelumnya tertahan di tanggal lama.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

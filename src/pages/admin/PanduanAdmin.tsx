@@ -201,9 +201,9 @@ export default function PanduanAdmin() {
           admin lain. Cuma akun dengan role admin yang bisa ditandai.
         </Langkah>
         <Langkah no={4}>
-          <strong>Log Aktivitas:</strong> menampilkan <strong>Login Terakhir Admin</strong> (waktu
-          login terakhir tiap admin, diambil dari data login Supabase Auth — bukan dicatat
-          manual) dan <strong>Riwayat Aksi Super Admin</strong>: semua koreksi absensi dan
+          <strong>Log Aktivitas:</strong> menampilkan <strong>Terakhir Aktif Admin</strong> (kapan
+          tiap admin terakhir login atau membuka aplikasi, diambil dari data sesi Supabase
+          Auth — bukan dicatat manual) dan <strong>Riwayat Aksi Super Admin</strong>: semua koreksi absensi dan
           perubahan status super admin yang pernah dilakukan (siapa, apa, kapan) — tidak bisa
           dihapus lewat aplikasi, sebagai jejak audit untuk kekuatan menu ini.
         </Langkah>
