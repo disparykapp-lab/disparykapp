@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
@@ -14,6 +14,10 @@ import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
 import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
 import type { Absensi } from "../types/database";
 
+// Pop-up Zona Game dimuat terpisah (berikut aset game-nya) baru saat tombol Game dibuka.
+const muatPopupGame = () => import("../features/game/PopupGame");
+const PopupGame = lazy(muatPopupGame);
+
 export default function Beranda() {
   const { profile, bisaKalenderKonten, bisaNaskahAi } = useAuth();
   const isAdmin = profile?.role === "admin";
@@ -22,6 +26,8 @@ export default function Beranda() {
   const [error, setError] = useState<string | null>(null);
   const [tugasBelum, setTugasBelum] = useState(0);
   const [tugasTotal, setTugasTotal] = useState(0);
+  const [bukaGame, setBukaGame] = useState(false);
+  const tombolGame = useRef<HTMLButtonElement>(null);
 
   async function muatStatus() {
     if (!profile) return;
@@ -72,7 +78,7 @@ export default function Beranda() {
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-20">
       <HeaderHub />
 
       <p className="text-center text-sm text-gray-500">{tanggalHariIni}</p>
@@ -168,7 +174,6 @@ export default function Beranda() {
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender Konten" />
             )}
             {bisaNaskahAi && <IconTile to="/naskah-ai" iconSrc="/icon_naskahai.png" label="Naskah AI" />}
-            <IconTile to="/game" iconSrc="/icon_coret_tebak.png" label="Coret Tebak" />
 
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
             <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
@@ -176,6 +181,34 @@ export default function Beranda() {
 
           <FormKeteranganAbsen onTersimpan={muatStatus} />
         </>
+      )}
+
+      {/* Game dipisah dari deretan menu kerja: tombol melayang yang membuka pop-up sendiri */}
+      <button
+        ref={tombolGame}
+        type="button"
+        onClick={() => setBukaGame(true)}
+        onPointerEnter={() => void muatPopupGame()}
+        onFocus={() => void muatPopupGame()}
+        onTouchStart={() => void muatPopupGame()}
+        aria-haspopup="dialog"
+        className="tombol-game fixed bottom-5 right-[max(1rem,calc((100vw-32rem)/2+1rem))] z-40 flex items-center gap-2 rounded-full bg-[#1f6feb] py-2 pl-2 pr-4 font-bold text-white shadow-lg shadow-blue-900/25 transition active:scale-95 lg:right-[max(1rem,calc((100vw-64rem)/2+1rem))]"
+      >
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white">
+          <img src="/icon_gamepad.webp" alt="" aria-hidden="true" className="h-6 w-auto" />
+        </span>
+        Game
+      </button>
+
+      {bukaGame && (
+        <Suspense fallback={null}>
+          <PopupGame
+            onTutup={() => {
+              setBukaGame(false);
+              tombolGame.current?.focus();
+            }}
+          />
+        </Suspense>
       )}
     </div>
   );

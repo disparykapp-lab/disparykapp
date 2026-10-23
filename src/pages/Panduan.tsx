@@ -163,7 +163,8 @@ export default function Panduan() {
 
       <Bagian judul="🎨 Game Coret Tebak">
         <p className="text-sm text-gray-600">
-          Game tebak gambar untuk 2–10 pemain, buka lewat menu "Coret Tebak" di Beranda.
+          Game tebak gambar untuk 2–10 pemain. Buka lewat tombol <strong>🎮 Game</strong> di pojok
+          kanan bawah Beranda, lalu pilih "Main Sekarang" di pop-up Zona Game.
         </p>
         <Langkah no={1}>
           Tekan <strong>"Buat Room"</strong>, pilih tema, waktu menggambar, jumlah ronde, maksimal

@@ -179,7 +179,8 @@ hapusnya tercatat juga di log super admin (lihat bagian "Kontrol khusus super ad
 
 ## Game Coret Tebak
 
-Menu **Coret Tebak** di Beranda (`/game`): tebak gambar multipemain 2–10 orang — lobi, buat
+Tombol melayang **🎮 Game** di Beranda membuka pop-up **Zona Game** (terpisah dari deretan menu
+kerja; komponen `PopupGame` dimuat lazy), lalu "Main Sekarang" ke `/game`: tebak gambar multipemain 2–10 orang — lobi, buat
 room (tema, waktu 60/90/120 dtk, 1–5 ronde, publik/privat), ruang tunggu, pilih kata, menggambar
 & menebak, reveal, lalu podium juara. Desain & alurnya mengikuti
 `Brief_Aset_Visual_Game_Tebak_Gambar.md`. Gambar aslinya (PNG transparan 2000 px, ±91 MB)
