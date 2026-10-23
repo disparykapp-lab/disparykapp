@@ -37,7 +37,7 @@ export const ASET = {
   medali: [u("lencana-1"), u("lencana-2"), u("lencana-3")],
   lencana: { api: u("lencana-api") },
   poin: { lima_puluh: u("poin-50"), seratus: u("poin-100") },
-  tema: { tugu: u("tema-tugu"), candi: u("tema-candi") },
+  tema: { tugu: u("tema-tugu"), candi: u("tema-candi"), hewan: u("tema-hewan"), kantor: u("tema-kantor") },
   item: { tas: u("item-tas"), gudeg: u("item-gudeg"), becak: u("item-becak") },
   dekorasi: { gunungan: u("dekorasi-gunungan") },
   latar: { jalan: u("latar-jalan") },

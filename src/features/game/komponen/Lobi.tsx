@@ -107,7 +107,7 @@ export default function Lobi() {
             return (
               <div key={r.id} className="ct-kartu ct-naik-masuk flex items-center gap-3 p-3">
                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl" style={{ background: tema.warna }}>
-                  {tema.gambar ? <img src={tema.gambar} alt="" className="h-11 w-11 object-contain" loading="lazy" /> : <span className="text-2xl">{tema.emoji}</span>}
+                  <img src={tema.gambar} alt="" className="h-11 w-11 object-contain" loading="lazy" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">Room {r.host_nama ?? "tanpa nama"}</p>

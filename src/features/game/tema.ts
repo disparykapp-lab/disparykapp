@@ -3,9 +3,7 @@ import { ASET } from "./assets";
 export interface Tema {
   id: string;
   label: string;
-  /** gambar dari lembar aset; kalau tidak ada, pakai emoji */
-  gambar?: string;
-  emoji?: string;
+  gambar: string;
   warna: string;
 }
 
@@ -14,9 +12,9 @@ export const DAFTAR_TEMA: Tema[] = [
   { id: "umum", label: "Umum", gambar: ASET.item.tas, warna: "#8FC9F2" },
   { id: "jogja", label: "Jogja", gambar: ASET.tema.tugu, warna: "#FCE7A8" },
   { id: "kuliner", label: "Kuliner", gambar: ASET.item.gudeg, warna: "#F8C9A8" },
-  { id: "hewan", label: "Hewan", emoji: "🐾", warna: "#BFE5CC" },
+  { id: "hewan", label: "Hewan", gambar: ASET.tema.hewan, warna: "#BFE5CC" },
   { id: "wisata", label: "Wisata", gambar: ASET.tema.candi, warna: "#C7E3F7" },
-  { id: "kantor", label: "Kantor", emoji: "💼", warna: "#E4DFD6" },
+  { id: "kantor", label: "Kantor", gambar: ASET.tema.kantor, warna: "#E4DFD6" },
   { id: "aktivitas", label: "Aktivitas", gambar: ASET.item.becak, warna: "#F6C3C4" },
 ];
 

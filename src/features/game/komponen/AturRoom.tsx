@@ -51,11 +51,7 @@ export default function AturRoom() {
                 style={{ background: t.warna }}
               >
                 <span className="flex h-14 w-full items-center justify-center">
-                  {t.gambar ? (
-                    <img src={t.gambar} alt="" loading="lazy" className="max-h-14 max-w-full object-contain" />
-                  ) : (
-                    <span className="text-3xl">{t.emoji}</span>
-                  )}
+                  <img src={t.gambar} alt="" loading="lazy" className="max-h-14 max-w-full object-contain" />
                 </span>
                 <span className="text-xs font-semibold">{t.label}</span>
               </button>

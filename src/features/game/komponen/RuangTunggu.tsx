@@ -35,7 +35,7 @@ export default function RuangTunggu({ s, linkRoom }: { s: StateRoom; linkRoom: s
     <div className="flex flex-col gap-4">
       <section className="ct-kartu flex items-center gap-3 p-3">
         <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl" style={{ background: tema.warna }}>
-          {tema.gambar ? <img src={tema.gambar} alt="" className="h-12 w-12 object-contain" /> : <span className="text-3xl">{tema.emoji}</span>}
+          <img src={tema.gambar} alt="" className="h-12 w-12 object-contain" />
         </span>
         <div className="min-w-0 flex-1">
           <p className="ct-judul text-lg">Tema {tema.label}</p>
