@@ -104,6 +104,9 @@ npm run dev
    24. `0028_game_coret_tebak.sql` — game tebak gambar multipemain "Coret Tebak" (lihat bagian
        **Game Coret Tebak** di bawah). Membuat tabel `game_*`, fungsi RPC `game_*`, bank kata 7
        tema, dan menambahkan tabel game ke publikasi Realtime.
+   25. `0029_lobi_status_match.sql` — lobi game juga menampilkan room publik yang **sedang main**
+       (status, ronde, siapa yang menggambar) dan room yang sedang kamu ikuti ("Room Kamu" +
+       tombol Lanjutkan), dengan skor & status online tiap pemain untuk detail room.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

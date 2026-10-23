@@ -3,6 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  aksiRoom,
   faseBerikut,
   infoRonde,
   jarakEdit,
@@ -13,6 +14,7 @@ import {
   peringkat,
   poinPenebak,
   poinPenggambar,
+  statusMatch,
   tebakanCocok,
 } from "../src/features/game/logika.ts";
 
@@ -109,4 +111,20 @@ test("nama pendek: awalan pendek ikut kata kedua", () => {
   assert.equal(namaPendek("M. Rizky"), "M. Rizky");
   assert.equal(namaPendek("Ani"), "Ani", "satu kata pendek tetap dipakai");
   assert.equal(namaPendek("  Budi   Santoso "), "Budi");
+});
+
+test("status match untuk lobi", () => {
+  assert.deepEqual(statusMatch("menunggu", 0, 0, 2), { label: "Menunggu pemain", nada: "tunggu" });
+  assert.deepEqual(statusMatch("menggambar", 4, 6, 2), { label: "Sedang main · Ronde 2/2", nada: "main" });
+  assert.deepEqual(statusMatch("memilih", 0, 6, 2), { label: "Sedang main · Ronde 1/2", nada: "main" });
+  assert.deepEqual(statusMatch("reveal", 2, 9, 3), { label: "Sedang main · Ronde 1/3", nada: "main" });
+  assert.equal(statusMatch("selesai", 9, 9, 3).nada, "selesai");
+  assert.equal(statusMatch("menggambar", 4, 6, 2, true).label, "Main · Ronde 2/2", "versi ringkas untuk kartu");
+});
+
+test("aksi room di lobi mengikuti aturan gabung server", () => {
+  assert.equal(aksiRoom("menggambar", true, 3, 6), "lanjut", "anggota selalu bisa kembali");
+  assert.equal(aksiRoom("menunggu", false, 3, 6), "gabung");
+  assert.equal(aksiRoom("menunggu", false, 6, 6), "penuh");
+  assert.equal(aksiRoom("menggambar", false, 2, 6), "berjalan", "pemain baru tidak bisa masuk di tengah match");
 });

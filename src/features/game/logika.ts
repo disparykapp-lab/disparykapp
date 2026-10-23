@@ -110,6 +110,35 @@ export function kotakPetunjuk(pola: string): (string | null)[] {
   return [...pola].map((c) => (c === " " ? null : c === "_" ? "" : c));
 }
 
+export type NadaStatus = "tunggu" | "main" | "selesai";
+
+/** Label status match untuk lobi & detail room. `ringkas` = versi pendek untuk kartu sempit. */
+export function statusMatch(
+  status: StatusRoom,
+  giliranKe: number,
+  totalGiliran: number,
+  jumlahRonde: number,
+  ringkas = false
+): { label: string; nada: NadaStatus } {
+  if (status === "menunggu") return { label: "Menunggu pemain", nada: "tunggu" };
+  if (status === "selesai") return { label: "Selesai", nada: "selesai" };
+  const { ronde, total } = infoRonde(totalGiliran, jumlahRonde, giliranKe);
+  return { label: `${ringkas ? "Main" : "Sedang main"} · Ronde ${ronde}/${total}`, nada: "main" };
+}
+
+export type AksiRoom = "lanjut" | "gabung" | "penuh" | "berjalan";
+
+/**
+ * Aksi utama untuk satu room di lobi. Sama dengan aturan game_gabung() di
+ * server: pemain lama selalu boleh kembali; pemain baru hanya saat room masih
+ * menunggu dan kursi (dihitung dari pemain online) belum penuh.
+ */
+export function aksiRoom(status: StatusRoom, sayaAnggota: boolean, jumlahOnline: number, maksPemain: number): AksiRoom {
+  if (sayaAnggota) return "lanjut";
+  if (status !== "menunggu") return "berjalan";
+  return jumlahOnline >= maksPemain ? "penuh" : "gabung";
+}
+
 /**
  * Nama pendek untuk tempat sempit. Biasanya kata pertama, tapi kalau kata pertama
  * cuma awalan pendek (mis. "Ni Wayan …", "I Made …", "M. Rizky …") ambil dua kata,

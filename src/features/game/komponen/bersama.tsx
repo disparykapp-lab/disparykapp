@@ -2,6 +2,7 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { ASET, avatarCadangan } from "../assets";
 import { aturSuara, suaraNyala } from "../suara";
+import type { NadaStatus } from "../logika";
 
 export function Avatar({
   userId,
@@ -196,5 +197,22 @@ export function Konfeti({ jumlah = 60 }: { jumlah?: number }) {
         />
       ))}
     </div>
+  );
+}
+
+const GAYA_STATUS: Record<NadaStatus, { latar: string; titik: string }> = {
+  tunggu: { latar: "bg-green-100 text-green-800", titik: "bg-green-500" },
+  main: { latar: "bg-orange-100 text-orange-800", titik: "bg-orange-500 animate-pulse" },
+  selesai: { latar: "bg-slate-100 text-slate-600", titik: "bg-slate-400" },
+};
+
+/** Lencana status match: hijau = menunggu pemain, oranye berdenyut = sedang main. */
+export function ChipStatus({ label, nada }: { label: string; nada: NadaStatus }) {
+  const g = GAYA_STATUS[nada];
+  return (
+    <span className={`inline-flex max-w-full items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${g.latar}`}>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${g.titik}`} aria-hidden="true" />
+      <span className="truncate">{label}</span>
+    </span>
   );
 }

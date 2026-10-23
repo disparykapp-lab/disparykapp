@@ -176,19 +176,26 @@ export default function Panduan() {
           menekan <strong>"Mulai"</strong> kalau sudah ada minimal 2 pemain.
         </Langkah>
         <Langkah no={3}>
+          Di lobi, tiap room punya status: <strong>Menunggu pemain</strong> (masih bisa
+          bergabung) atau <strong>Main · Ronde x/y</strong> (sedang berlangsung). Ketuk kartu room
+          untuk melihat detailnya — tema, pengaturan, siapa yang sedang menggambar, dan skor
+          sementara. Room yang sedang kamu ikuti muncul di <strong>Room Kamu</strong>; tekan
+          "Lanjutkan" untuk kembali ke permainan yang sempat ditinggal.
+        </Langkah>
+        <Langkah no={4}>
           Pemain bergiliran menggambar: pilih 1 dari 3 kata, lalu gambar di kanvas. Pemain lain
           mengetik tebakan. Huruf petunjuk terbuka pelan-pelan seiring waktu.
         </Langkah>
-        <Langkah no={4}>
+        <Langkah no={5}>
           Tebakan salah terlihat semua pemain. Tebakan <strong>"hampir benar"</strong> cuma
           terlihat olehmu (kolomnya bergoyang). Tebakan benar tidak ditampilkan ke pemain lain —
           mereka cuma melihat "kamu menebak benar".
         </Langkah>
-        <Langkah no={5}>
+        <Langkah no={6}>
           Makin cepat menebak, makin besar poinnya. Setelah semua giliran selesai, juara 1–3
           tampil di podium. Host bisa langsung "Main Lagi".
         </Langkah>
-        <Langkah no={6}>
+        <Langkah no={7}>
           Selama di halaman game ada musik latar (mulai setelah kamu menyentuh layar pertama
           kali). Tombol speaker 🔊 di pojok kanan atas mematikan musik sekaligus efek suaranya.
         </Langkah>

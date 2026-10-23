@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 import { ASET } from "../assets";
 import { ambilRoomLobi, gabungRoom, type RoomLobi } from "../api";
+import { aksiRoom, statusMatch } from "../logika";
 import { temaById } from "../tema";
-import { Avatar, Kepala } from "./bersama";
+import { Avatar, ChipStatus, Kepala } from "./bersama";
+import DetailRoom from "./DetailRoom";
 
 export default function Lobi() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function Lobi() {
   const [kode, setKode] = useState("");
   const [bergabung, setBergabung] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const muat = useCallback(async () => {
     try {
@@ -42,6 +45,10 @@ export default function Lobi() {
       setBergabung(null);
     }
   }
+
+  const milikSaya = room.filter((r) => r.saya_anggota);
+  const publik = room.filter((r) => !r.saya_anggota);
+  const detail = room.find((r) => r.id === detailId) ?? null;
 
   function kirimKode(e: FormEvent) {
     e.preventDefault();
@@ -84,6 +91,23 @@ export default function Lobi() {
 
       {error && <p className="ct-goyang rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
+      {milikSaya.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="ct-judul text-lg text-[var(--ct-indigo)]">Room Kamu</h2>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {milikSaya.map((r) => (
+              <KartuRoom
+                key={r.id}
+                r={r}
+                bergabung={bergabung === r.kode}
+                onDetail={() => setDetailId(r.id)}
+                onAksi={() => navigate(`/game/main/${r.id}`)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="ct-judul text-lg text-[var(--ct-indigo)]">Room Publik</h2>
@@ -92,54 +116,93 @@ export default function Lobi() {
           </button>
         </div>
 
-        {!memuat && room.length === 0 && (
+        {!memuat && publik.length === 0 && (
           <div className="ct-kartu flex flex-col items-center gap-2 p-6 text-center">
             <img src={ASET.maskot.menunjuk} alt="" className="h-28 w-auto" />
-            <p className="font-semibold">Belum ada room yang menunggu pemain.</p>
+            <p className="font-semibold">Belum ada room publik yang aktif.</p>
             <p className="text-sm text-slate-500">Buat room baru, lalu bagikan kodenya ke rekan kerja.</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {room.map((r) => {
-            const tema = temaById(r.tema);
-            const penuh = r.pemain.length >= r.maks_pemain;
-            return (
-              <div key={r.id} className="ct-kartu ct-naik-masuk flex min-w-0 items-center gap-2.5 p-3 sm:gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14" style={{ background: tema.warna }}>
-                  <img src={tema.gambar} alt="" className="h-9 w-9 object-contain sm:h-11 sm:w-11" loading="lazy" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 break-words font-semibold leading-tight" title={`Room ${r.host_nama ?? ""}`}>
-                    {r.host_nama ?? "Tanpa nama"}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {tema.label} · {r.waktu_gambar} dtk · {r.jumlah_ronde} ronde
-                  </p>
-                  <div className="mt-1 flex items-center gap-1">
-                    <div className="flex -space-x-2">
-                      {r.pemain.slice(0, 4).map((p) => (
-                        <Avatar key={p.user_id} userId={p.user_id} foto={p.foto_url} nama={p.nama} ukuran={22} />
-                      ))}
-                    </div>
-                    <span className="ml-1 flex items-center gap-0.5 text-xs text-slate-500">
-                      <img src={ASET.ui.grup} alt="" aria-hidden="true" className="h-3.5 w-auto" /> {r.pemain.length}/{r.maks_pemain}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  disabled={penuh || bergabung === r.kode}
-                  onClick={() => void gabung(r.kode)}
-                  className="ct-tombol ct-tombol-hijau min-h-[40px] shrink-0 px-3 text-sm sm:px-4"
-                >
-                  {penuh ? "Penuh" : bergabung === r.kode ? "..." : "Gabung"}
-                </button>
-              </div>
-            );
-          })}
+          {publik.map((r) => (
+            <KartuRoom
+              key={r.id}
+              r={r}
+              bergabung={bergabung === r.kode}
+              onDetail={() => setDetailId(r.id)}
+              onAksi={() => void gabung(r.kode)}
+            />
+          ))}
         </div>
       </section>
+
+      {detail && (
+        <DetailRoom
+          room={detail}
+          bergabung={bergabung === detail.kode}
+          onGabung={() => void gabung(detail.kode)}
+          onLanjut={() => navigate(`/game/main/${detail.id}`)}
+          onTutup={() => setDetailId(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Kartu room di lobi: ketuk kartu untuk detail; tombol kanan = aksi cepat (gabung/lanjutkan). */
+function KartuRoom({
+  r,
+  bergabung,
+  onDetail,
+  onAksi,
+}: {
+  r: RoomLobi;
+  bergabung: boolean;
+  onDetail: () => void;
+  onAksi: () => void;
+}) {
+  const tema = temaById(r.tema);
+  const st = statusMatch(r.status, r.giliran_ke, r.total_giliran, r.jumlah_ronde, true);
+  const online = r.pemain.filter((p) => p.online);
+  const aksi = aksiRoom(r.status, r.saya_anggota, online.length, r.maks_pemain);
+
+  return (
+    <div className="ct-kartu ct-naik-masuk relative flex min-w-0 items-center gap-2.5 p-3 text-left transition active:scale-[0.99] sm:gap-3">
+      {/* tombol tak terlihat selebar kartu: ketuk di mana saja untuk detail */}
+      <button
+        type="button"
+        onClick={onDetail}
+        aria-label={`Lihat detail room ${r.host_nama ?? ""}`}
+        className="absolute inset-0 rounded-[1.25rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--ct-biru)]"
+      />
+      <span className="pointer-events-none flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14" style={{ background: tema.warna }}>
+        <img src={tema.gambar} alt="" className="h-9 w-9 object-contain sm:h-11 sm:w-11" loading="lazy" />
+      </span>
+      <div className="pointer-events-none flex min-w-0 flex-1 flex-col items-start gap-0.5">
+        <p className="line-clamp-2 break-words font-semibold leading-tight">{r.host_nama ?? "Tanpa nama"}</p>
+        <ChipStatus label={st.label} nada={st.nada} />
+        <div className="flex items-center gap-1">
+          <div className="flex -space-x-2">
+            {online.slice(0, 4).map((p) => (
+              <Avatar key={p.user_id} userId={p.user_id} foto={p.foto_url} nama={p.nama} ukuran={22} />
+            ))}
+          </div>
+          <span className="ml-1 flex items-center gap-0.5 text-xs text-slate-500">
+            <img src={ASET.ui.grup} alt="" aria-hidden="true" className="h-3.5 w-auto" /> {online.length}/{r.maks_pemain} · {tema.label}
+          </span>
+        </div>
+      </div>
+      <button
+        type="button"
+        disabled={aksi === "penuh" || bergabung}
+        onClick={() => (aksi === "berjalan" ? onDetail() : onAksi())}
+        className={`ct-tombol relative z-10 min-h-[40px] shrink-0 px-3 text-sm sm:px-4 ${
+          aksi === "gabung" ? "ct-tombol-hijau" : aksi === "berjalan" ? "ct-tombol-putih" : ""
+        }`}
+      >
+        {bergabung ? "..." : aksi === "lanjut" ? "Lanjutkan" : aksi === "gabung" ? "Gabung" : aksi === "penuh" ? "Penuh" : "Detail"}
+      </button>
     </div>
   );
 }

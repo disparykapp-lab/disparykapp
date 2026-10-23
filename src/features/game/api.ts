@@ -118,6 +118,14 @@ export async function mainLagi(roomId: string) {
   cekError(error);
 }
 
+export interface PemainLobi {
+  user_id: string;
+  nama: string;
+  foto_url: string | null;
+  skor: number;
+  online: boolean;
+}
+
 export interface RoomLobi {
   id: string;
   kode: string;
@@ -125,11 +133,21 @@ export interface RoomLobi {
   waktu_gambar: number;
   jumlah_ronde: number;
   maks_pemain: number;
+  publik: boolean;
+  status: StatusRoom;
+  giliran_ke: number;
+  total_giliran: number;
+  host_id: string;
   host_nama: string | null;
-  pemain: { user_id: string; nama: string; foto_url: string | null }[];
+  penggambar_nama: string | null;
+  saya_anggota: boolean;
+  pemain: PemainLobi[];
 }
 
-/** Room publik yang menunggu & masih punya penghuni online — disaring di server. */
+/**
+ * Room untuk lobi — disaring di server: room publik yang menunggu / sedang main
+ * dan masih punya penghuni online, plus room yang sedang diikuti pengguna sendiri.
+ */
 export async function ambilRoomLobi(): Promise<RoomLobi[]> {
   const { data, error } = await supabase.rpc("game_daftar_lobi");
   cekError(error);
