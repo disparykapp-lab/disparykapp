@@ -131,18 +131,25 @@ export default function Beranda() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <IconTile
-              to="/absen/masuk"
-              iconSrc="/icon_absen_masuk.png"
-              label="Absen Masuk"
-              disabled={sudahMasuk}
-            />
-            <IconTile
-              to="/absen/pulang"
-              iconSrc="/icon_absen_keluar.png"
-              label="Absen Pulang"
-              disabled={!sudahMasuk || sudahPulang}
-            />
+            {/* Absen Masuk & Pulang sebaris, tombol bulat Izin/Sakit tepat di tengahnya */}
+            <div className="relative col-span-2 grid grid-cols-2 gap-3">
+              <IconTile
+                to="/absen/masuk"
+                iconSrc="/icon_absen_masuk.png"
+                label="Absen Masuk"
+                disabled={sudahMasuk}
+              />
+              <IconTile
+                to="/absen/pulang"
+                iconSrc="/icon_absen_keluar.png"
+                label="Absen Pulang"
+                disabled={!sudahMasuk || sudahPulang}
+              />
+              <FormKeteranganAbsen
+                onTersimpan={muatStatus}
+                className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
+              />
+            </div>
             {tugasTotal > 0 && tugasBelum === 0 ? (
               <Link
                 to="/tugas"
@@ -178,8 +185,6 @@ export default function Beranda() {
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
             <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
           </div>
-
-          <FormKeteranganAbsen onTersimpan={muatStatus} />
         </>
       )}
 

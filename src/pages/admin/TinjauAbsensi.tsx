@@ -7,6 +7,7 @@ import { formatTanggal } from "../../lib/tanggal";
 import { tandaiAbsensi } from "../../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
 import { teksDenganLink } from "../../lib/linkify";
+import { bukaBukti, buktiDiStorage } from "../../lib/buktiIzin";
 import type { BarisAbsensi } from "../../lib/rekap";
 import type { Divisi } from "../../types/database";
 
@@ -235,7 +236,16 @@ function DetailAbsensi({ row, onUbah }: { row: BarisAbsensi; onUbah: () => void 
         <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
           <p className="font-semibold">Keterangan dari pegawai</p>
           {row.catatan_klarifikasi && <p className="mt-1">{teksDenganLink(row.catatan_klarifikasi)}</p>}
-          {row.bukti_url && (
+          {row.bukti_url && buktiDiStorage(row.bukti_url) && (
+            <button
+              type="button"
+              onClick={() => bukaBukti(row.bukti_url!).catch((e: Error) => setErrorTanda(e.message))}
+              className="mt-1 inline-block text-blue-700 underline"
+            >
+              🖼️ Lihat foto bukti
+            </button>
+          )}
+          {row.bukti_url && !buktiDiStorage(row.bukti_url) && (
             <a
               href={row.bukti_url}
               target="_blank"

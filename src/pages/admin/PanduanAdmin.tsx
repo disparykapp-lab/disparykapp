@@ -175,12 +175,12 @@ export default function PanduanAdmin() {
           difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
         </Langkah>
         <Langkah no={6}>
-          Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta link bukti
-          (mis. surat dokter di Google Drive) — lewat tombol "+ Tambah Keterangan" di Beranda,
-          kolom keterangan opsional saat absen, atau tombol "+Keterangan" di Rekap mereka —
-          keterangan itu muncul di kotak biru paling atas detail entri ini. Tekan "🔗 Buka link
-          bukti" untuk memeriksanya, atau kalau link ketercampur di teks keterangan, link itu
-          otomatis jadi bisa diklik juga.
+          Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta foto bukti
+          (mis. surat dokter) — lewat tombol bulat "Izin/Sakit" di Beranda, kolom keterangan
+          opsional saat absen, atau tombol "+Keterangan" di Rekap mereka — keterangan itu muncul
+          di kotak biru paling atas detail entri ini. Tekan "🖼️ Lihat foto bukti" untuk membuka
+          fotonya (tersimpan privat di Supabase Storage, bucket bukti_izin). Keterangan lama yang
+          masih berupa link tampil sebagai "🔗 Buka link bukti".
         </Langkah>
       </Bagian>
 

@@ -8,6 +8,7 @@ import { formatTanggal, keYMD, rentangBulan, rentangMinggu } from "../lib/tangga
 import { supabase } from "../lib/supabase";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import HeaderHalaman from "../components/HeaderHalaman";
+import InputBukti from "../components/InputBukti";
 import GrafikKerajinan from "../components/GrafikKerajinan";
 import { hitungPeringkat, unduhGambarPeringkat } from "../lib/peringkat";
 import type { Divisi, Profile } from "../types/database";
@@ -45,6 +46,7 @@ export default function Rekap() {
   const [formCatatan, setFormCatatan] = useState("");
   const [formBukti, setFormBukti] = useState("");
   const [mengirimKlarifikasi, setMengirimKlarifikasi] = useState(false);
+  const [mengunggahBukti, setMengunggahBukti] = useState(false);
   const [errorKlarifikasi, setErrorKlarifikasi] = useState<string | null>(null);
 
   function terapkanRentang(dariYmd = dariInput, sampaiYmd = sampaiInput) {
@@ -142,7 +144,7 @@ export default function Rekap() {
     setMengirimKlarifikasi(true);
     setErrorKlarifikasi(null);
     try {
-      await kirimKlarifikasiAbsensi(tanggal, formCatatan.trim(), formBukti.trim());
+      await kirimKlarifikasiAbsensi(tanggal, formCatatan.trim(), formBukti);
       setEditId(null);
       await muatUlang();
     } catch (e) {
@@ -389,14 +391,9 @@ export default function Rekap() {
                               placeholder="Contoh: Sakit demam, surat keterangan dokter terlampir"
                             />
                             <label className="text-xs font-medium text-gray-600">
-                              Link bukti (opsional — link Google Drive/foto/dokumen)
+                              Foto bukti (opsional — mis. surat dokter)
                             </label>
-                            <input
-                              value={formBukti}
-                              onChange={(e) => setFormBukti(e.target.value)}
-                              className="rounded-lg border border-gray-300 p-2 text-sm"
-                              placeholder="https://drive.google.com/..."
-                            />
+                            <InputBukti nilai={formBukti} onUbah={setFormBukti} onSibuk={setMengunggahBukti} />
                             {errorKlarifikasi && (
                               <p className="text-xs text-red-600">{errorKlarifikasi}</p>
                             )}
@@ -409,7 +406,7 @@ export default function Rekap() {
                               </button>
                               <button
                                 onClick={() => void kirimKlarifikasi(r.tanggal)}
-                                disabled={mengirimKlarifikasi}
+                                disabled={mengirimKlarifikasi || mengunggahBukti}
                                 className="min-h-[36px] flex-1 rounded-lg bg-brand-masuk text-xs font-semibold text-white disabled:opacity-60"
                               >
                                 {mengirimKlarifikasi ? "Menyimpan..." : "Simpan"}

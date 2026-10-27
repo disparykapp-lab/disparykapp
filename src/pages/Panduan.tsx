@@ -47,8 +47,8 @@ export default function Panduan() {
         <Langkah no={4}>
           Ada juga kolom <strong>"Keterangan (opsional)"</strong> — boleh dikosongkan, atau diisi
           kalau ada yang mau dicatat (mis. "Telat karena macet parah di jalan"). Begitu diisi,
-          muncul kolom <strong>"Link bukti (opsional)"</strong> juga kalau mau lampirkan link
-          (mis. foto/dokumen di Google Drive).
+          muncul tombol <strong>"Unggah foto bukti"</strong> kalau mau melampirkan foto (foto
+          otomatis dikecilkan dulu sebelum diunggah).
         </Langkah>
         <Langkah no={5}>
           Kamera akan terbuka otomatis dengan bingkai "Jogja Istimewa" — posisikan wajah kamu di
@@ -105,9 +105,10 @@ export default function Panduan() {
 
       <Bagian judul="🤒 Tidak Masuk Karena Sakit/Izin">
         <p className="text-sm text-gray-600">
-          Di Beranda ada tombol <strong>"+ Tambah Keterangan"</strong>. Pilih tanggal kamu tidak
-          masuk, isi alasannya, dan boleh tambahkan link bukti (mis. link foto surat dokter di
-          Google Drive). Admin bisa melihat keterangan ini.
+          Di Beranda ada tombol bulat <strong>"Izin/Sakit"</strong> di antara Absen Masuk dan Absen
+          Pulang. Pilih tanggal kamu tidak masuk, isi alasannya, lalu boleh unggah foto bukti
+          (mis. foto surat dokter) langsung dari HP — tidak perlu lewat Google Drive. Foto
+          dikecilkan otomatis dan hanya bisa dilihat kamu sendiri serta admin.
         </p>
       </Bagian>
 

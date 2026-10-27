@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import KameraLive from "../components/KameraLive";
 import HeaderHalaman from "../components/HeaderHalaman";
+import InputBukti from "../components/InputBukti";
 import { ambilPosisi, type Posisi } from "../lib/geolocation";
 import {
   kirimKlarifikasiAbsensi,
@@ -36,6 +37,7 @@ export default function Absen() {
   const [catatan, setCatatan] = useState("");
   const [keteranganOpsional, setKeteranganOpsional] = useState("");
   const [buktiOpsional, setBuktiOpsional] = useState("");
+  const [mengunggahBukti, setMengunggahBukti] = useState(false);
   const [posisi, setPosisi] = useState<Posisi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasil, setHasil] = useState<{ jam: string; status: string; jarak: number } | null>(null);
@@ -184,14 +186,9 @@ export default function Absen() {
           {keteranganOpsional.trim().length >= 3 && (
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Link bukti (opsional)
+                Foto bukti (opsional)
               </label>
-              <input
-                value={buktiOpsional}
-                onChange={(e) => setBuktiOpsional(e.target.value)}
-                placeholder="https://drive.google.com/..."
-                className="w-full rounded-xl border border-gray-300 p-3 text-base"
-              />
+              <InputBukti nilai={buktiOpsional} onUbah={setBuktiOpsional} onSibuk={setMengunggahBukti} />
             </div>
           )}
 
@@ -199,9 +196,10 @@ export default function Absen() {
 
           <button
             onClick={() => void lanjutDariMode()}
-            className="min-h-[52px] rounded-xl bg-brand-masuk text-base font-semibold text-white"
+            disabled={mengunggahBukti}
+            className="min-h-[52px] rounded-xl bg-brand-masuk text-base font-semibold text-white disabled:opacity-60"
           >
-            Lanjutkan
+            {mengunggahBukti ? "Tunggu unggahan foto..." : "Lanjutkan"}
           </button>
         </div>
       )}
