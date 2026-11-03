@@ -154,3 +154,110 @@ export function nomorWarnaDivisi(divisiId: string | null, urutanDivisi: string[]
   const i = urutanDivisi.indexOf(divisiId);
   return i < 0 ? null : (i % 8) + 1;
 }
+
+// ---------------------------------------------------------------------------
+// Permainan — cermin RPC di migrasi 0033
+// ---------------------------------------------------------------------------
+
+/** Lewat dari ronde ini penyusup menang karena berhasil berbaur. */
+export const BATAS_RONDE = 6;
+export const PANJANG_PETUNJUK = 24;
+
+/** Sama dengan game_normal() di SQL: "Kupu-kupu!" -> "kupu kupu". */
+export function normalKata(teks: string): string {
+  return teks
+    .toLowerCase()
+    .replace(/[-_]/g, " ")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function rapikanPetunjuk(teks: string): string {
+  return teks.replace(/\s+/g, " ").trim();
+}
+
+export type AlasanTolakPetunjuk = "kosong" | "panjang" | "satu_kata" | "sama_kata";
+
+/**
+ * Cermin penyusup_petunjuk(): 1 kata, maks 24 huruf, dan tidak sama persis
+ * dengan kata sendiri. Bagian kata ("Prambanan" untuk "Candi Prambanan") boleh.
+ */
+export function cekPetunjuk(teks: string, kataSendiri: string): AlasanTolakPetunjuk | null {
+  const t = rapikanPetunjuk(teks);
+  if (!t) return "kosong";
+  if (t.length > PANJANG_PETUNJUK) return "panjang";
+  if (t.includes(" ")) return "satu_kata";
+  const a = normalKata(t);
+  const b = normalKata(kataSendiri);
+  if (a === b || a.replace(/ /g, "") === b.replace(/ /g, "")) return "sama_kata";
+  return null;
+}
+
+/** Sisa detik (dibulatkan ke atas) sampai tenggat fase, menurut jam server. */
+export function sisaDetik(faseBerakhir: string | null, sekarangMs: number): number {
+  if (!faseBerakhir) return 0;
+  return Math.max(0, Math.ceil((Date.parse(faseBerakhir) - sekarangMs) / 1000));
+}
+
+/** Timer cincin: kuning <= 10 dtk, merah bergetar <= 5 dtk. */
+export function kelasTimer(sisa: number): string {
+  if (sisa <= 5) return "is-critical sp-anim-critical";
+  if (sisa <= 10) return "is-warning";
+  return "";
+}
+
+export interface Suara {
+  voter: string;
+  /** null = lewati */
+  target: string | null;
+}
+
+/**
+ * Cermin _penyusup_hitung_vote(): suara terbanyak tersingkir; seri di posisi
+ * teratas, atau suara lewati >= suara terbanyak, berarti tidak ada yang tersingkir.
+ */
+export function hitungVote(suara: Suara[]): { tally: Record<string, number>; lewati: number; tersingkir: string | null } {
+  const tally: Record<string, number> = {};
+  let lewati = 0;
+  for (const s of suara) {
+    if (s.target === null) lewati++;
+    else tally[s.target] = (tally[s.target] ?? 0) + 1;
+  }
+  const nilai = Object.values(tally);
+  const maks = nilai.length ? Math.max(...nilai) : 0;
+  const teratas = Object.keys(tally).filter((k) => tally[k] === maks);
+  const tersingkir = maks > lewati && teratas.length === 1 ? teratas[0] : null;
+  return { tally, lewati, tersingkir };
+}
+
+export type Peran = "pemandu" | "penyusup";
+
+/** Cermin _penyusup_cek_menang(). null = permainan berlanjut. */
+export function cekPemenang(penyusupHidup: number, pemanduHidup: number): Peran | null {
+  if (penyusupHidup === 0) return "pemandu";
+  if (penyusupHidup >= pemanduHidup) return "penyusup";
+  return null;
+}
+
+/**
+ * Cermin perhitungan poin di _penyusup_selesai() (tabel skor README):
+ * pemandu menang +100 (+50 kalau masih hidup), +30 per vote ke penyusup;
+ * penyusup menang +300, +50 per ronde selamat, +200 tebakan terakhir benar.
+ * Pemain yang keluar sebelum game selesai tidak mendapat poin.
+ */
+export function poinPemain(p: {
+  peran: Peran;
+  pemenang: Peran;
+  aktif: boolean;
+  hidup: boolean;
+  voteTepat: number;
+  rondeSelamat: number;
+  tebakanBenar: boolean;
+}): number {
+  if (!p.aktif) return 0;
+  if (p.peran === "pemandu") {
+    return (p.pemenang === "pemandu" ? 100 + (p.hidup ? 50 : 0) : 0) + 30 * p.voteTepat;
+  }
+  return (p.pemenang === "penyusup" ? 300 : 0) + 50 * p.rondeSelamat + (p.tebakanBenar ? 200 : 0);
+}

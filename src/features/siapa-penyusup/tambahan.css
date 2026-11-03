@@ -31,6 +31,8 @@
 .sp-root .sp-toggle__teks { display: flex; flex-direction: column; }
 .sp-root .sp-toggle__teks small { font-weight: 700; font-size: var(--fs-xs); color: #6B5D4F; }
 .sp-root .sp-stepper button:disabled { opacity: .4; cursor: not-allowed; }
+/* target sentuh minimal 44x44 (README bagian 8); bawaan paket 36x34 */
+.sp-root .sp-stepper button { width: 44px; height: 44px; }
 .sp-root .sp-stepper output { min-width: 72px; }
 .sp-root .sp-pilih {
   font: 800 15px var(--font-body); color: var(--ink);
@@ -54,14 +56,33 @@
 /* Lobby */
 .sp-root .sp-lobi-grid { padding-top: 12px; }
 .sp-root button.sp-player { font: inherit; color: inherit; }
-.sp-root .sp-player .sp-divisi { max-width: 100%; }
-.sp-root .sp-player .sp-divisi > span { overflow: hidden; text-overflow: ellipsis; }
+/* Badge divisi di dalam tile: ringkas & boleh 2 baris supaya "PEMASARAN" / "EKONOMI
+   KREATIF" terbaca utuh. Titik warna disembunyikan: warna divisi sudah ada di garis
+   atas tile dan latar badge, nama divisinya tetap tertulis. */
+.sp-root .sp-player .sp-divisi {
+  max-width: 100%; min-width: 0; padding: 1px 4px; gap: 0;
+  font-size: 9px; line-height: 1.15; white-space: normal; text-align: center;
+}
+.sp-root .sp-player .sp-divisi::before { display: none; }
+.sp-root .sp-player .sp-divisi > span {
+  min-width: 0; overflow: hidden; overflow-wrap: break-word;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+}
+/* Grid item & kolom 1fr bawaannya tidak mau lebih sempit dari isinya, jadi nama /
+   badge divisi yang panjang ("PEMASARAN") mendorong tile keluar panel. */
+.sp-root .sp-grid-players > * { min-width: 0; }
+/* Di layar lebar paket memakai 4 kolom, padahal konten dibatasi 440px (tile ±93px,
+   badge divisi terpotong & meluber). 3 kolom seperti bingkai HP di prototype. */
+@media (min-width: 720px) {
+  .sp-root .sp-grid-players:not(.sp-grid-players--compact) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.sp-root .sp-grid-players--compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .sp-root .sp-player.is-offline .sp-player__avatar,
 .sp-root .sp-player.is-offline .sp-player__name { opacity: .45; filter: grayscale(.8); }
 .sp-root .sp-status-kecil { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #6B5D4F; }
 .sp-root .sp-kick {
-  position: absolute; top: -14px; right: -14px; z-index: 1;
-  width: 40px; height: 40px; padding: 0; border-radius: 50%;
+  position: absolute; top: -16px; right: -16px; z-index: 1;
+  width: 44px; height: 44px; padding: 0; border-radius: 50%;
   border: 2px solid var(--ink); background: var(--cream); box-shadow: var(--shadow-press-sm);
   display: grid; place-items: center; cursor: pointer;
 }
@@ -75,3 +96,71 @@
 .sp-root .sp-pilih-avatar { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-bottom: var(--space-3); }
 .sp-root .sp-pilih-avatar .sp-player { padding: 6px 2px; border-top-width: 3px; }
 .sp-root .sp-pilih-avatar .sp-player__avatar { width: 100%; height: auto; }
+
+/* Bagikan kata */
+.sp-root .sp-count-layer { position: absolute; inset: 0; display: grid; place-items: center; z-index: 5; pointer-events: none; }
+.sp-root .sp-kartu-peran { width: min(78vw, 300px); }
+.sp-root .sp-word-card { cursor: pointer; -webkit-touch-callout: none; }
+.sp-root .sp-word-card:focus-visible { outline: 4px solid var(--gold-500); outline-offset: 6px; border-radius: 24px; }
+
+/* Tahan untuk lihat kata (layar petunjuk & diskusi) */
+.sp-root .sp-lihat-kata {
+  align-self: center; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 16px;
+  border: 3px solid var(--ink); border-radius: var(--radius-pill); background: var(--cream); color: var(--ink);
+  font: 800 var(--fs-sm) var(--font-body); box-shadow: var(--shadow-press-sm); cursor: pointer;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none;
+}
+.sp-root .sp-lihat-kata img { width: 24px; height: 24px; }
+.sp-root .sp-lihat-kata.is-open { background: var(--teal-300); }
+.sp-root .sp-lihat-kata:focus-visible { outline: 4px solid var(--gold-500); outline-offset: 3px; }
+
+/* Petunjuk & diskusi */
+.sp-root .sp-clue.is-lewat { opacity: .6; font-style: italic; }
+.sp-root .sp-ronde-label { margin: 8px 0 4px; font-weight: 800; font-size: var(--fs-xs); color: #6B5D4F; text-transform: uppercase; }
+.sp-root .sp-input .sp-btn { flex: none; }
+.sp-root .sp-chat { max-height: 230px; }
+
+/* Toast di bawah bilah atas, bukan di bawah layar: di layar petunjuk & diskusi
+   bagian bawah berisi kotak input + tombol Kirim yang tertutup toast. Lebar
+   mengikuti isi. Dipusatkan dengan margin, bukan translate: -50% bawaan paket,
+   karena animasi sp-anim-slide-up juga memakai properti translate dan menimpanya
+   (toast jadi bergeser ke kanan & terpotong). */
+.sp-root .sp-toast {
+  top: calc(72px + env(safe-area-inset-top)); bottom: auto;
+  left: 0; right: 0; margin-inline: auto; translate: none;
+  width: max-content; max-width: calc(100vw - 32px); text-align: center;
+}
+
+/* Voting */
+.sp-root .sp-vote-aksi { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr 2fr; gap: 10px; padding-top: 8px; }
+.sp-root .sp-stempel-tile { position: absolute; width: 150%; left: -25%; top: 30%; pointer-events: none; z-index: 2; }
+
+/* Hasil vote */
+.sp-root .sp-stempel-wrap { position: relative; width: 190px; min-height: 190px; margin: 0 auto; }
+.sp-root .sp-avatar-besar { width: 190px; height: 190px; display: block; }
+.sp-root .sp-avatar-terbang { position: absolute; inset: 0; }
+.sp-root .sp-stempel { position: absolute; left: 50%; top: 58%; width: 260px; max-width: none; translate: -50% -50%; pointer-events: none; }
+
+/* Hasil akhir & papan skor */
+.sp-root .sp-banner { width: 100%; display: block; }
+.sp-root .sp-avatar-baris { display: flex; justify-content: center; gap: 8px; }
+.sp-root .sp-avatar-baris .sp-avatar-besar:not(:only-child) { width: 130px; height: 130px; }
+.sp-root .sp-kata-akhir { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sp-root .sp-kata-akhir > div { border: 3px solid var(--ink); border-radius: 16px; padding: 10px; text-align: center; color: var(--cream); }
+.sp-root .sp-kata-akhir small { display: block; font-weight: 800; opacity: .85; }
+.sp-root .sp-kata-akhir b { font: 800 22px var(--font-display); overflow-wrap: anywhere; }
+.sp-root .sp-kata-akhir__pemandu { background: var(--teal-700); }
+.sp-root .sp-kata-akhir__penyusup { background: var(--maroon-500); }
+.sp-root .sp-tab { display: flex; gap: 6px; }
+.sp-root .sp-tab > .sp-btn { flex: 1; }
+.sp-root .sp-leader__nama { display: flex; flex-direction: column; min-width: 0; }
+.sp-root .sp-leader__nama small { font-weight: 700; font-size: var(--fs-xs); color: #6B5D4F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-root .sp-poin-saya { position: relative; margin: 0; text-align: center; color: var(--cream); font-weight: 800; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.sp-root .sp-poin-melayang { position: absolute; left: 50%; top: -12px; font-size: 32px; translate: -50% 0; pointer-events: none; }
+.sp-root .sp-row > .sp-hint { flex: 1; }
+
+/* animasi.css mematikan animasi untuk [class*="sp-anim-"] saat "kurangi gerakan",
+   tapi anak .sp-anim-stagger beranimasi lewat selektor induk tanpa kelas itu */
+@media (prefers-reduced-motion: reduce) {
+  .sp-root .sp-anim-stagger > * { animation: none !important; }
+}

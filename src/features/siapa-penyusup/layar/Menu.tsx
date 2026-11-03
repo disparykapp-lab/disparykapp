@@ -4,13 +4,11 @@ import { ikon, ui } from "../aset";
 import { sfx } from "../audio";
 import Layar from "../komponen/Layar";
 import { TombolSuara } from "../komponen/bersama";
-import { useToast } from "../komponen/toastKonteks";
 
 const urut = (i: number) => ({ "--i": i }) as CSSProperties;
 
 export default function Menu() {
   const navigate = useNavigate();
-  const toast = useToast();
 
   function ke(path: string) {
     sfx("sfx_klik");
@@ -42,14 +40,7 @@ export default function Menu() {
             <img src={ikon("bantuan")} alt="" />
             Cara Main
           </button>
-          <button
-            type="button"
-            className="sp-btn sp-btn--light sp-btn--sm"
-            onClick={() => {
-              sfx("sfx_klik");
-              toast("Papan skor muncul setelah room online siap.");
-            }}
-          >
+          <button type="button" className="sp-btn sp-btn--light sp-btn--sm" onClick={() => ke("/siapa-penyusup/papan-skor")}>
             <img src={ikon("papan_skor")} alt="" />
             Papan Skor
           </button>

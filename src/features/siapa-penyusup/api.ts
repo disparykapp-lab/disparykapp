@@ -23,8 +23,8 @@ export interface PenyusupRoom {
   giliran_user_id: string | null;
   fase_mulai: string | null;
   fase_berakhir: string | null;
-  hasil_vote: Record<string, unknown> | null;
-  akhir: Record<string, unknown> | null;
+  hasil_vote: HasilVote | null;
+  akhir: AkhirGame | null;
   dibuat_at: string;
   diperbarui_at: string;
 }
@@ -41,6 +41,7 @@ export interface PenyusupPemain {
   aktif: boolean;
   dikeluarkan: boolean;
   skor: number;
+  ronde_selamat: number;
   bergabung_at: string;
   profiles: { nama: string } | null;
 }
@@ -52,6 +53,77 @@ export interface PenyusupLog {
   user_id: string | null;
   data: Record<string, unknown> | null;
   dibuat_at: string;
+}
+
+export interface PenyusupKartu {
+  game_ke: number;
+  kata: string;
+  /** null kalau setting "penyusup tahu perannya" mati */
+  peran_terlihat: "pemandu" | "penyusup" | null;
+}
+
+export interface PenyusupPetunjuk {
+  id: number;
+  room_id: string;
+  game_ke: number;
+  ronde: number;
+  user_id: string;
+  teks: string;
+  lewat: boolean;
+  dibuat_at: string;
+}
+
+export interface PenyusupChat {
+  id: number;
+  room_id: string;
+  game_ke: number;
+  ronde: number;
+  user_id: string;
+  teks: string;
+  dibuat_at: string;
+}
+
+export type HasilPetunjuk = "ok" | "bukan_giliran" | "tutup" | "kosong" | "panjang" | "satu_kata" | "sama_kata" | "kasar";
+export type HasilChat = "ok" | "kosong" | "tutup" | "tersingkir" | "terlalu_cepat" | "kasar";
+export type HasilTebakan = "benar" | "salah" | "kosong" | "tutup";
+
+/** penyusup_room.hasil_vote (diisi saat fase hasil_vote). */
+export interface HasilVote {
+  ronde: number;
+  tally: Record<string, number>;
+  lewati: number;
+  seri: boolean;
+  tersingkir_id: string | null;
+  peran: "pemandu" | "penyusup" | null;
+  /** hanya diisi kalau yang tertangkap penyusup */
+  kata: string | null;
+}
+
+export interface SkorAkhir {
+  user_id: string;
+  divisi_id: string | null;
+  peran: "pemandu" | "penyusup";
+  menang: boolean;
+  poin: number;
+}
+
+export type AlasanAkhir = "semua_tertangkap" | "penyusup_seimbang" | "batas_ronde" | "tebakan_benar" | "pemain_keluar";
+
+/** penyusup_room.akhir (diisi saat game selesai). */
+export interface AkhirGame {
+  pemenang: "pemandu" | "penyusup";
+  alasan: AlasanAkhir;
+  kata_pemandu: string;
+  kata_penyusup: string;
+  penyusup_ids: string[];
+  penebak_benar: string | null;
+  skor: SkorAkhir[];
+  skor_divisi: { divisi_id: string; poin: number }[];
+}
+
+export interface PapanSkor {
+  per_pemain: { user_id: string; nama: string; divisi_id: string | null; poin: number; main: number; menang: number }[];
+  per_divisi: { divisi_id: string; nama: string; poin: number; pemain: number }[];
 }
 
 export interface DivisiRingkas {
@@ -125,6 +197,56 @@ export async function pilihAvatar(roomId: string, avatar: number) {
   cekError(error);
 }
 
+export async function mulaiGame(roomId: string) {
+  const { error } = await supabase.rpc("penyusup_mulai", { p_room: roomId });
+  cekError(error);
+}
+
+export async function hafal(roomId: string) {
+  const { error } = await supabase.rpc("penyusup_hafal", { p_room: roomId });
+  cekError(error);
+}
+
+export async function kirimPetunjuk(roomId: string, teks: string) {
+  const { data, error } = await supabase.rpc("penyusup_petunjuk", { p_room: roomId, p_teks: teks });
+  cekError(error);
+  return (data as { hasil: HasilPetunjuk }).hasil;
+}
+
+export async function kirimChat(roomId: string, teks: string) {
+  const { data, error } = await supabase.rpc("penyusup_chat", { p_room: roomId, p_teks: teks });
+  cekError(error);
+  return (data as { hasil: HasilChat }).hasil;
+}
+
+export async function keVoting(roomId: string) {
+  const { error } = await supabase.rpc("penyusup_ke_voting", { p_room: roomId });
+  cekError(error);
+}
+
+/** target null = lewati. Bisa diganti selama waktu voting belum habis. */
+export async function vote(roomId: string, target: string | null) {
+  const { error } = await supabase.rpc("penyusup_vote", { p_room: roomId, p_target: target });
+  cekError(error);
+}
+
+export async function tebakAkhir(roomId: string, teks: string) {
+  const { data, error } = await supabase.rpc("penyusup_tebak_akhir", { p_room: roomId, p_teks: teks });
+  cekError(error);
+  return (data as { hasil: HasilTebakan }).hasil;
+}
+
+export async function ambilPapanSkor(rentang: "minggu" | "semua"): Promise<PapanSkor> {
+  const { data, error } = await supabase.rpc("penyusup_papan_skor", { p_rentang: rentang });
+  cekError(error);
+  return (data as PapanSkor | null) ?? { per_pemain: [], per_divisi: [] };
+}
+
+export async function mainLagi(roomId: string) {
+  const { error } = await supabase.rpc("penyusup_main_lagi", { p_room: roomId });
+  cekError(error);
+}
+
 /** Detak kehadiran + pemicu kemajuan state. Mengembalikan jam server (ms). */
 export async function detak(roomId: string): Promise<number> {
   const { data, error } = await supabase.rpc("penyusup_detak", { p_room: roomId });
@@ -170,6 +292,56 @@ export async function ambilKehadiran(roomId: string) {
   const { data, error } = await supabase.from("penyusup_kehadiran").select("user_id, terakhir_aktif").eq("room_id", roomId);
   cekError(error);
   return (data as { user_id: string; terakhir_aktif: string }[]) ?? [];
+}
+
+/** Kartu milik sendiri saja — kartu pemain lain tidak bisa dibaca (RLS). */
+export async function ambilKartu(roomId: string) {
+  const { data, error } = await supabase
+    .from("penyusup_kartu")
+    .select("game_ke, kata, peran_terlihat")
+    .eq("room_id", roomId)
+    .maybeSingle();
+  cekError(error);
+  return data as PenyusupKartu | null;
+}
+
+/**
+ * Vote sendiri di ronde ini (vote orang lain tidak bisa dibaca — RLS).
+ * undefined = belum vote, null = memilih lewati.
+ */
+export async function ambilVoteSaya(roomId: string, gameKe: number, ronde: number) {
+  const { data, error } = await supabase
+    .from("penyusup_vote")
+    .select("target_id")
+    .eq("room_id", roomId)
+    .eq("game_ke", gameKe)
+    .eq("ronde", ronde)
+    .maybeSingle();
+  cekError(error);
+  return data ? (data as { target_id: string | null }).target_id : undefined;
+}
+
+export async function ambilPetunjuk(roomId: string, gameKe: number) {
+  const { data, error } = await supabase
+    .from("penyusup_petunjuk")
+    .select("*")
+    .eq("room_id", roomId)
+    .eq("game_ke", gameKe)
+    .order("id");
+  cekError(error);
+  return (data as PenyusupPetunjuk[]) ?? [];
+}
+
+export async function ambilChat(roomId: string, gameKe: number) {
+  const { data, error } = await supabase
+    .from("penyusup_chat")
+    .select("*")
+    .eq("room_id", roomId)
+    .eq("game_ke", gameKe)
+    .order("id", { ascending: false })
+    .limit(150);
+  cekError(error);
+  return ((data as PenyusupChat[]) ?? []).reverse();
 }
 
 /** Semua divisi, urut seperti di database — urutan ini yang menentukan warna --divisi-N. */

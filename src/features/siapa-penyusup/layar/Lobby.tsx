@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { namaPendek } from "../../game/logika";
-import { avatar, ikon } from "../aset";
+import { ikon } from "../aset";
 import { sfx } from "../audio";
 import Layar from "../komponen/Layar";
 import PilihAvatar from "../komponen/PilihAvatar";
+import TilePemain from "../komponen/TilePemain";
 import { TombolKembali, TombolSuara } from "../komponen/bersama";
 import { useToast } from "../komponen/toastKonteks";
 import { DAFTAR_KATEGORI } from "../kategori";
@@ -92,9 +93,11 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
     setSibuk(false);
   }
 
-  function mulai() {
-    sfx("sfx_klik");
-    toast("Mulai game sedang disiapkan di tahap berikutnya.");
+  async function mulai() {
+    sfx("sfx_mulai");
+    setSibuk(true);
+    await s.mulai();
+    setSibuk(false);
   }
 
   async function gantiAvatar(i: number) {
@@ -125,42 +128,37 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
           {s.aktif.map((p, i) => {
             const saya = p.user_id === s.saya;
             const on = s.online(p.user_id);
-            const nama = p.profiles?.nama ?? "Pemain";
             const kelas = [
-              "sp-player",
               p.siap ? "is-ready" : "",
-              saya ? "is-me is-selectable" : "",
+              saya ? "is-selectable" : "",
               on ? "" : "is-offline",
               // animasi masuk untuk pemain yang baru bergabung (kejadian realtime terakhir)
               s.kejadian?.jenis === "gabung" && s.kejadian.user_id === p.user_id ? "sp-anim-join" : "",
             ].join(" ");
-            const gaya = { "--dv": s.warnaDivisi(p.divisi_id), "--i": i } as CSSProperties;
-            const isi = (
-              <>
-                {p.user_id === room.host_id && <img className="sp-player__host" src={ikon("host")} alt="Host" />}
-                <img className="sp-player__avatar" src={avatar(p.avatar)} alt="" />
-                <span className="sp-player__name" title={nama}>
-                  {namaPendek(nama)}
-                </span>
-                <span className="sp-divisi" style={{ "--dv": s.warnaDivisi(p.divisi_id) } as CSSProperties}>
-                  <span>{s.namaDivisi(p.divisi_id) ?? "Tanpa divisi"}</span>
-                </span>
+            return (
+              <TilePemain
+                key={p.user_id}
+                s={s}
+                p={p}
+                i={i}
+                kelas={kelas}
+                statusAvatar="normal"
+                divisi={room.mode === "antar_divisi"}
+                onClick={saya ? () => setPilihAvatar(true) : undefined}
+                label={saya ? "Ganti karakter" : undefined}
+              >
                 {!on && <span className="sp-status-kecil">offline</span>}
-              </>
-            );
-            return saya ? (
-              <button key={p.user_id} type="button" className={kelas} style={gaya} onClick={() => setPilihAvatar(true)} aria-label="Ganti karakter">
-                {isi}
-              </button>
-            ) : (
-              <div key={p.user_id} className={kelas} style={gaya}>
-                {isi}
                 {bolehKeluarkan(s.saya, room.host_id, p) && (
-                  <button type="button" className="sp-kick" onClick={() => void keluarkan(p.user_id)} aria-label={`Keluarkan ${nama}`}>
+                  <button
+                    type="button"
+                    className="sp-kick"
+                    onClick={() => void keluarkan(p.user_id)}
+                    aria-label={`Keluarkan ${p.profiles?.nama ?? "pemain"}`}
+                  >
                     <img src={ikon("keluarkan_pemain")} alt="" />
                   </button>
                 )}
-              </div>
+              </TilePemain>
             );
           })}
         </div>
@@ -180,7 +178,7 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
           Undang
         </button>
         {s.sayaHost ? (
-          <button type="button" className="sp-btn" onClick={mulai} disabled={!siapMulai}>
+          <button type="button" className="sp-btn" onClick={() => void mulai()} disabled={!siapMulai || sibuk}>
             <img src={ikon("main")} alt="" />
             Mulai Game
           </button>

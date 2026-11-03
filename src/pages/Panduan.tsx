@@ -202,6 +202,48 @@ export default function Panduan() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="🕵️ Game Siapa Penyusup?">
+        <p className="text-sm text-gray-600">
+          Game tebak kata untuk 4–12 pemain. Buka lewat tombol <strong>🎮 Game</strong> di pojok
+          kanan bawah Beranda, lalu pilih "Main Sekarang" di kartu Siapa Penyusup?.
+        </p>
+        <Langkah no={1}>
+          Tekan <strong>"Buat Room"</strong> dan pilih mode: <strong>Satu Divisi</strong> (hanya
+          teman satu divisi yang bisa gabung) atau <strong>Antar Divisi</strong> (semua divisi
+          boleh gabung, poin dikumpulkan per divisi). Atur juga jumlah penyusup, waktu tiap fase,
+          dan kategori kata.
+        </Langkah>
+        <Langkah no={2}>
+          Bagikan <strong>kode room</strong> 5 huruf atau tombol <strong>Undang</strong>. Rekan
+          bergabung lewat "Gabung Room". Di lobi, ketuk karaktermu untuk menggantinya. Host
+          menekan <strong>"Mulai Game"</strong> kalau sudah ada minimal 4 pemain.
+        </Langkah>
+        <Langkah no={3}>
+          Semua pemain dapat <strong>kata rahasia</strong>. Tekan dan tahan kartu untuk melihatnya.
+          Sebagian besar pemain (Pemandu) dapat kata yang sama; 1–2 Penyusup dapat kata yang mirip
+          tapi beda — dan biasanya tidak tahu kalau dirinya penyusup.
+        </Langkah>
+        <Langkah no={4}>
+          Bergiliran, beri <strong>1 kata petunjuk</strong> tentang katamu (tidak boleh sama
+          persis dengan katamu). Lalu <strong>diskusi</strong> lewat chat: siapa yang petunjuknya
+          janggal?
+        </Langkah>
+        <Langkah no={5}>
+          <strong>Voting</strong>: pilih yang kamu curigai, atau Lewati. Suara terbanyak
+          tersingkir dan perannya diungkap; kalau seri, tidak ada yang tersingkir. Siapa memilih
+          siapa tetap rahasia.
+        </Langkah>
+        <Langkah no={6}>
+          Pemandu menang kalau semua penyusup tertangkap. Penyusup menang kalau jumlahnya sama
+          dengan pemandu yang tersisa, atau masih bertahan setelah 6 ronde. Poin masuk ke
+          <strong> Papan Skor</strong> (minggu ini &amp; sepanjang waktu, per pemain dan per divisi).
+        </Langkah>
+        <Langkah no={7}>
+          Kalau menutup aplikasi lebih dari 1 menit di tengah permainan, kamu dianggap keluar dan
+          tidak mendapat poin game itu. Tombol speaker 🔊 mengatur musik dan efek suara.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="💡 Tips Supaya Absen Lancar">
         <ul className="list-disc space-y-1 pl-5 text-sm text-gray-600">
           <li>Aktifkan GPS/Lokasi di HP sebelum membuka aplikasi.</li>

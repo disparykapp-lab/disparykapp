@@ -8,7 +8,14 @@ import { TombolKembali, TombolSuara } from "../komponen/bersama";
 import { useToast } from "../komponen/toastKonteks";
 import { avatarTersimpan } from "../preferensi";
 import { usePenyusupRoom } from "../usePenyusupRoom";
+import BagikanKata from "./BagikanKata";
+import Diskusi from "./Diskusi";
+import HasilAkhir from "./HasilAkhir";
+import HasilVote from "./HasilVote";
 import Lobby from "./Lobby";
+import Petunjuk from "./Petunjuk";
+import TebakanTerakhir from "./TebakanTerakhir";
+import Voting from "./Voting";
 
 export default function HalamanRoom() {
   const { roomId = "" } = useParams();
@@ -83,10 +90,24 @@ export default function HalamanRoom() {
     );
   }
 
-  if (s.room.status === "menunggu") return <Lobby s={s} />;
-
-  // Layar permainan (bagikan kata → hasil akhir) menyusul di tahap 3–4.
-  return <Pesan judul="Permainan sedang berjalan" isi="Layar permainan sedang disiapkan." onKembali={keMenu} />;
+  switch (s.room.status) {
+    case "menunggu":
+      return <Lobby s={s} />;
+    case "bagikan":
+      return <BagikanKata s={s} />;
+    case "petunjuk":
+      return <Petunjuk s={s} />;
+    case "diskusi":
+      return <Diskusi s={s} />;
+    case "voting":
+      return <Voting s={s} />;
+    case "hasil_vote":
+      return <HasilVote s={s} />;
+    case "tebakan_terakhir":
+      return <TebakanTerakhir s={s} />;
+    case "selesai":
+      return s.room.akhir ? <HasilAkhir s={s} /> : <Pesan judul="Permainan selesai" onKembali={keMenu} />;
+  }
 }
 
 function Pesan({ judul, isi, onKembali, children }: { judul: string; isi?: string; onKembali?: () => void; children?: ReactNode }) {
