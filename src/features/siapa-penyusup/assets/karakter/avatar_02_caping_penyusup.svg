@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Avatar 02 caping - Penyusup</title>
+<defs><radialGradient id="auraG"><stop offset=".55" stop-color="#9B1D3A" stop-opacity=".55"/><stop offset="1" stop-color="#9B1D3A" stop-opacity="0"/></radialGradient></defs>
+<style>
+.av{animation:idle 2.8s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.eyes{animation:blink 4.2s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.glow{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.aura{animation:aura 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes aura{0%,100%{transform:scale(.95);opacity:.5}50%{transform:scale(1.05);opacity:.85}}
+.halo{animation:halo 2.2s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ghost{animation:ghost 3.2s ease-in-out infinite}
+@keyframes ghost{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+<circle class="aura" cx="256" cy="290" r="250" fill="url(#auraG)"/><ellipse cx="256" cy="494" rx="132" ry="14" fill="#000" opacity=".18"/><g class="av">
+<path d="M126,488 C126,388 176,334 256,334 C336,334 386,388 386,488Z" fill="#3FA55B" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+<path d="M150,488 C150,430 162,400 180,382" fill="none" stroke="#2A7A40" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+<path d="M216,338 L256,376 L296,338" fill="#FFF7E8" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+<path d="M232,352 L250,420 M280,352 L262,420" stroke="#0B6E77" stroke-width="7" stroke-linecap="round"/>
+<g transform="translate(256 448) rotate(-4)">
+  <rect x="-34" y="-34" width="68" height="78" rx="10" fill="#FFF7E8" stroke="#2B1E16" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" />
+  <rect x="-34" y="-34" width="68" height="20" rx="8" fill="#0B6E77"/>
+  <circle cx="0" cy="6" r="11" fill="#3FA55B"/>
+  <rect x="-20" y="22" width="40" height="6" rx="3" fill="#C9BBA6"/>
+</g><circle cx="146" cy="234" r="24" fill="#D9A06F" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><circle cx="366" cy="234" r="24" fill="#D9A06F" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><circle cx="256" cy="222" r="112" fill="#D9A06F" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M226,284 Q262,300 290,276" fill="none" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M282,280 l10,-8" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M70,176 L256,62 L442,176 Q256,206 70,176Z" fill="#EBC877" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M256,72 L150,176" stroke="#C89B3C" stroke-width="5"/><path d="M256,72 L200,176" stroke="#C89B3C" stroke-width="5"/><path d="M256,72 L312,176" stroke="#C89B3C" stroke-width="5"/><path d="M256,72 L362,176" stroke="#C89B3C" stroke-width="5"/><path d="M70,176 Q256,206 442,176" fill="none" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+<g>
+  <path d="M138,222 C148,176 208,172 256,190 C304,172 364,176 374,222 C376,262 336,284 302,274 C282,268 268,256 256,256 C244,256 230,268 210,274 C176,284 136,262 138,222Z" fill="#9B1D3A" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M168,206 C188,190 222,192 238,208" fill="none" stroke="#F2C14E" stroke-width="6" stroke-linecap="round"/>
+  <path d="M344,206 C324,190 290,192 274,208" fill="none" stroke="#F2C14E" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="256" cy="200" r="9" fill="#F2C14E" stroke="#2B1E16" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" />
+  <path d="M186,234 C200,218 226,218 238,236 C222,244 200,244 186,234Z" fill="#1F1A17"/>
+  <path d="M326,234 C312,218 286,218 274,236 C290,244 312,244 326,234Z" fill="#1F1A17"/>
+  <g class="glow">
+    <ellipse cx="213" cy="234" rx="10" ry="5" fill="#FF6B8B"/>
+    <ellipse cx="299" cy="234" rx="10" ry="5" fill="#FF6B8B"/>
+  </g>
+  <path d="M180,262 C200,252 210,262 210,262 M332,262 C312,252 302,262 302,262" fill="none" stroke="#F2C14E" stroke-width="5" stroke-linecap="round"/>
+</g></g>
+</svg>

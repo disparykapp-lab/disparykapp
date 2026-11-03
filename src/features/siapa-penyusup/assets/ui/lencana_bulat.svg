@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Lencana bulat (isi angka lewat HTML)</title>
+<defs></defs>
+<style>@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+
+<circle cx="100" cy="100" r="88" fill="#F28C28" stroke="#2B1E16" stroke-width="10"/>
+<circle cx="100" cy="100" r="70" fill="none" stroke="#FFF7E8" stroke-width="6" stroke-dasharray="6 14" stroke-linecap="round"/>
+<path d="M40,70 A70,70 0 0 1 120,32" fill="none" stroke="#FFF" stroke-width="10" stroke-linecap="round" opacity=".45"/>
+
+</svg>

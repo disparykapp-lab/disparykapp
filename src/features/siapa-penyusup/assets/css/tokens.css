@@ -1,0 +1,96 @@
+/* =====================================================================
+   SIAPA PENYUSUP? — Design tokens
+   Satu sumber warna, font, radius, bayangan, dan durasi animasi.
+   Import file ini paling awal, lalu komponen.css dan animasi.css.
+   Variabel sengaja dipasang di .sp-root (bukan :root) supaya tidak
+   bentrok dengan style aplikasi absensi / game Coret Tebak.
+   ===================================================================== */
+
+@font-face {
+  font-family: "Baloo 2";
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../font/Baloo2-Variable-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Nunito";
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("../font/Nunito-Variable-latin.woff2") format("woff2");
+}
+
+.sp-root {
+  /* ---- Warna dasar ---- */
+  --ink: #2B1E16;            /* outline & teks utama */
+  --cream: #FFF7E8;          /* latar panel */
+  --cream-2: #F6E9D2;        /* panel sekunder / divider */
+  --white: #FFFFFF;
+
+  --teal-300: #7FD3D1;
+  --teal-500: #14A3A8;       /* PEMANDU / aksi sekunder */
+  --teal-700: #0B6E77;
+  --orange-300: #FFB877;
+  --orange-500: #F28C28;     /* CTA utama */
+  --orange-700: #C4660F;
+  --gold-500: #F2C14E;       /* aksen batik, poin, host */
+  --red-500: #E5484D;        /* bahaya, timer kritis, vote terpilih */
+  --maroon-500: #9B1D3A;     /* PENYUSUP */
+  --maroon-800: #5E0F24;
+  --green-500: #3FA55B;      /* benar / siap */
+  --indigo-900: #1C1745;     /* latar malam (voting) */
+  --indigo-700: #2E2A6B;
+  --gray-400: #9AA5A8;       /* nonaktif / tersingkir */
+
+  /* ---- Peran ---- */
+  --role-pemandu: var(--teal-500);
+  --role-pemandu-dark: var(--teal-700);
+  --role-penyusup: var(--maroon-500);
+  --role-penyusup-dark: var(--maroon-800);
+
+  /* ---- Warna divisi (urut sesuai id divisi di aplikasi absensi) ---- */
+  --divisi-1: #14A3A8;
+  --divisi-2: #F28C28;
+  --divisi-3: #9B5DE5;
+  --divisi-4: #3FA55B;
+  --divisi-5: #E86A92;
+  --divisi-6: #3D7DD8;
+  --divisi-7: #E9B949;
+  --divisi-8: #E5484D;
+
+  /* ---- Tipografi ---- */
+  --font-display: "Baloo 2", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 20px;
+  --fs-xl: 28px;
+  --fs-2xl: 36px;
+  --fs-word: clamp(32px, 9vw, 52px);   /* kata rahasia di kartu */
+
+  /* ---- Bentuk ---- */
+  --stroke: 3px;                       /* outline tebal khas game */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-press: 0 5px 0 var(--ink);  /* tombol "3D" */
+  --shadow-press-sm: 0 3px 0 var(--ink);
+  --shadow-soft: 0 10px 30px rgba(28, 23, 69, .25);
+
+  /* ---- Spasi ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --gutter: 16px;                      /* jarak tepi layar HP */
+
+  /* ---- Gerak ---- */
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --dur-fast: 150ms;
+  --dur-med: 300ms;
+  --dur-slow: 600ms;
+}

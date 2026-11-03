@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Emblem / ikon aplikasi Siapa Penyusup</title>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14A3A8"/><stop offset="1" stop-color="#0B6E77"/></linearGradient><pattern id="kw" width="64" height="64" patternUnits="userSpaceOnUse"><g fill="#F2C14E" opacity="0.22"><ellipse cx="32.0" cy="17.92" rx="7.04" ry="12.8" transform="rotate(45 32.0 32.0)"/><ellipse cx="32.0" cy="17.92" rx="7.04" ry="12.8" transform="rotate(135 32.0 32.0)"/><ellipse cx="32.0" cy="17.92" rx="7.04" ry="12.8" transform="rotate(225 32.0 32.0)"/><ellipse cx="32.0" cy="17.92" rx="7.04" ry="12.8" transform="rotate(315 32.0 32.0)"/><circle cx="32.0" cy="32.0" r="3.2"/></g></pattern></defs>
+<style>
+.mask{animation:tilt 3.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes tilt{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.mag{animation:scan 4.8s ease-in-out infinite}
+@keyframes scan{0%,100%{transform:translate(-40px,0)}50%{transform:translate(20px,-30px)}}
+.shine{animation:shine 2.4s ease-in-out infinite}
+@keyframes shine{0%{transform:rotate(30deg) translateX(-40px)}60%,100%{transform:rotate(30deg) translateX(160px)}}
+.glow{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.5}50%{opacity:1}}
+.sparkle{animation:sparkle 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes sparkle{0%,100%{transform:scale(.4) rotate(0);opacity:.3}50%{transform:scale(1) rotate(45deg);opacity:1}}
+.q{animation:q 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:bottom center}
+@keyframes q{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-14px) rotate(8deg)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+
+<rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bg)" stroke="#2B1E16" stroke-width="12"/>
+<rect x="8" y="8" width="496" height="496" rx="112" fill="url(#kw)"/>
+<circle cx="256" cy="246" r="170" fill="#F2C14E" opacity=".3"/>
+<g transform="translate(256 220)"><g class="mask"><g transform="scale(1.4)">
+  <path d="M-118,-6 C-108,-52 -48,-56 0,-38 C48,-56 108,-52 118,-6 C120,34 80,56 46,46 C26,40 12,28 0,28 C-12,28 -26,40 -46,46 C-80,56 -120,34 -118,-6Z" fill="#9B1D3A" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M-88,-22 C-68,-38 -34,-36 -18,-20 M88,-22 C68,-38 34,-36 18,-20" fill="none" stroke="#F2C14E" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="0" cy="-28" r="11" fill="#F2C14E" stroke="#2B1E16" stroke-width="5"/>
+  <path d="M-70,6 C-56,-10 -30,-10 -18,8 C-34,16 -56,16 -70,6Z M70,6 C56,-10 30,-10 18,8 C34,16 56,16 70,6Z" fill="#1F1A17"/>
+  <g class="glow"><ellipse cx="-43" cy="6" rx="11" ry="5" fill="#FF6B8B"/><ellipse cx="43" cy="6" rx="11" ry="5" fill="#FF6B8B"/></g>
+  <path d="M-76,34 C-56,24 -46,34 -46,34 M76,34 C56,24 46,34 46,34" fill="none" stroke="#F2C14E" stroke-width="6" stroke-linecap="round"/>
+</g></g></g>
+<g transform="translate(300 290)"><g class="mag"><g transform="scale(.9)"><g>
+  <path d="M44,44 L104,104" stroke="#2B1E16" stroke-width="34" stroke-linecap="round"/>
+  <path d="M44,44 L104,104" stroke="#F28C28" stroke-width="20" stroke-linecap="round"/>
+  <circle r="66" fill="#FFF7E8" fill-opacity=".35" stroke="#2B1E16" stroke-width="10"/>
+  <circle r="58" fill="none" stroke="#14A3A8" stroke-width="12"/>
+  <clipPath id="lensClip"><circle r="52"/></clipPath>
+  <g clip-path="url(#lensClip)"><rect class="shine" x="-90" y="-80" width="26" height="170" fill="#FFF" opacity=".7" transform="rotate(30)"/></g>
+</g></g></g></g>
+<g transform="translate(110 110) scale(1.3)"><g class="sparkle" style="animation-delay:0s"><path d="M0,-20 C3,-6 6,-3 20,0 C6,3 3,6 0,20 C-3,6 -6,3 -20,0 C-6,-3 -3,-6 0,-20Z" fill="#F2C14E" stroke="#2B1E16" stroke-width="3"/></g></g><g transform="translate(410 400) scale(1)"><g class="sparkle" style="animation-delay:-0.8s"><path d="M0,-20 C3,-6 6,-3 20,0 C6,3 3,6 0,20 C-3,6 -6,3 -20,0 C-6,-3 -3,-6 0,-20Z" fill="#FFF7E8" stroke="#2B1E16" stroke-width="3"/></g></g>
+
+</svg>

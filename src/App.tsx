@@ -34,6 +34,8 @@ import NaskahAi from "./pages/NaskahAi";
 const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
 // Game Coret Tebak juga terpisah: aset & kodenya baru diunduh saat menu game dibuka.
 const GamePage = lazy(() => import("./features/game/GamePage"));
+// Game Siapa Penyusup juga terpisah, dan layar penuh (di luar AppLayout).
+const SiapaPenyusupPage = lazy(() => import("./features/siapa-penyusup/SiapaPenyusupPage"));
 
 export default function App() {
   return (
@@ -85,6 +87,14 @@ export default function App() {
           <Route path="/daftar" element={<Daftar />} />
 
           <Route element={<RequireAuth />}>
+            <Route
+              path="/siapa-penyusup/*"
+              element={
+                <Suspense fallback={<Loading teks="Memuat game..." />}>
+                  <SiapaPenyusupPage />
+                </Suspense>
+              }
+            />
             <Route element={<AppLayout />}>
               <Route path="/beranda" element={<Beranda />} />
               <Route path="/absen/:jenis" element={<Absen />} />
