@@ -1,9 +1,36 @@
 # Rencana implementasi — "Siapa Penyusup?"
 
-Status: **disetujui 2026-11-03** (jawaban P1–P7 di §10; sisanya memakai rekomendasi). Tahap 1 dan 2 selesai (belum di-commit); berikutnya tahap 3.
+Status: **semua tahap selesai (2026-11-03)**. Tahap 1–2 di-commit di `fitur/siapa-penyusup`; tahap 3–5 belum di-commit. Belum di-merge ke `main`.
+Seluruh mesin permainan ada di server (0033), termasuk voting, skor, main lagi, dan papan skor, karena transisinya saling bergantung.
 
-### Menjalankan migrasi & menguji (tahap 2)
-1. Supabase → SQL Editor → tempel isi `supabase/migrations/0032_game_siapa_penyusup.sql` → Run. Syarat: 0001–0031 sudah jalan (butuh `game_normal()` dari 0028). Aman dijalankan ulang.
+### Checklist README §10
+| Item | Status |
+|---|---|
+| Entry menu game (emblem + nama) | ✅ kartu di pop-up Zona Game |
+| Buat/gabung room + validasi Satu Divisi | ✅ |
+| Lobby realtime (join/leave/ready/kick/host pindah) | ✅ (realtime belum diuji di Supabase asli) |
+| Pembagian kata per-user + kartu tahan-untuk-lihat | ✅ |
+| Fase petunjuk bergiliran + validasi petunjuk | ✅ |
+| Chat diskusi + timer server | ✅ |
+| Voting rahasia + hasil + seri/lewati | ✅ |
+| Cek menang + layar akhir + kata terungkap | ✅ (+ tebakan terakhir, batas 6 ronde) |
+| Skor per pemain & per divisi + papan skor | ✅ |
+| Audio manager (BGM per layar, SFX, mute tersimpan, unlock on tap) | ✅ |
+| Reconnect & penanganan host keluar | ✅ (muat ulang di tiap fase, host pindah) |
+| Uji di HP Android & iPhone (Safari) + reduced motion | ⚠️ reduced motion ✅ di Chrome; **HP asli belum** |
+
+### Yang diuji & yang belum
+- Postgres lokal (image Supabase): uji RLS + 6 skenario permainan penuh (`supabase/tests/siapa_penyusup_rls.sql` untuk dijalankan di Supabase).
+- Chrome 375 px, 4 user lewat PostgREST: buat/gabung/lobi/kick, mulai → kartu → petunjuk → diskusi → voting → hasil → akhir → main lagi, tebakan terakhir, papan skor, mute, reduced motion.
+- **Belum**: Realtime Supabase (layar berganti tanpa reload), HP asli (Android Chrome, iPhone Safari — terutama audio OGG/MP3 & tahan-kartu), dan jaringan lambat.
+
+### Perbaikan atas CSS paket (di `tambahan.css`)
+- `.sp-toast`: `translate: -50%` tertimpa animasi `sp-anim-slide-up` → toast bergeser & terpotong; kini dipusatkan dengan margin dan dipindah ke atas agar tidak menutup kotak input.
+- "Kurangi gerakan" tidak mematikan animasi anak `.sp-anim-stagger`.
+- Target sentuh tombol stepper (36×34) dan tombol keluarkan pemain dinaikkan ke 44 px.
+
+### Menjalankan migrasi & menguji
+1. Supabase → SQL Editor → jalankan berurutan `0032_game_siapa_penyusup.sql`, lalu `0033_siapa_penyusup_permainan.sql`. Syarat: 0001–0031 sudah jalan (butuh `game_normal()` & `game_jarak()` dari 0028). Keduanya aman dijalankan ulang.
 2. Masih di SQL Editor, jalankan `supabase/tests/siapa_penyusup_rls.sql`. Harus muncul dua NOTICE `OK: …`, tanpa `GAGAL`. Skrip ini di-rollback, jadi tidak mengubah data.
 3. Cek Realtime: Database → Publications → `supabase_realtime` harus memuat `penyusup_room`, `penyusup_pemain`, `penyusup_petunjuk`, `penyusup_chat`, `penyusup_log`.
 4. Uji dua akun: browser biasa (akun A) + jendela incognito (akun B, harus akun lain yang terdaftar). A: Beranda → Game → Siapa Penyusup → Buat Room. B: Gabung Room → ketik kode, atau buka link undangan. Yang dicek: B muncul di lobi A tanpa reload (+ suara & toast), tombol Siap, ganti karakter, kick (B melihat layar "Kamu dikeluarkan" dan tidak bisa masuk lagi), host keluar → B jadi host. Mode Satu Divisi: akun dari divisi lain harus ditolak. Tombol Mulai Game baru aktif dengan 4 pemain online (3–4 akun).

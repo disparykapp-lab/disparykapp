@@ -7,15 +7,22 @@ import {
   BATAS,
   bisaMulai,
   bolehKeluarkan,
+  cekPemenang,
+  cekPetunjuk,
   geser,
+  hitungVote,
   hostBerikut,
   HURUF_KODE,
   jumlahPenyusupOtomatis,
   jumlahPenyusupValid,
+  kelasTimer,
   kodeValid,
   nomorWarnaDivisi,
+  normalKata,
+  poinPemain,
   penyusupDipakai,
   rapikanKode,
+  sisaDetik,
 } from "../src/features/siapa-penyusup/logika.ts";
 
 test("huruf kode tanpa O/0/I/1", () => {
@@ -133,4 +140,83 @@ test("warna divisi mengikuti urutan divisi, berulang tiap 8", () => {
   assert.equal(nomorWarnaDivisi("d9", urutan), 1);
   assert.equal(nomorWarnaDivisi(null, urutan), null);
   assert.equal(nomorWarnaDivisi("hilang", urutan), null);
+});
+
+test("normalisasi kata sama dengan game_normal()", () => {
+  assert.equal(normalKata("  Alun-Alun   Kidul! "), "alun alun kidul");
+  assert.equal(normalKata("Onde_onde"), "onde onde");
+});
+
+test("petunjuk: 1 kata, maks 24 huruf, bukan kata sendiri", () => {
+  assert.equal(cekPetunjuk("   ", "Gudeg"), "kosong");
+  assert.equal(cekPetunjuk("a".repeat(25), "Gudeg"), "panjang");
+  assert.equal(cekPetunjuk("dua kata", "Gudeg"), "satu_kata");
+  assert.equal(cekPetunjuk("  manis  ", "Gudeg"), null);
+  assert.equal(cekPetunjuk("GUDEG!", "Gudeg"), "sama_kata");
+  assert.equal(cekPetunjuk("CandiPrambanan", "Candi Prambanan"), "sama_kata");
+  assert.equal(cekPetunjuk("Onde-onde", "Onde-onde"), "sama_kata");
+  // P5: bagian kata diperbolehkan
+  assert.equal(cekPetunjuk("Prambanan", "Candi Prambanan"), null);
+});
+
+test("timer: sisa detik dibulatkan ke atas, warna sesuai ambang", () => {
+  const akhir = "2026-11-03T08:00:30.000Z";
+  assert.equal(sisaDetik(akhir, Date.parse("2026-11-03T08:00:00.000Z")), 30);
+  assert.equal(sisaDetik(akhir, Date.parse("2026-11-03T08:00:29.100Z")), 1);
+  assert.equal(sisaDetik(akhir, Date.parse("2026-11-03T08:01:00.000Z")), 0);
+  assert.equal(sisaDetik(null, 0), 0);
+  assert.equal(kelasTimer(11), "");
+  assert.equal(kelasTimer(10), "is-warning");
+  assert.equal(kelasTimer(5), "is-critical sp-anim-critical");
+});
+
+test("hitung vote: suara terbanyak tersingkir", () => {
+  const h = hitungVote([
+    { voter: "a", target: "e" },
+    { voter: "b", target: "e" },
+    { voter: "c", target: "a" },
+    { voter: "e", target: null },
+  ]);
+  assert.deepEqual(h.tally, { e: 2, a: 1 });
+  assert.equal(h.lewati, 1);
+  assert.equal(h.tersingkir, "e");
+});
+
+test("hitung vote: seri, lewati terbanyak, atau tanpa suara = tidak ada yang tersingkir", () => {
+  const seri = [
+    { voter: "a", target: "c" },
+    { voter: "b", target: "d" },
+  ];
+  assert.equal(hitungVote(seri).tersingkir, null);
+  const lewatiSama = [
+    { voter: "a", target: "c" },
+    { voter: "b", target: "c" },
+    { voter: "c", target: null },
+    { voter: "d", target: null },
+  ];
+  assert.equal(hitungVote(lewatiSama).tersingkir, null);
+  assert.equal(hitungVote([]).tersingkir, null);
+});
+
+test("kondisi menang", () => {
+  assert.equal(cekPemenang(0, 3), "pemandu");
+  assert.equal(cekPemenang(1, 1), "penyusup");
+  assert.equal(cekPemenang(2, 1), "penyusup");
+  assert.equal(cekPemenang(1, 2), null);
+  assert.equal(cekPemenang(2, 3), null);
+});
+
+test("skor sesuai tabel README (sama dengan skenario uji SQL)", () => {
+  const dasar = { aktif: true, hidup: true, voteTepat: 0, rondeSelamat: 0, tebakanBenar: false };
+  // pemandu menang, masih hidup, 1 vote tepat
+  assert.equal(poinPemain({ ...dasar, peran: "pemandu", pemenang: "pemandu", voteTepat: 1 }), 180);
+  assert.equal(poinPemain({ ...dasar, peran: "pemandu", pemenang: "pemandu", hidup: false }), 100);
+  assert.equal(poinPemain({ ...dasar, peran: "pemandu", pemenang: "penyusup", voteTepat: 2 }), 60);
+  // penyusup bertahan 6 ronde (batas ronde)
+  assert.equal(poinPemain({ ...dasar, peran: "penyusup", pemenang: "penyusup", rondeSelamat: 6 }), 600);
+  // penyusup tertangkap lalu tebakan terakhir benar
+  assert.equal(poinPemain({ ...dasar, peran: "penyusup", pemenang: "penyusup", hidup: false, tebakanBenar: true }), 500);
+  assert.equal(poinPemain({ ...dasar, peran: "penyusup", pemenang: "pemandu", hidup: false }), 0);
+  // keluar sebelum selesai: 0
+  assert.equal(poinPemain({ ...dasar, peran: "pemandu", pemenang: "pemandu", aktif: false, voteTepat: 3 }), 0);
 });

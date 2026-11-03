@@ -11,6 +11,7 @@ import GabungLewatLink from "./layar/GabungLewatLink";
 import GabungRoom from "./layar/GabungRoom";
 import HalamanRoom from "./layar/HalamanRoom";
 import Menu from "./layar/Menu";
+import PapanSkor from "./layar/PapanSkor";
 
 /**
  * Game "Siapa Penyusup?" — dimuat lazy dari App.tsx, layar penuh di luar AppLayout.
@@ -26,6 +27,7 @@ export default function SiapaPenyusupPage() {
           <Route index element={<Menu />} />
           <Route path="cara-main" element={<CaraMain />} />
           <Route path="buat" element={<BuatRoom />} />
+          <Route path="papan-skor" element={<PapanSkor />} />
           <Route path="gabung" element={<GabungRoom />} />
           <Route path="gabung/:kode" element={<GabungLewatLink />} />
           <Route path="main/:roomId" element={<HalamanRoom />} />

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import * as api from "./api";
-import type { DivisiRingkas, PenyusupLog, PenyusupPemain, PenyusupRoom } from "./api";
+import type { DivisiRingkas, PenyusupChat, PenyusupKartu, PenyusupLog, PenyusupPemain, PenyusupPetunjuk, PenyusupRoom } from "./api";
 import { nomorWarnaDivisi } from "./logika";
 
 const INTERVAL_DETAK = 5000;
@@ -28,6 +28,12 @@ export function usePenyusupRoom(roomId: string) {
   const [log, setLog] = useState<PenyusupLog[]>([]);
   const [divisi, setDivisi] = useState<DivisiRingkas[]>([]);
   const [kehadiran, setKehadiran] = useState<Record<string, number>>({});
+  /** Kartu milik sendiri (kata & peran). Pemain lain tidak bisa membacanya (RLS). */
+  const [kartu, setKartu] = useState<PenyusupKartu | null>(null);
+  const [petunjuk, setPetunjuk] = useState<PenyusupPetunjuk[]>([]);
+  const [chat, setChat] = useState<PenyusupChat[]>([]);
+  /** Vote sendiri ronde ini: undefined = belum, null = lewati. Disimpan bersama kuncinya. */
+  const [voteSaya, setVoteSaya] = useState<{ kunci: string; target: string | null } | null>(null);
   /** Kejadian realtime terbaru (gabung/keluar/…), untuk efek suara & toast. Riwayat lama tidak ikut. */
   const [kejadian, setKejadian] = useState<PenyusupLog | null>(null);
   const [selisihJam, setSelisihJam] = useState(0);
@@ -60,10 +66,17 @@ export function usePenyusupRoom(roomId: string) {
         setDitutup(true);
         return;
       }
-      const [p, l] = await Promise.all([api.ambilPemain(roomId), api.ambilLog(roomId)]);
+      const [p, l, pt, c] = await Promise.all([
+        api.ambilPemain(roomId),
+        api.ambilLog(roomId),
+        r.game_ke > 0 ? api.ambilPetunjuk(roomId, r.game_ke) : [],
+        r.game_ke > 0 ? api.ambilChat(roomId, r.game_ke) : [],
+      ]);
       setRoom(r);
       setPemain(p);
       setLog(l);
+      setPetunjuk(pt);
+      setChat(c);
       void muatKehadiran();
     } catch (e) {
       setError(pesanError(e, "Gagal memuat room."));
@@ -90,6 +103,14 @@ export function usePenyusupRoom(roomId: string) {
       .on("postgres_changes", { event: "*", schema: "public", table: "penyusup_pemain", filter: `room_id=eq.${roomId}` }, () =>
         muatPemain()
       )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "penyusup_petunjuk", filter: `room_id=eq.${roomId}` }, (payload) => {
+        const p = payload.new as PenyusupPetunjuk;
+        setPetunjuk((lama) => (lama.some((x) => x.id === p.id) ? lama : [...lama, p]));
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "penyusup_chat", filter: `room_id=eq.${roomId}` }, (payload) => {
+        const c = payload.new as PenyusupChat;
+        setChat((lama) => (lama.some((x) => x.id === c.id) ? lama : [...lama.slice(-150), c]));
+      })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "penyusup_log", filter: `room_id=eq.${roomId}` }, (payload) => {
         const l = payload.new as PenyusupLog;
         setLog((lama) => (lama.some((x) => x.id === l.id) ? lama : [...lama.slice(-60), l]));
@@ -114,6 +135,43 @@ export function usePenyusupRoom(roomId: string) {
       void supabase.removeChannel(ch);
     };
   }, [roomId, muatSemua, muatPemain, muatKehadiran]);
+
+  // Game baru (atau main lagi): petunjuk & chat game ini, dan kartu sendiri.
+  const gameKe = room?.game_ke ?? 0;
+  const diLobi = !room || room.status === "menunggu";
+  useEffect(() => {
+    if (gameKe === 0 || diLobi) return;
+    let batal = false;
+    Promise.all([api.ambilKartu(roomId), api.ambilPetunjuk(roomId, gameKe), api.ambilChat(roomId, gameKe)])
+      .then(([k, pt, c]) => {
+        if (batal) return;
+        setKartu(k);
+        setPetunjuk(pt);
+        setChat(c);
+      })
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
+  }, [roomId, gameKe, diLobi]);
+
+  // Vote sendiri (setelah memuat ulang di tengah voting, pilihan tetap terlihat).
+  const ronde = room?.ronde ?? 0;
+  const sedangVoting = room?.status === "voting";
+  const kunciVote = `${gameKe}:${ronde}`;
+  useEffect(() => {
+    if (!sedangVoting) return;
+    let batal = false;
+    api
+      .ambilVoteSaya(roomId, gameKe, ronde)
+      .then((t) => {
+        if (!batal && t !== undefined) setVoteSaya({ kunci: `${gameKe}:${ronde}`, target: t });
+      })
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
+  }, [roomId, gameKe, ronde, sedangVoting]);
 
   // Detak kehadiran berkala + saat tab kembali terlihat.
   const sayaAnggota = pemain.some((p) => p.user_id === saya && p.aktif);
@@ -194,12 +252,21 @@ export function usePenyusupRoom(roomId: string) {
     }
   }
 
+  // hanya data game yang sedang berjalan; sisa game sebelumnya disaring
+  const kartuGame = !diLobi && kartu?.game_ke === gameKe ? kartu : null;
+  const petunjukGame = useMemo(() => petunjuk.filter((p) => p.game_ke === gameKe), [petunjuk, gameKe]);
+  const chatGame = useMemo(() => chat.filter((c) => c.game_ke === gameKe), [chat, gameKe]);
+
   return {
     saya,
     room,
     pemain,
     aktif,
     log,
+    kartu: kartuGame,
+    voteSaya: voteSaya?.kunci === kunciVote ? voteSaya.target : undefined,
+    petunjuk: petunjukGame,
+    chat: chatGame,
     kejadian,
     memuat,
     ditutup,
@@ -217,6 +284,18 @@ export function usePenyusupRoom(roomId: string) {
     keluarkan: (userId: string) => jalankan(() => api.keluarkanPemain(roomId, userId), "Gagal mengeluarkan pemain."),
     aturSiap: (siap: boolean) => jalankan(() => api.aturSiap(roomId, siap), "Gagal mengubah status siap."),
     pilihAvatar: (avatar: number) => jalankan(() => api.pilihAvatar(roomId, avatar), "Gagal mengganti karakter."),
+    mulai: () => jalankan(() => api.mulaiGame(roomId), "Gagal memulai permainan."),
+    hafal: () => jalankan(() => api.hafal(roomId), "Gagal mengirim status hafal."),
+    kirimPetunjuk: (teks: string) => jalankan(() => api.kirimPetunjuk(roomId, teks), "Gagal mengirim petunjuk."),
+    kirimChat: (teks: string) => jalankan(() => api.kirimChat(roomId, teks), "Gagal mengirim pesan."),
+    keVoting: () => jalankan(() => api.keVoting(roomId), "Gagal lanjut ke voting."),
+    mainLagi: () => jalankan(() => api.mainLagi(roomId), "Gagal memulai ulang."),
+    vote: async (target: string | null) => {
+      const ok = await jalankan(() => api.vote(roomId, target).then(() => true), "Gagal mengirim vote.");
+      if (ok) setVoteSaya({ kunci: kunciVote, target });
+      return !!ok;
+    },
+    tebakAkhir: (teks: string) => jalankan(() => api.tebakAkhir(roomId, teks), "Gagal mengirim tebakan."),
     muatUlang: muatSemua,
   };
 }
