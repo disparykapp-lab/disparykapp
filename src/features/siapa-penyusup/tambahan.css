@@ -1,0 +1,77 @@
+/* Helper tata letak dari <style> prototype (Referensi/prototype/index.html), diberi
+   prefiks sp- dan di-scope ke .sp-root supaya tidak bocor ke halaman lain.
+   Sengaja CSS biasa, bukan utilitas Tailwind: kelas sp-* paket tidak memakai
+   @layer, jadi selalu menang atas utilitas Tailwind pada elemen yang sama. */
+
+.sp-root .sp-topbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.sp-root .sp-topbar > .sp-title { font-size: 26px; }
+.sp-root .sp-logo { width: min(86%, 340px); margin: 8px auto 0; display: block; }
+.sp-root .sp-stack { display: flex; flex-direction: column; gap: 12px; }
+.sp-root .sp-center { text-align: center; }
+.sp-root .sp-muted { color: #6B5D4F; font-weight: 700; font-size: 14px; margin: 0; }
+.sp-root .sp-row { display: flex; gap: 10px; align-items: center; }
+.sp-root .sp-row > .sp-btn { flex: 1; }
+.sp-root .sp-spacer { flex: 1; }
+.sp-root .sp-hint {
+  background: rgba(28, 23, 69, .75); color: var(--cream); border-radius: 999px;
+  padding: 6px 14px; font-weight: 800; font-size: 13px; text-align: center; align-self: center; margin: 0;
+}
+/* di layar lebar komponen.css membuat anak .sp-screen selebar 440px; pil petunjuk tetap selebar isinya */
+.sp-root .sp-screen > .sp-hint { width: auto; }
+
+/* Cara main */
+.sp-root .sp-aturan { margin: 0 0 var(--space-3); padding-left: 22px; list-style: decimal; }
+.sp-root .sp-aturan li { margin-bottom: 6px; font-weight: 700; }
+.sp-root .sp-info-mode { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.sp-root .sp-info-mode img { width: 40px; height: 40px; flex: none; }
+
+/* Buat room */
+.sp-root .sp-mode__opt:has(input:focus-visible) { outline: 4px solid var(--gold-500); outline-offset: 3px; }
+.sp-root .sp-mode__opt:has(input:disabled) { opacity: .55; cursor: not-allowed; }
+.sp-root .sp-toggle__teks { display: flex; flex-direction: column; }
+.sp-root .sp-toggle__teks small { font-weight: 700; font-size: var(--fs-xs); color: #6B5D4F; }
+.sp-root .sp-stepper button:disabled { opacity: .4; cursor: not-allowed; }
+.sp-root .sp-stepper output { min-width: 72px; }
+.sp-root .sp-pilih {
+  font: 800 15px var(--font-body); color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 12px; padding: 6px 8px; background: #fff; max-width: 60%;
+}
+
+/* Gabung room: 5 kotak huruf */
+.sp-root .sp-kode { display: flex; gap: 8px; justify-content: center; }
+.sp-root .sp-kode input {
+  width: 48px; height: 60px; text-align: center; text-transform: uppercase;
+  font: 800 30px var(--font-display); color: var(--ink);
+  border: 3px solid var(--ink); border-radius: 12px; background: var(--white); box-shadow: var(--shadow-press-sm);
+}
+.sp-root .sp-kode input:focus-visible { outline: 4px solid var(--gold-500); outline-offset: 2px; }
+.sp-root .sp-kosong { margin: 0; padding: 8px 0; border-top: 1px solid #ffffff22; font-weight: 700; opacity: .85; }
+.sp-root .sp-daftar-room { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid #ffffff22; }
+.sp-root .sp-daftar-room__kode { font: 800 20px var(--font-display); color: var(--gold-500); letter-spacing: 1px; }
+.sp-root .sp-daftar-room__info { display: flex; flex-direction: column; min-width: 0; flex: 1; font-weight: 700; font-size: var(--fs-sm); }
+.sp-root .sp-daftar-room__info small { opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Lobby */
+.sp-root .sp-lobi-grid { padding-top: 12px; }
+.sp-root button.sp-player { font: inherit; color: inherit; }
+.sp-root .sp-player .sp-divisi { max-width: 100%; }
+.sp-root .sp-player .sp-divisi > span { overflow: hidden; text-overflow: ellipsis; }
+.sp-root .sp-player.is-offline .sp-player__avatar,
+.sp-root .sp-player.is-offline .sp-player__name { opacity: .45; filter: grayscale(.8); }
+.sp-root .sp-status-kecil { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #6B5D4F; }
+.sp-root .sp-kick {
+  position: absolute; top: -14px; right: -14px; z-index: 1;
+  width: 40px; height: 40px; padding: 0; border-radius: 50%;
+  border: 2px solid var(--ink); background: var(--cream); box-shadow: var(--shadow-press-sm);
+  display: grid; place-items: center; cursor: pointer;
+}
+.sp-root .sp-kick img { width: 24px; height: 24px; }
+.sp-root .sp-kick:active { transform: translateY(2px); box-shadow: none; }
+.sp-root .sp-ringkas {
+  margin: 0; text-align: center; color: var(--cream); font-weight: 800; font-size: var(--fs-xs);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+.sp-root .sp-row > .sp-btn.sp-lebar-isi { flex: none; }
+.sp-root .sp-pilih-avatar { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-bottom: var(--space-3); }
+.sp-root .sp-pilih-avatar .sp-player { padding: 6px 2px; border-top-width: 3px; }
+.sp-root .sp-pilih-avatar .sp-player__avatar { width: 100%; height: auto; }

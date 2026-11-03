@@ -1,0 +1,132 @@
+/* =====================================================================
+   SIAPA PENYUSUP? — Animasi
+   Pakai dengan menambah kelas "sp-anim-*" ke elemen. Animasi sekali-jalan
+   (reveal, stempel, tersingkir) cukup ditambah kelasnya lalu dengarkan
+   event `animationend` bila perlu lanjut ke langkah berikutnya.
+   Semua animasi mati otomatis bila pengguna memilih "kurangi gerakan".
+   ===================================================================== */
+
+/* ---------- Loop halus ---------- */
+.sp-anim-float { animation: sp-float 3s ease-in-out infinite; }
+@keyframes sp-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+
+.sp-anim-pulse { animation: sp-pulse 1.6s ease-in-out infinite; }
+@keyframes sp-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.06; } }
+
+.sp-anim-wiggle { animation: sp-wiggle 2.4s ease-in-out infinite; }
+@keyframes sp-wiggle { 0%, 80%, 100% { rotate: 0deg; } 85% { rotate: -6deg; } 90% { rotate: 6deg; } 95% { rotate: -3deg; } }
+
+/* Giliran memberi petunjuk: cincin emas berdenyut di sekeliling tile pemain */
+.sp-anim-turn { position: relative; }
+.sp-anim-turn::after {
+  content: ""; position: absolute; inset: -6px; border-radius: inherit;
+  border: 4px solid var(--gold-500); animation: sp-ring 1.2s ease-out infinite; pointer-events: none;
+}
+@keyframes sp-ring { from { opacity: 1; scale: 1; } to { opacity: 0; scale: 1.18; } }
+
+/* Titik "sedang mengetik…" */
+.sp-typing { display: inline-flex; gap: 4px; }
+.sp-typing i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: sp-typing 1s infinite; }
+.sp-typing i:nth-child(2) { animation-delay: .15s; }
+.sp-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes sp-typing { 0%, 60%, 100% { translate: 0 0; opacity: .4; } 30% { translate: 0 -6px; opacity: 1; } }
+
+/* Skeleton loading */
+.sp-anim-shimmer {
+  background: linear-gradient(90deg, var(--cream-2) 25%, var(--white) 50%, var(--cream-2) 75%) 0 0 / 300% 100%;
+  animation: sp-shimmer 1.4s linear infinite;
+}
+@keyframes sp-shimmer { to { background-position: -150% 0; } }
+
+/* ---------- Masuk / keluar layar ---------- */
+.sp-anim-pop-in { animation: sp-pop-in .45s var(--ease-bounce) both; }
+@keyframes sp-pop-in { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+
+.sp-anim-slide-up { animation: sp-slide-up .45s var(--ease-out) both; }
+@keyframes sp-slide-up { from { opacity: 0; translate: 0 32px; } to { opacity: 1; translate: 0 0; } }
+
+.sp-anim-fade-in { animation: sp-fade .35s ease both; }
+@keyframes sp-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* Daftar muncul berurutan: beri style="--i: 0..n" pada tiap item */
+.sp-anim-stagger > * { animation: sp-slide-up .4s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 60ms); }
+
+/* Pemain baru bergabung ke lobby */
+.sp-anim-join { animation: sp-join .6s var(--ease-bounce) both; }
+@keyframes sp-join { 0% { opacity: 0; scale: .3; rotate: -12deg; } 70% { opacity: 1; scale: 1.1; rotate: 4deg; } 100% { scale: 1; rotate: 0deg; } }
+
+/* ---------- Kartu & peran ---------- */
+/* Hitung mundur 3-2-1 sebelum kata dibagikan. Ganti teks lalu re-trigger kelas. */
+.sp-anim-countdown {
+  font-family: var(--font-display); font-weight: 800; font-size: 160px; color: var(--cream);
+  -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill;
+  animation: sp-countdown .9s var(--ease-out) both;
+}
+@keyframes sp-countdown { 0% { opacity: 0; scale: 2.4; } 30% { opacity: 1; scale: 1; } 80% { opacity: 1; scale: .95; } 100% { opacity: 0; scale: .6; } }
+
+/* Kartu peran / kartu kata muncul dramatis */
+.sp-anim-reveal { animation: sp-reveal .9s var(--ease-bounce) both; }
+@keyframes sp-reveal {
+  0% { opacity: 0; scale: .2; rotate: -18deg; filter: brightness(3); }
+  60% { opacity: 1; scale: 1.08; rotate: 3deg; filter: brightness(1.3); }
+  100% { scale: 1; rotate: 0deg; filter: brightness(1); }
+}
+
+/* Kartu yang dibagikan "terbang" dari tumpukan ke tengah */
+.sp-anim-deal { animation: sp-deal .7s var(--ease-out) both; }
+@keyframes sp-deal { from { opacity: 0; translate: 0 60vh; rotate: 25deg; } to { opacity: 1; translate: 0 0; rotate: 0deg; } }
+
+/* Peran PENYUSUP: kilatan merah + getar */
+.sp-anim-penyusup { animation: sp-reveal .9s var(--ease-bounce) both, sp-shake .5s .9s ease-in-out 2; }
+.sp-flash-merah { position: fixed; inset: 0; background: radial-gradient(circle, rgba(229, 72, 77, .0) 30%, rgba(155, 29, 58, .75)); pointer-events: none; animation: sp-flash 1.2s ease-out both; z-index: 30; }
+@keyframes sp-flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------- Voting ---------- */
+/* Stempel jatuh ke tile pemain (pakai Asset/ui/stempel_*.svg) */
+.sp-anim-stamp { animation: sp-stamp .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes sp-stamp {
+  0% { opacity: 0; scale: 3; rotate: -25deg; }
+  60% { opacity: 1; scale: .92; rotate: -6deg; }
+  100% { scale: 1; rotate: -8deg; }
+}
+
+/* Chip jumlah suara bertambah */
+.sp-anim-vote-bump { animation: sp-bump .4s var(--ease-bounce); }
+@keyframes sp-bump { 0% { scale: 1; } 40% { scale: 1.5; } 100% { scale: 1; } }
+
+/* Pemain tersingkir: lompat, berputar, terbang keluar */
+.sp-anim-tersingkir { animation: sp-out 1.6s cubic-bezier(.5, -0.3, .7, .6) both; }
+@keyframes sp-out {
+  0% { translate: 0 0; rotate: 0deg; opacity: 1; }
+  20% { translate: 0 -30px; rotate: -10deg; }
+  100% { translate: 40vw -80vh; rotate: 540deg; opacity: 0; scale: .3; }
+}
+
+/* Detik-detik akhir timer */
+.sp-anim-critical { animation: sp-shake .4s ease-in-out infinite, sp-pulse .8s ease-in-out infinite; }
+@keyframes sp-shake { 0%, 100% { translate: 0 0; } 25% { translate: -4px 0; } 75% { translate: 4px 0; } }
+
+/* ---------- Hasil ---------- */
+.sp-anim-banner { animation: sp-banner 1s var(--ease-bounce) both; }
+@keyframes sp-banner { 0% { opacity: 0; scale: .2 1; } 60% { opacity: 1; scale: 1.08 1.08; } 100% { scale: 1; } }
+
+/* Confetti CSS: buat beberapa <i class="sp-confetti"> dengan --x, --d, --c acak */
+.sp-confetti {
+  position: fixed; top: -20px; left: var(--x, 50%); width: 10px; height: 16px; border-radius: 2px;
+  background: var(--c, var(--gold-500)); z-index: 60; pointer-events: none;
+  animation: sp-confetti var(--d, 2.6s) linear forwards;
+}
+@keyframes sp-confetti {
+  to { translate: calc(var(--drift, 0) * 1px) 110vh; rotate: 720deg; }
+}
+
+/* Angka poin melayang naik (+100) */
+.sp-anim-points { animation: sp-points 1.2s var(--ease-out) both; font-family: var(--font-display); font-weight: 800; color: var(--gold-500); -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; }
+@keyframes sp-points { 0% { opacity: 0; translate: 0 10px; scale: .6; } 30% { opacity: 1; scale: 1.2; } 100% { opacity: 0; translate: 0 -60px; scale: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="sp-anim-"], [class*="sp-anim-"]::after, .sp-confetti, .sp-typing i, .sp-flash-merah {
+    animation: none !important;
+  }
+  .sp-word-card__inner { transition: none !important; }
+}

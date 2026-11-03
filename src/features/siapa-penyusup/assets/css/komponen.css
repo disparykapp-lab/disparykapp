@@ -1,0 +1,298 @@
+/* =====================================================================
+   SIAPA PENYUSUP? — Komponen UI
+   Butuh tokens.css. Semua kelas diawali "sp-" supaya tidak bentrok
+   dengan style aplikasi absensi Dispar yang sudah ada.
+   ===================================================================== */
+
+.sp-root {
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+.sp-root *, .sp-root *::before, .sp-root *::after { box-sizing: border-box; }
+
+/* ---------- Layar & background ---------- */
+.sp-screen {
+  position: relative;
+  min-height: 100dvh;
+  padding: var(--space-4) var(--gutter) calc(var(--space-5) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow: hidden;
+  isolation: isolate;
+}
+.sp-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;          /* kanvas persegi aman untuk portrait & landscape */
+  object-position: center;
+  pointer-events: none;
+}
+.sp-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  line-height: 1.1;
+  color: var(--cream);
+  text-align: center;
+  -webkit-text-stroke: 6px var(--ink);
+  paint-order: stroke fill;
+  margin: 0;
+}
+
+/* ---------- Tombol ---------- */
+.sp-btn {
+  --btn-bg: var(--orange-500);
+  --btn-fg: var(--cream);
+  appearance: none;
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-lg);
+  letter-spacing: .5px;
+  min-height: 52px;
+  padding: 10px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-press);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), filter var(--dur-fast);
+  text-shadow: 0 2px 0 rgba(43, 30, 22, .35);
+}
+.sp-btn img { width: 26px; height: 26px; }
+.sp-btn:hover { filter: brightness(1.06); }
+.sp-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.sp-btn:focus-visible { outline: 4px solid var(--gold-500); outline-offset: 3px; }
+.sp-btn:disabled { --btn-bg: var(--gray-400); cursor: not-allowed; filter: none; transform: none; box-shadow: var(--shadow-press-sm); }
+.sp-btn--block { width: 100%; }
+.sp-btn--teal { --btn-bg: var(--teal-500); }
+.sp-btn--danger { --btn-bg: var(--red-500); }
+.sp-btn--maroon { --btn-bg: var(--maroon-500); }
+.sp-btn--light { --btn-bg: var(--cream); --btn-fg: var(--ink); text-shadow: none; }
+.sp-btn--sm { min-height: 40px; font-size: var(--fs-md); padding: 6px 14px; box-shadow: var(--shadow-press-sm); border-radius: var(--radius-sm); }
+.sp-icon-btn {
+  width: 48px; height: 48px; padding: 0;
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-pill);
+  background: var(--cream); box-shadow: var(--shadow-press-sm);
+  display: grid; place-items: center; cursor: pointer;
+}
+.sp-icon-btn img { width: 30px; height: 30px; }
+.sp-icon-btn:active { transform: translateY(3px); box-shadow: none; }
+
+/* ---------- Panel / kartu ---------- */
+.sp-panel {
+  background: var(--cream);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-press), var(--shadow-soft);
+  padding: var(--space-4);
+}
+.sp-panel--dark { background: rgba(28, 23, 69, .78); color: var(--cream); backdrop-filter: blur(6px); }
+.sp-panel__title {
+  font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg);
+  margin: 0 0 var(--space-3);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+
+/* ---------- Kode room ---------- */
+.sp-room-code {
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  background: var(--indigo-900); color: var(--gold-500);
+  border: var(--stroke) solid var(--ink); border-radius: var(--radius-md);
+  padding: 6px 8px 6px 16px;
+  font-family: var(--font-display); font-weight: 800; font-size: var(--fs-2xl); letter-spacing: 6px;
+}
+
+/* ---------- Badge divisi ---------- */
+.sp-divisi {
+  --dv: var(--divisi-1);
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px 2px 6px;
+  border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--dv) 22%, var(--cream));
+  font-weight: 800; font-size: var(--fs-xs); white-space: nowrap;
+}
+.sp-divisi::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--dv); border: 2px solid var(--ink); }
+
+/* ---------- Tile pemain (lobby, diskusi, voting) ---------- */
+.sp-grid-players {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: var(--space-3);
+}
+/* Versi ringkas untuk fase petunjuk/diskusi: 4 kolom, avatar kecil */
+.sp-grid-players--compact { grid-template-columns: repeat(4, 1fr); gap: var(--space-2); }
+.sp-grid-players--compact .sp-player { padding: 4px 2px 6px; border-top-width: 6px; }
+.sp-grid-players--compact .sp-player__avatar { width: 48px; height: 48px; }
+.sp-grid-players--compact .sp-player__name { font-size: var(--fs-xs); }
+.sp-grid-players--compact .sp-player__host { width: 22px; top: -14px; }
+.sp-grid-players--compact .sp-player.is-me .sp-player__name::after { content: ""; }
+.sp-player {
+  --dv: var(--divisi-1);
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 6px 10px;
+  background: var(--white);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-press-sm);
+  border-top: 8px solid var(--dv);       /* garis warna divisi */
+  transition: transform var(--dur-fast) var(--ease-bounce);
+}
+.sp-player__avatar { width: 72px; height: 72px; }
+.sp-player__name { font-weight: 900; font-size: var(--fs-sm); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-player__host { position: absolute; top: -18px; left: 50%; translate: -50% 0; width: 30px; }
+.sp-player__votes {
+  position: absolute; top: -10px; right: -10px;
+  min-width: 30px; height: 30px; padding: 0 6px;
+  display: grid; place-items: center;
+  background: var(--red-500); color: var(--cream);
+  border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  font-family: var(--font-display); font-weight: 800;
+}
+.sp-player.is-ready::after { content: "SIAP"; position: absolute; bottom: -10px; background: var(--green-500); color: var(--cream); font: 800 10px var(--font-display); padding: 1px 8px; border: 2px solid var(--ink); border-radius: var(--radius-pill); }
+.sp-player.is-turn { box-shadow: 0 0 0 4px var(--gold-500), var(--shadow-press-sm); }
+.sp-player.is-selectable { cursor: pointer; }
+.sp-player.is-selectable:hover { transform: translateY(-3px); }
+.sp-player.is-selected { background: #FFE3E4; box-shadow: 0 0 0 4px var(--red-500), var(--shadow-press-sm); transform: scale(1.04); }
+.sp-player.is-voted::before { content: ""; position: absolute; top: 6px; left: 6px; width: 22px; height: 22px; background: url("../ikon/ic_benar.svg") center/contain no-repeat; }
+.sp-player.is-eliminated { opacity: .55; filter: grayscale(.85); }
+.sp-player.is-me .sp-player__name::after { content: " (kamu)"; font-weight: 700; color: var(--teal-700); }
+
+/* ---------- Kartu kata (flip) ---------- */
+.sp-word-card {
+  width: min(78vw, 320px);
+  aspect-ratio: 600 / 840;
+  perspective: 1200px;
+  margin-inline: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.sp-word-card__inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform var(--dur-slow) var(--ease-bounce); }
+.sp-word-card.is-open .sp-word-card__inner { transform: rotateY(180deg); }
+.sp-word-card__face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.sp-word-card__face img { width: 100%; height: 100%; display: block; }
+.sp-word-card__face--front { transform: rotateY(180deg); }
+.sp-word-card__word {
+  /* posisi = area-kata di kartu_kata_depan.svg (x60 y250 w480 h300 dari 600x840) */
+  position: absolute; left: 10%; top: 29.8%; width: 80%; height: 35.7%;
+  display: grid; place-items: center; text-align: center; padding: 0 8px;
+  font-family: var(--font-display); font-weight: 800; font-size: var(--fs-word); line-height: 1.05;
+  color: var(--ink); overflow-wrap: anywhere;
+}
+
+/* ---------- Timer cincin ---------- */
+.sp-timer {
+  --p: 1;                       /* sisa waktu 0..1, diisi lewat JS */
+  --c: var(--teal-500);
+  width: 64px; height: 64px; border-radius: 50%;
+  background: conic-gradient(var(--c) calc(var(--p) * 360deg), rgba(43, 30, 22, .15) 0);
+  border: var(--stroke) solid var(--ink);
+  display: grid; place-items: center;
+  box-shadow: var(--shadow-press-sm);
+}
+.sp-timer > span {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--cream); border: 2px solid var(--ink);
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg);
+}
+.sp-timer.is-warning { --c: var(--orange-500); }
+.sp-timer.is-critical { --c: var(--red-500); }
+
+/* ---------- Header fase ---------- */
+.sp-phase {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+}
+.sp-phase__label {
+  flex: 1;
+  background: var(--cream); border: var(--stroke) solid var(--ink); border-radius: var(--radius-pill);
+  padding: 6px 14px; font-family: var(--font-display); font-weight: 800; font-size: var(--fs-md);
+  box-shadow: var(--shadow-press-sm);
+  display: flex; align-items: center; gap: 8px;
+}
+.sp-phase__label small { font-family: var(--font-body); font-weight: 700; color: var(--teal-700); margin-left: auto; }
+
+/* ---------- Petunjuk (clue) & chat ---------- */
+.sp-clues { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.sp-clue {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--white); border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  padding: 4px 12px 4px 4px; font-weight: 800; font-size: var(--fs-sm);
+}
+.sp-clue img { width: 26px; height: 26px; border-radius: 50%; background: var(--cream-2); }
+.sp-chat { display: flex; flex-direction: column; gap: var(--space-2); overflow-y: auto; }
+.sp-bubble { max-width: 80%; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 16px 16px 16px 4px; background: var(--white); font-size: var(--fs-sm); }
+.sp-bubble b { display: block; font-size: var(--fs-xs); color: var(--teal-700); }
+.sp-bubble--me { align-self: flex-end; background: var(--teal-300); border-radius: 16px 16px 4px 16px; }
+.sp-bubble--system { align-self: center; background: var(--gold-500); border-radius: var(--radius-pill); font-weight: 800; text-align: center; }
+.sp-input {
+  display: flex; gap: var(--space-2);
+  background: var(--cream); border: var(--stroke) solid var(--ink); border-radius: var(--radius-pill); padding: 4px 4px 4px 14px;
+}
+.sp-input input { flex: 1; border: 0; background: transparent; font: 700 var(--fs-md) var(--font-body); color: var(--ink); min-width: 0; }
+.sp-input input:focus { outline: none; }
+
+/* ---------- Pilihan mode (segmented) ---------- */
+.sp-mode { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.sp-mode__opt {
+  position: relative; text-align: center; cursor: pointer;
+  background: var(--white); border: var(--stroke) solid var(--ink); border-radius: var(--radius-md);
+  padding: var(--space-3); box-shadow: var(--shadow-press-sm);
+}
+.sp-mode__opt img { width: 56px; height: 56px; }
+.sp-mode__opt strong { display: block; font-family: var(--font-display); font-size: var(--fs-lg); }
+.sp-mode__opt span { font-size: var(--fs-xs); font-weight: 700; color: #6B5D4F; }
+.sp-mode__opt input { position: absolute; opacity: 0; }
+.sp-mode__opt:has(input:checked) { background: #FFF1DD; box-shadow: 0 0 0 4px var(--orange-500), var(--shadow-press-sm); }
+
+/* ---------- Toggle ---------- */
+.sp-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font-weight: 800; padding: 6px 0; }
+.sp-toggle input { appearance: none; width: 52px; height: 30px; border: var(--stroke) solid var(--ink); border-radius: var(--radius-pill); background: var(--cream-2); position: relative; cursor: pointer; transition: background var(--dur-fast); flex: none; }
+.sp-toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--white); border: 2px solid var(--ink); transition: translate var(--dur-med) var(--ease-bounce); }
+.sp-toggle input:checked { background: var(--green-500); }
+.sp-toggle input:checked::after { translate: 22px 0; }
+
+/* ---------- Stepper angka (jumlah penyusup, durasi) ---------- */
+.sp-stepper { display: inline-flex; align-items: center; border: var(--stroke) solid var(--ink); border-radius: var(--radius-pill); overflow: hidden; background: var(--white); }
+.sp-stepper button { width: 36px; height: 34px; border: 0; background: var(--cream-2); font: 800 var(--fs-lg) var(--font-display); cursor: pointer; }
+.sp-stepper output { min-width: 44px; text-align: center; font: 800 var(--fs-md) var(--font-display); }
+
+/* ---------- Papan skor ---------- */
+.sp-leader { display: flex; flex-direction: column; gap: var(--space-2); }
+.sp-leader__row {
+  --dv: var(--divisi-1);
+  display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: var(--space-3);
+  background: var(--white); border: 2px solid var(--ink); border-left: 10px solid var(--dv); border-radius: var(--radius-sm);
+  padding: 6px 12px; font-weight: 800;
+}
+.sp-leader__rank { font-family: var(--font-display); font-size: var(--fs-lg); text-align: center; }
+.sp-leader__pts { font-family: var(--font-display); color: var(--orange-700); display: flex; align-items: center; gap: 4px; }
+.sp-leader__pts img { width: 20px; }
+.sp-leader__row:nth-child(1) { background: #FFF3CC; }
+
+/* ---------- Toast & modal ----------
+   Token warna ada di .sp-root, jadi portal (toast, modal, confetti) harus
+   dirender di dalam elemen .sp-root, bukan langsung di document.body. */
+.sp-toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); translate: -50% 0; z-index: 50;
+  background: var(--ink); color: var(--cream); border-radius: var(--radius-pill); padding: 10px 18px; font-weight: 800;
+  box-shadow: var(--shadow-soft);
+}
+.sp-overlay { position: fixed; inset: 0; z-index: 40; background: rgba(28, 23, 69, .72); display: grid; place-items: center; padding: var(--gutter); }
+.sp-modal { width: min(100%, 380px); }
+
+/* ---------- Layar lebar: konten tetap selebar HP di tengah ---------- */
+@media (min-width: 720px) {
+  .sp-screen { align-items: center; }
+  .sp-screen > :not(.sp-bg) { width: 100%; max-width: 440px; }
+  .sp-grid-players:not(.sp-grid-players--compact) { grid-template-columns: repeat(4, 1fr); }
+}

@@ -3,6 +3,9 @@ import "./game.css";
 import { ASET } from "./assets";
 import Lembar from "./komponen/Lembar";
 
+// Diambil langsung (bukan lewat siapa-penyusup/aset.ts) supaya chunk pop-up tetap kecil.
+const EMBLEM_PENYUSUP = new URL("../siapa-penyusup/assets/ui/emblem_app.svg", import.meta.url).href;
+
 /**
  * Pop-up "Zona Game" dari tombol Game di Beranda — terpisah dari deretan menu
  * kerja. Dimuat lazy dari Beranda, jadi aset game baru diunduh saat dibuka.
@@ -39,7 +42,26 @@ export default function PopupGame({ onTutup }: { onTutup: () => void }) {
           </div>
         </article>
 
-        <p className="rounded-2xl border-2 border-dashed border-slate-200 p-3 text-center text-sm text-slate-400">Game lain menyusul…</p>
+        <article className="relative overflow-hidden rounded-2xl border-2 border-[#9B1D3A]/20 bg-[#FFF7E8]">
+          <div className="relative flex items-center gap-3 p-3">
+            <img src={EMBLEM_PENYUSUP} alt="" aria-hidden="true" className="ct-napas h-24 w-24 shrink-0 drop-shadow" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <p className="ct-judul text-xl leading-tight text-[#5E0F24]">Siapa Penyusup?</p>
+              <p className="text-sm text-slate-700">Tebak kata, temukan penyusupnya! Main satu divisi atau antar divisi.</p>
+              <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+                <span className="flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 shadow-sm">
+                  <img src={ASET.ui.grup} alt="" aria-hidden="true" className="h-3 w-auto" /> 4–12 pemain
+                </span>
+                <span className="rounded-full bg-white/90 px-2 py-0.5 shadow-sm">Voting</span>
+              </div>
+            </div>
+          </div>
+          <div className="relative px-3 pb-3">
+            <button type="button" onClick={() => navigate("/siapa-penyusup")} className="ct-tombol ct-tombol-merah w-full text-lg">
+              Main Sekarang
+            </button>
+          </div>
+        </article>
       </div>
     </Lembar>
   );

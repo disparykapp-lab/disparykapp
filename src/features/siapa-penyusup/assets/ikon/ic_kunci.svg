@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>kunci</title>
+<path d="M20,28 V20 C20,12 26,7 32,7 C38,7 44,12 44,20 V28" fill="none" stroke="#2B1E16" stroke-width="6"/><rect x="10" y="26" width="44" height="32" rx="7" fill="#F2C14E" stroke="#2B1E16" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="39" r="5" fill="#2B1E16"/><path d="M32,42 V49" stroke="#2B1E16" stroke-width="4" stroke-linecap="round"/>
+</svg>

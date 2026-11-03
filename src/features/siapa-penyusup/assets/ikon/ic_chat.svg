@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<title>chat</title>
+<path d="M8,12 H56 Q60,12 60,16 V42 Q60,46 56,46 H26 L14,56 L16,46 H8 Q4,46 4,42 V16 Q4,12 8,12Z" fill="#14A3A8" stroke="#2B1E16" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="20" cy="29" r="4" fill="#FFF7E8"/><circle cx="32" cy="29" r="4" fill="#FFF7E8"/><circle cx="44" cy="29" r="4" fill="#FFF7E8"/>
+</svg>

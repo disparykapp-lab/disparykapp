@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<title>Avatar 03 topi - Tersingkir</title>
+<defs><filter id="gray"><feColorMatrix type="saturate" values=".15"/></filter></defs>
+<style>
+.av{animation:idle 2.8s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.eyes{animation:blink 4.2s infinite;transform-box:fill-box;transform-origin:center}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.glow{animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+.aura{animation:aura 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes aura{0%,100%{transform:scale(.95);opacity:.5}50%{transform:scale(1.05);opacity:.85}}
+.halo{animation:halo 2.2s ease-in-out infinite}
+@keyframes halo{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ghost{animation:ghost 3.2s ease-in-out infinite}
+@keyframes ghost{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+<g class="ghost" opacity=".78"><g filter="url(#gray)">
+<path d="M126,488 C126,388 176,334 256,334 C336,334 386,388 386,488Z" fill="#F28C28" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+<path d="M150,488 C150,430 162,400 180,382" fill="none" stroke="#C4660F" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+<path d="M216,338 L256,376 L296,338" fill="#FFF7E8" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" />
+<path d="M232,352 L250,420 M280,352 L262,420" stroke="#0B6E77" stroke-width="7" stroke-linecap="round"/>
+<g transform="translate(256 448) rotate(-4)">
+  <rect x="-34" y="-34" width="68" height="78" rx="10" fill="#FFF7E8" stroke="#2B1E16" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" />
+  <rect x="-34" y="-34" width="68" height="20" rx="8" fill="#0B6E77"/>
+  <circle cx="0" cy="6" r="11" fill="#F28C28"/>
+  <rect x="-20" y="22" width="40" height="6" rx="3" fill="#C9BBA6"/>
+</g><circle cx="146" cy="234" r="24" fill="#F5D0AA" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><circle cx="366" cy="234" r="24" fill="#F5D0AA" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><circle cx="256" cy="222" r="112" fill="#F5D0AA" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M146,222 C136,136 200,106 256,106 C318,106 376,138 366,222 C340,178 300,164 256,168 C208,166 172,180 146,222Z" fill="#4A2C1A" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M202,216 l28,28 M230,216 l-28,28" stroke="#2B1E16" stroke-width="9" stroke-linecap="round"/><path d="M282,216 l28,28 M310,216 l-28,28" stroke="#2B1E16" stroke-width="9" stroke-linecap="round"/><path d="M232,286 Q256,268 280,286" fill="none" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M146,196 C146,104 366,104 366,196Z" fill="#C4660F" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><path d="M232,196 Q336,170 434,196 Q336,220 232,206Z" fill="#C4660F" stroke="#2B1E16" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" /><circle cx="256" cy="116" r="10" fill="#F28C28" stroke="#2B1E16" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" /><path d="M180,170 C200,140 240,128 270,128" fill="none" stroke="#F28C28" stroke-width="10" stroke-linecap="round"/></g><g class="halo"><ellipse cx="256" cy="84" rx="82" ry="20" fill="none" stroke="#F2C14E" stroke-width="12"/></g></g>
+</svg>
