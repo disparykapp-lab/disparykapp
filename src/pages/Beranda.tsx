@@ -11,6 +11,7 @@ import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
 import FotoAbsenHariIni from "../components/FotoAbsenHariIni";
 import { hitungProgressMagang } from "../lib/profil";
+import { formatTanggal } from "../lib/tanggal";
 import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
 import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
 import type { Absensi } from "../types/database";
@@ -96,7 +97,7 @@ export default function Beranda() {
         <>
           <div className={`grid gap-4 ${magang ? "lg:grid-cols-2" : ""}`}>
           {magang && (
-            <section className="rounded-2xl bg-white p-5 shadow-sm">
+            <section className="rounded-2xl bg-white p-5 shadow-sm lg:flex lg:flex-col">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-gray-500">Progress Magang</h2>
                 <span className="text-sm font-bold text-brand-masuk">{magang.persen}%</span>
@@ -110,23 +111,45 @@ export default function Beranda() {
               <p className="mt-2 text-xs text-gray-500">
                 {magang.selesai ? "Masa magang sudah selesai" : magang.teksSisa}
               </p>
+              {/* Desktop: kartu ini setinggi kartu Status di sebelahnya — isi sisa ruangnya
+                  dengan rincian masa magang supaya tidak kosong */}
+              <dl className="mt-auto hidden grid-cols-3 gap-3 border-t border-gray-100 pt-4 text-xs lg:grid">
+                <div>
+                  <dt className="text-gray-400">Mulai</dt>
+                  <dd className="mt-0.5 font-semibold text-brand-text">{formatTanggal(profile!.tanggal_mulai_magang!)}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-400">Selesai</dt>
+                  <dd className="mt-0.5 font-semibold text-brand-text">{formatTanggal(profile!.tanggal_selesai_magang!)}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-400">Hari ke</dt>
+                  <dd className="mt-0.5 font-semibold text-brand-text">
+                    {magang.hariBerjalan} dari {magang.totalHari}
+                  </dd>
+                </div>
+              </dl>
             </section>
           )}
 
-          <section className="rounded-2xl bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
-            <div className="flex flex-col gap-2 text-sm">
-              <BarisStatus
-                label="Masuk"
-                nilai={absensi?.masuk_at ? formatJam(absensi.masuk_at) : "Belum absen"}
-              />
-              <BarisStatus
-                label="Pulang"
-                nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
-              />
-              {absensi?.status && (
-                <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
-              )}
+          <section className="rounded-2xl bg-white p-5 shadow-sm lg:flex lg:items-start lg:gap-6">
+            {/* Desktop: status di kiri, foto absen di kanan (lebih pendek, tidak menyisakan
+                ruang kosong di kartu Progress sebelahnya) */}
+            <div className="lg:min-w-0 lg:flex-1">
+              <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
+              <div className="flex flex-col gap-2 text-sm">
+                <BarisStatus
+                  label="Masuk"
+                  nilai={absensi?.masuk_at ? formatJam(absensi.masuk_at) : "Belum absen"}
+                />
+                <BarisStatus
+                  label="Pulang"
+                  nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
+                />
+                {absensi?.status && (
+                  <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
+                )}
+              </div>
             </div>
             {absensi && <FotoAbsenHariIni absensi={absensi} />}
           </section>
