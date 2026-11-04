@@ -6,6 +6,7 @@ import { sfx } from "../audio";
 import Layar from "../komponen/Layar";
 import PilihAvatar from "../komponen/PilihAvatar";
 import TilePemain from "../komponen/TilePemain";
+import UbahPengaturan from "../komponen/UbahPengaturan";
 import { TombolKembali, TombolSuara } from "../komponen/bersama";
 import { useToast } from "../komponen/toastKonteks";
 import { DAFTAR_KATEGORI } from "../kategori";
@@ -18,6 +19,7 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
   const navigate = useNavigate();
   const toast = useToast();
   const [pilihAvatar, setPilihAvatar] = useState(false);
+  const [aturRoom, setAturRoom] = useState(false);
   const [sibuk, setSibuk] = useState(false);
 
   const linkUndangan = `${window.location.origin}/siapa-penyusup/gabung/${room.kode}`;
@@ -47,6 +49,9 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
     } else if (kejadian.jenis === "host" && id === saya) {
       sfx("sfx_pop");
       toast("Kamu sekarang host room ini");
+    } else if (kejadian.jenis === "pengaturan") {
+      sfx("sfx_pop");
+      toast("Host mengubah pengaturan room");
     }
   }, [kejadian, saya, namaPemain, toast]);
 
@@ -170,6 +175,19 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
         {room.penyusup_tahu ? " · Penyusup tahu perannya" : ""}
         {room.tebakan_terakhir ? " · Tebakan terakhir" : ""}
       </p>
+      {s.sayaHost && (
+        <button
+          type="button"
+          className="sp-btn sp-btn--light sp-btn--sm sp-lebar-isi sp-atur-room"
+          onClick={() => {
+            sfx("sfx_klik");
+            setAturRoom(true);
+          }}
+        >
+          <img src={ikon("pengaturan")} alt="" />
+          Ubah Pengaturan
+        </button>
+      )}
 
       <div className="sp-spacer" />
       <div className="sp-row">
@@ -197,6 +215,16 @@ export default function Lobby({ s }: { s: StatePenyusupRoom }) {
           : "Hanya host (mahkota) yang bisa mulai. Ketuk karaktermu untuk menggantinya."}
       </p>
 
+      {aturRoom && s.sayaHost && (
+        <UbahPengaturan
+          room={room}
+          onTutup={() => setAturRoom(false)}
+          onTersimpan={() => {
+            setAturRoom(false);
+            void s.muatUlang();
+          }}
+        />
+      )}
       {pilihAvatar && s.sayaPemain && (
         <PilihAvatar nilai={s.sayaPemain.avatar} onPilih={(i) => void gantiAvatar(i)} onTutup={() => setPilihAvatar(false)} />
       )}

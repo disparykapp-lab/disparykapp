@@ -123,6 +123,9 @@ npm run dev
        Siapa Penyusup (butuh 0032–0034). Pertanyaan dibuat AI lewat Edge Function
        `penyusup-tod` (lihat bagian **Truth or Dare** di bawah); tanpa function itu dipakai
        pilihan cadangan, jadi aman dijalankan duluan.
+   31. `0038_siapa_penyusup_ubah_pengaturan.sql` — host bisa mengubah mode, kategori, dan aturan
+       room di lobi (mis. setelah Main Lagi) tanpa membuat room baru. Validasinya sama dengan
+       membuat room; pindah ke Satu Divisi ditolak kalau ada pemain dari divisi lain.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

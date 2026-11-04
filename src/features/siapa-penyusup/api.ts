@@ -195,6 +195,23 @@ export async function buatRoom(p: PengaturanRoom, avatar: number | null) {
   return data as string;
 }
 
+/** Host mengubah pengaturan room di lobi (setelah Main Lagi atau sebelum game pertama). */
+export async function ubahPengaturan(roomId: string, p: PengaturanRoom) {
+  const { error } = await supabase.rpc("penyusup_ubah_pengaturan", {
+    p_room: roomId,
+    p_mode: p.mode,
+    p_kategori: p.kategori,
+    p_jumlah_penyusup: p.jumlahPenyusup,
+    p_waktu_petunjuk: p.waktuPetunjuk,
+    p_waktu_diskusi: p.waktuDiskusi,
+    p_waktu_voting: p.waktuVoting,
+    p_penyusup_tahu: p.penyusupTahu,
+    p_tebakan_terakhir: p.tebakanTerakhir,
+    p_privat: p.privat,
+  });
+  cekError(error);
+}
+
 /** Gabung lewat kode. Penolakan (kode salah, divisi beda, penuh, …) dilempar sebagai Error berisi pesan server. */
 export async function gabungRoom(kode: string, avatar: number | null) {
   const { data, error } = await supabase.rpc("penyusup_gabung", { p_kode: kode, p_avatar: avatar });
