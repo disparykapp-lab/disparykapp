@@ -80,6 +80,8 @@ export interface Pengaturan {
   timezone: string;
   retensi_foto_hari: number;
   retensi_absensi_bulan: number;
+  /** File twibbon kustom di bucket `twibbon`; null = bawaan (migrasi 0035). */
+  twibbon_path: string | null;
 }
 
 export interface Absensi {

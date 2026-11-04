@@ -147,6 +147,29 @@ export default function PanduanAdmin() {
         </Catatan>
       </Bagian>
 
+      <Bagian judul="📸 Twibbon Foto Absen">
+        <Langkah no={1}>
+          Buka Kelola → Twibbon Foto Absen. Bingkai ini tampil di kamera absen dan ikut tersimpan
+          di foto absen semua pegawai.
+        </Langkah>
+        <Langkah no={2}>
+          Siapkan gambar sesuai ketentuan: <strong>PNG transparan, rasio 3:4 potret</strong>{" "}
+          (disarankan 1080 × 1440 px, minimal 600 × 800 px), maksimal 2 MB, dan area wajah di
+          tengah dibiarkan transparan. Ornamen/logo taruh di pinggir.
+        </Langkah>
+        <Langkah no={3}>
+          Tekan "Pilih Twibbon Baru", cek pratinjau dan hasil pemeriksaan, lalu tekan "Simpan &
+          Pakai". Berlaku mulai pegawai membuka kamera absen berikutnya.
+        </Langkah>
+        <Langkah no={4}>
+          Tekan "Kembalikan ke Twibbon Bawaan" kalau ingin memakai bingkai asli aplikasi lagi.
+        </Langkah>
+        <Catatan>
+          Ukuran twibbon media sosial (1080 × 1080 atau 1080 × 1350) ditolak karena bingkainya
+          akan gepeng. Unduh twibbon bawaan di halaman itu sebagai contoh/template desain.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="🔍 Tinjau Absensi">
         <Langkah no={1}>
           Buka Kelola → Tinjau Absensi. Secara default halaman ini menampilkan data{" "}

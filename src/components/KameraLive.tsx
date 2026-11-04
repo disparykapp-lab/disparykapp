@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ambilUrlTwibbon } from "../lib/twibbon";
+import { TWIBBON_BAWAAN } from "../lib/twibbonMeta";
 
 interface KameraLiveProps {
   nama: string;
@@ -21,13 +23,37 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
   const [error, setError] = useState<string | null>(null);
   const [hasilUrl, setHasilUrl] = useState<string | null>(null);
   const [hasilBlob, setHasilBlob] = useState<Blob | null>(null);
+  const [bingkaiUrl, setBingkaiUrl] = useState<string | null>(null);
+  const [bingkaiSiap, setBingkaiSiap] = useState(false);
 
   useEffect(() => {
     // Preload bingkai twibbon dari awal (paralel sama izin kamera) supaya
     // pas tombol "Ambil Foto" ditekan, gambarnya sudah pasti siap dipakai.
-    const img = new Image();
-    img.src = "/twibbon.png";
-    bingkaiRef.current = img;
+    // Twibbon pilihan admin ada di Storage (beda origin) — dimuat dengan CORS
+    // supaya kanvas tetap bisa diekspor. Gagal dimuat = pakai bingkai bawaan.
+    let batal = false;
+    function muat(url: string) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        if (batal) return;
+        bingkaiRef.current = img;
+        setBingkaiUrl(url);
+        setBingkaiSiap(true);
+      };
+      img.onerror = () => {
+        if (batal) return;
+        if (url !== TWIBBON_BAWAAN) muat(TWIBBON_BAWAAN);
+        else setBingkaiSiap(true); // foto tetap bisa diambil tanpa bingkai
+      };
+      img.src = url;
+    }
+    void ambilUrlTwibbon()
+      .catch(() => TWIBBON_BAWAAN)
+      .then(muat);
+    return () => {
+      batal = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -153,11 +179,14 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
             />
             {/* Preview bingkai supaya wajah bisa diposisikan pas sebelum jepret
                 — hasil akhirnya sudah pasti kebingkai juga (digambar di kanvas). */}
-            <img
-              src="/twibbon.png"
-              alt=""
-              className="pointer-events-none absolute inset-0 h-full w-full object-fill"
-            />
+            {bingkaiUrl && (
+              <img
+                src={bingkaiUrl}
+                crossOrigin="anonymous"
+                alt=""
+                className="pointer-events-none absolute inset-0 h-full w-full object-fill"
+              />
+            )}
           </>
         )}
         {hasilUrl && (
@@ -181,7 +210,7 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
           </button>
           <button
             onClick={ambilFoto}
-            disabled={!siap}
+            disabled={!siap || !bingkaiSiap}
             className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-brand-masuk font-semibold text-white disabled:opacity-50"
           >
             <img src="/icon_kamera.png" alt="" className="-ml-1 h-9 w-9 object-contain" />
