@@ -39,6 +39,17 @@ export async function unggahFotoAbsen(
   return path;
 }
 
+/**
+ * URL sementara (5 menit) untuk melihat foto absen sendiri. Database hanya
+ * mengizinkan pemilik membuka foto yang diunggah hari ini (migrasi 0036), jadi
+ * foto hari sebelumnya mengembalikan null.
+ */
+export async function urlFotoAbsenSaya(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage.from("absensi").createSignedUrl(path, 300);
+  if (error || !data) return null;
+  return data.signedUrl;
+}
+
 export interface ParamAbsen {
   lat: number;
   lng: number;

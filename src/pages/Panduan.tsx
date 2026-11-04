@@ -51,11 +51,16 @@ export default function Panduan() {
           otomatis dikecilkan dulu sebelum diunggah).
         </Langkah>
         <Langkah no={5}>
-          Kamera akan terbuka otomatis dengan bingkai "Jogja Istimewa" — posisikan wajah kamu di
+          Kamera akan terbuka otomatis dengan bingkai twibbon — posisikan wajah kamu di
           dalam bingkainya, lalu tekan <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan
           "Ambil Ulang".
         </Langkah>
         <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
+        <Langkah no={7}>
+          Foto absen kamu tampil di kartu <strong>"Status Hari Ini"</strong> di Beranda — tekan
+          fotonya untuk memperbesar. Foto hanya bisa kamu lihat <strong>hari itu saja</strong>;
+          mulai pukul 00.00 besoknya sudah tidak tampil lagi.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="🟠 Cara Absen Pulang">

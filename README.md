@@ -116,6 +116,9 @@ npm run dev
    28. `0035_twibbon.sql` — twibbon foto absen bisa diganti admin lewat *Kelola → Twibbon
        Foto Absen*. Bucket publik **twibbon** (PNG, maks. 2 MB, hanya admin yang menulis) dan
        kolom `pengaturan.twibbon_path` (kosong = pakai `public/twibbon.png` bawaan).
+   29. `0036_foto_absen_hari_ini.sql` — pegawai bisa melihat foto absen masuk/pulang miliknya
+       di Beranda, **hanya pada hari itu** (policy Storage memakai waktu unggah & zona waktu
+       kantor). Foto tidak dihapus; admin tetap bisa melihat sampai retensi foto habis.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
