@@ -42,6 +42,8 @@ export function usePenyusupRoom(roomId: string) {
   const [error, setError] = useState<string | null>(null);
 
   const timerPemain = useRef<number | undefined>(undefined);
+  // false selama Realtime belum/tidak tersambung: data room lalu diambil lewat detak
+  const terhubung = useRef(false);
 
   const muatPemain = useCallback(() => {
     window.clearTimeout(timerPemain.current);
@@ -59,7 +61,8 @@ export function usePenyusupRoom(roomId: string) {
     }
   }, [roomId]);
 
-  const muatSemua = useCallback(async () => {
+  /** `diam`: pemuatan cadangan berkala — gagal sesaat tidak perlu tampil sebagai error. */
+  const muatSemua = useCallback(async (diam = false) => {
     try {
       const r = await api.ambilRoom(roomId);
       if (!r) {
@@ -79,7 +82,7 @@ export function usePenyusupRoom(roomId: string) {
       setChat(c);
       void muatKehadiran();
     } catch (e) {
-      setError(pesanError(e, "Gagal memuat room."));
+      if (!diam) setError(pesanError(e, "Gagal memuat room."));
     } finally {
       setMemuat(false);
     }
@@ -123,6 +126,7 @@ export function usePenyusupRoom(roomId: string) {
         if (l.jenis === "gabung" || l.jenis === "keluar" || l.jenis === "dikeluarkan") void muatKehadiran();
       })
       .subscribe((status) => {
+        terhubung.current = status === "SUBSCRIBED";
         // termasuk setelah sambungan putus lalu tersambung lagi: isi celah data yang terlewat
         if (status === "SUBSCRIBED") void muatSemua();
       });
@@ -132,6 +136,7 @@ export function usePenyusupRoom(roomId: string) {
     return () => {
       window.clearTimeout(muatAwal);
       window.clearTimeout(timerPemain.current);
+      terhubung.current = false;
       void supabase.removeChannel(ch);
     };
   }, [roomId, muatSemua, muatPemain, muatKehadiran]);
@@ -173,7 +178,9 @@ export function usePenyusupRoom(roomId: string) {
     };
   }, [roomId, gameKe, ronde, sedangVoting]);
 
-  // Detak kehadiran berkala + saat tab kembali terlihat.
+  // Detak kehadiran berkala + saat tab kembali terlihat. Selama Realtime tidak
+  // tersambung (jaringan memblokir WebSocket, sinyal HP putus), tiap detak juga
+  // memuat ulang room supaya layar tetap ikut berganti fase.
   const sayaAnggota = pemain.some((p) => p.user_id === saya && p.aktif);
   useEffect(() => {
     if (!sayaAnggota) return;
@@ -187,12 +194,16 @@ export function usePenyusupRoom(roomId: string) {
       } catch {
         // gagal sesaat (sinyal) — detak berikutnya mencoba lagi
       }
+      if (!batal && !terhubung.current) void muatSemua(true);
     }
     void denyut();
     const iv = window.setInterval(denyut, INTERVAL_DETAK);
     const kehadiranIv = window.setInterval(() => void muatKehadiran(), 10000);
     const onVis = () => {
-      if (document.visibilityState === "visible") void denyut();
+      if (document.visibilityState !== "visible") return;
+      void denyut();
+      // HP yang layarnya dikunci bisa melewatkan event Realtime tanpa tanda putus
+      if (terhubung.current) void muatSemua(true);
     };
     document.addEventListener("visibilitychange", onVis);
     return () => {
@@ -201,7 +212,7 @@ export function usePenyusupRoom(roomId: string) {
       window.clearInterval(kehadiranIv);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [roomId, sayaAnggota, muatKehadiran]);
+  }, [roomId, sayaAnggota, muatKehadiran, muatSemua]);
 
   // Picu server tepat saat tenggat fase, tanpa menunggu detak berikutnya.
   const status = room?.status;
@@ -210,9 +221,18 @@ export function usePenyusupRoom(roomId: string) {
     if (!sayaAnggota || !faseBerakhir || !status || !FASE_BERWAKTU.includes(status)) return;
     const sisa = new Date(faseBerakhir).getTime() - (Date.now() + selisihJam) + 250;
     if (sisa <= 0 || sisa > 10 * 60_000) return;
-    const t = window.setTimeout(() => void api.detak(roomId).catch(() => {}), sisa);
+    const t = window.setTimeout(
+      () =>
+        void api
+          .detak(roomId)
+          .catch(() => {})
+          .then(() => {
+            if (!terhubung.current) void muatSemua(true);
+          }),
+      sisa
+    );
     return () => window.clearTimeout(t);
-  }, [roomId, sayaAnggota, status, faseBerakhir, selisihJam]);
+  }, [roomId, sayaAnggota, status, faseBerakhir, selisihJam, muatSemua]);
 
   const sekarang = useCallback(() => Date.now() + selisihJam, [selisihJam]);
 
