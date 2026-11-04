@@ -42,8 +42,8 @@ export default function FotoAbsenHariIni({ absensi }: { absensi: Absensi }) {
   ];
 
   return (
-    <div className="mt-4 border-t border-gray-100 pt-4">
-      <div className="mb-3 flex items-baseline justify-between gap-2">
+    <div className="mt-4 border-t border-gray-100 pt-4 lg:mt-0 lg:w-64 lg:shrink-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
         <h3 className="text-sm font-semibold text-gray-500">Foto Absen Kamu</h3>
         <span className="text-[11px] text-gray-400">Hanya tampil hari ini</span>
       </div>
