@@ -159,8 +159,68 @@
 .sp-root .sp-poin-melayang { position: absolute; left: 50%; top: -12px; font-size: 32px; translate: -50% 0; pointer-events: none; }
 .sp-root .sp-row > .sp-hint { flex: 1; }
 
+/* Truth or Dare untuk yang kalah (layar akhir) */
+.sp-root .sp-tod { text-align: center; color: var(--ink); }
+.sp-root .sp-tod__judul { justify-content: center; margin-bottom: var(--space-2); }
+.sp-root .sp-tod__roda-wrap { --r: min(105px, 29vw); position: relative; width: calc(var(--r) * 2); aspect-ratio: 1; margin: 8px auto 6px; }
+.sp-root .sp-tod__roda {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: var(--stroke) solid var(--ink); box-shadow: var(--shadow-press);
+  transition-property: transform; transition-timing-function: cubic-bezier(.12, .8, .2, 1);
+}
+.sp-root .sp-tod__label {
+  position: absolute; left: 50%; top: 50%;
+  max-width: calc(var(--r) * .58); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 800 12px var(--font-display); letter-spacing: .04em; color: var(--white);
+  text-shadow: 0 1px 0 var(--ink), 0 -1px 0 var(--ink), 1px 0 0 var(--ink), -1px 0 0 var(--ink);
+  /* teks searah jari-jari (dari pusat ke tepi); --sudut = tengah juring */
+  transform: translate(-50%, -50%) rotate(var(--sudut)) translateY(calc(var(--r) * -.66)) rotate(-90deg);
+}
+.sp-root .sp-tod__jarum {
+  position: absolute; left: 50%; top: -10px; z-index: 2; translate: -50% 0;
+  border-left: 13px solid transparent; border-right: 13px solid transparent; border-top: 24px solid var(--gold-500);
+  filter: drop-shadow(0 2px 0 var(--ink));
+}
+.sp-root .sp-tod__pusat {
+  position: absolute; left: 50%; top: 50%; z-index: 1; translate: -50% -50%;
+  width: 36%; aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+  display: grid; place-items: center; background: var(--cream);
+  border: var(--stroke) solid var(--ink); font: 800 var(--fs-xl) var(--font-display);
+}
+.sp-root .sp-tod__pusat img { width: 100%; height: 100%; object-fit: cover; }
+.sp-root .sp-tod__hasil { margin: 4px 0 0; font: 800 var(--fs-lg) var(--font-display); }
+.sp-root .sp-tod__hasil b { padding: 0 8px; border-radius: var(--radius-sm); color: var(--white); background: var(--orange-500); }
+.sp-root .sp-tod--truth .sp-tod__hasil b { background: var(--teal-500); }
+.sp-root .sp-tod__info { margin: 4px 0 0; color: #6B5D4F; font-weight: 700; font-size: var(--fs-sm); }
+.sp-root .sp-tod__memuat { margin: 10px 0 2px; font-weight: 800; }
+.sp-root .sp-tod__memuat::after { content: "…"; display: inline-block; animation: sp-pulse 1s ease-in-out infinite; }
+.sp-root .sp-tod__pilihan { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; text-align: left; counter-reset: tod; }
+.sp-root .sp-tod__pilihan li {
+  counter-increment: tod; display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px 12px; background: var(--white); border: 3px solid var(--ink); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-press-sm); font-weight: 700; line-height: 1.35; overflow-wrap: anywhere;
+}
+.sp-root .sp-tod__pilihan li::before {
+  content: counter(tod); flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; color: var(--white); background: var(--orange-500);
+  font: 800 14px var(--font-display);
+}
+.sp-root .sp-tod--truth .sp-tod__pilihan li::before { background: var(--teal-500); }
+.sp-root .sp-tod .sp-status-kecil { margin: 8px 0 0; }
+.sp-root .sp-tod__riwayat { margin-top: 12px; padding-top: 10px; border-top: 2px dashed rgba(42, 31, 26, .25); }
+.sp-root .sp-tod__riwayat small { display: block; font-weight: 800; font-size: var(--fs-xs); color: #6B5D4F; text-transform: uppercase; }
+.sp-root .sp-tod__riwayat ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.sp-root .sp-tod__chip {
+  padding: 3px 10px; border: 2px solid var(--ink); border-radius: var(--radius-pill);
+  font-weight: 800; font-size: var(--fs-xs); color: var(--white); background: var(--orange-500);
+}
+.sp-root .sp-tod__chip--truth { background: var(--teal-500); }
+.sp-root .sp-tod__putar { margin-top: 12px; }
+
 /* animasi.css mematikan animasi untuk [class*="sp-anim-"] saat "kurangi gerakan",
    tapi anak .sp-anim-stagger beranimasi lewat selektor induk tanpa kelas itu */
 @media (prefers-reduced-motion: reduce) {
   .sp-root .sp-anim-stagger > * { animation: none !important; }
+  .sp-root .sp-tod__roda { transition: none !important; }
+  .sp-root .sp-tod__memuat::after { animation: none; }
 }

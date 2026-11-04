@@ -1,6 +1,6 @@
 # Rencana implementasi — "Siapa Penyusup?"
 
-Status: **semua tahap selesai dan sudah di `main`** (PR #8 tahap 1–2, PR #9 tahap 3–5). Lanjutan di `fitur/siapa-penyusup-lanjutan` (2026-11-04): bank kata umum (0034) dan cadangan saat Realtime terputus.
+Status: **semua tahap selesai dan sudah di `main`** (PR #8 tahap 1–2, PR #9 tahap 3–5). Lanjutan di `fitur/siapa-penyusup-lanjutan` (2026-11-04): bank kata umum (0034) dan cadangan saat Realtime terputus. Truth or Dare untuk yang kalah (0037 + Edge Function `penyusup-tod`) di `fitur/truth-or-dare`.
 Seluruh mesin permainan ada di server (0033), termasuk voting, skor, main lagi, dan papan skor, karena transisinya saling bergantung.
 
 ### Checklist README §10
@@ -27,6 +27,15 @@ Seluruh mesin permainan ada di server (0033), termasuk voting, skor, main lagi, 
 
 ### Cadangan saat Realtime terputus (`usePenyusupRoom.ts`)
 Selama channel Realtime belum/tidak `SUBSCRIBED` (WebSocket diblokir jaringan kantor, sinyal HP putus), setiap detak 5 dtk juga memuat ulang room, pemain, log, petunjuk, dan chat. Hal yang sama terjadi tepat saat tenggat fase. Saat tab kembali terlihat, room selalu dimuat ulang sekali, karena HP yang layarnya dikunci bisa melewatkan event tanpa tanda putus. Biayanya ±15 permintaan per pemain per 10 dtk, hanya selama Realtime terputus. Toast "X bergabung/keluar" hanya muncul lewat Realtime.
+
+### Truth or Dare untuk yang kalah (0037, `komponen/TruthOrDare.tsx`, `supabase/functions/penyusup-tod`)
+- Tampilan sama persis di semua layar (tanpa teks "Kamu…"), supaya semua pemain bisa membaca pilihan yang sama.
+- `penyusup_room.tod` = putaran yang tampil (`ke`, `korban_id`, `jenis`, `status`, `pertanyaan`, `calon`) + `riwayat` 20 putaran terakhir, per `game_ke` (Main Lagi otomatis mulai dari putaran 1).
+- `penyusup_tod(room)` membuat putaran 1 saat layar akhir terbuka. `penyusup_tod(room, ke)` = Putar Lagi: hanya kalau `ke` sama dengan putaran yang tampil dan pilihannya sudah siap, jadi tekan bersamaan = satu putaran. Korban: pihak kalah yang masih `aktif`, yang paling jarang kena dulu, tidak pernah orang yang sama berturut-turut kecuali tinggal satu. Semua yang kalah sudah keluar → `status = tidak_ada` (panel disembunyikan).
+- Layar: roda nama (`calon`, urutan papan skor) kalau yang kalah > 1 → roda TRUTH/DARE → pilihan. Sudut dihitung `arahRoda`/`putarRoda` (maju ≥ 5 putaran dari posisi terakhir). "Kurangi gerakan" atau putaran > 20 dtk = tanpa animasi.
+- Edge Function memanggil `penyusup_tod` sebagai pengguna (cek anggota), lalu `penyusup_tod_klaim` dan `penyusup_tod_simpan(…, ke, …)` dengan service role. Fungsi-fungsi itu dan `_penyusup_tod_baru` di-`revoke` dari klien, supaya pemain tidak bisa memilih korban atau menulis pilihan sendiri. Prompt menyertakan pilihan putaran sebelumnya supaya tidak diulang; cadangan juga mendahulukan yang belum dipakai.
+- Semua layar meminta pilihan AI untuk putaran yang `menunggu_ai` (jeda acak, sekali per putaran per layar), jadi tetap jalan walau yang menekan Putar Lagi menutup aplikasi. Selama belum siap, `penyusup_tod_cadangan` dicoba tiap 15 dtk (server mengizinkan setelah 12 dtk tanpa klaim, atau 40 dtk kalau AI macet).
+- Diuji: skenario SQL (6 pemandu kalah → 12 putaran, tiap orang tepat 2x, tidak pernah berturut-turut; tekan bersamaan = 1 putaran; batas riwayat 20; pemain keluar hilang dari roda; saringan kata terlarang; waktu cadangan), function asli di image `edge-runtime` dengan OpenAI tiruan, dan 4 pemain di Chrome (roda nama & jarum berhenti di hasil server, isi panel identik di 4 layar, 3 putaran = 3 panggilan OpenAI, tanpa function → cadangan).
 
 ### Perbaikan atas CSS paket (di `tambahan.css`)
 - `.sp-toast`: `translate: -50%` tertimpa animasi `sp-anim-slide-up` → toast bergeser & terpotong; kini dipusatkan dengan margin dan dipindah ke atas agar tidak menutup kotak input.

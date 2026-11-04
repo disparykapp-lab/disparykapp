@@ -119,6 +119,10 @@ npm run dev
    29. `0036_foto_absen_hari_ini.sql` — pegawai bisa melihat foto absen masuk/pulang miliknya
        di Beranda, **hanya pada hari itu** (policy Storage memakai waktu unggah & zona waktu
        kantor). Foto tidak dihapus; admin tetap bisa melihat sampai retensi foto habis.
+   30. `0037_siapa_penyusup_truth_or_dare.sql` — Truth or Dare untuk yang kalah di akhir game
+       Siapa Penyusup (butuh 0032–0034). Pertanyaan dibuat AI lewat Edge Function
+       `penyusup-tod` (lihat bagian **Truth or Dare** di bawah); tanpa function itu dipakai
+       pilihan cadangan, jadi aman dijalankan duluan.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
@@ -191,6 +195,33 @@ formnya, hasilnya) sebagai riwayat **bersama** — semua pegawai yang bisa akses
 melihat riwayat naskah satu sama lain, bukan cuma punya sendiri. Cuma **super admin** yang bisa
 menghapus baris riwayat siapa pun, lewat tombol "Hapus" yang muncul khusus untuk mereka; aksi
 hapusnya tercatat juga di log super admin (lihat bagian "Kontrol khusus super admin" di atas).
+
+## Truth or Dare di game Siapa Penyusup (opsional, pakai OpenAI)
+
+Di layar akhir game, pihak yang kalah kena hukuman. Tampilannya **sama persis di layar semua
+pemain**: kalau yang kalah lebih dari satu, roda nama memilih korbannya dulu, lalu roda
+Truth/Dare, lalu 3 pilihan dari AI. Tombol **Putar Lagi** boleh ditekan siapa saja, berapa kali
+pun: korban berikutnya yang paling jarang kena didahulukan, tidak pernah orang yang sama dua
+kali berturut-turut, dan dua orang yang menekan bersamaan tetap menghasilkan satu putaran.
+Semua keputusan acak dibuat server.
+
+Edge Function `penyusup-tod` meminta 3 pilihan ke OpenAI (`gpt-4o-mini`) dengan kunci yang
+**sama** dengan Naskah AI — secret `OPENAI_API_KEY` berlaku untuk semua Edge Function di
+project. OpenAI dipanggil sekali per putaran, dan diberi daftar pilihan putaran sebelumnya
+supaya tidak mengulang. Hasil yang kosong, kurang dari 3, atau mengandung kata terlarang
+diganti pilihan cadangan dari database. Yang dikirim ke OpenAI: nama depan pemain, divisi yang
+kena, kata kedua pihak, dan petunjuk yang dia berikan.
+
+Setup:
+1. Jalankan `0037_siapa_penyusup_truth_or_dare.sql` di SQL Editor.
+2. Deploy `supabase/functions/penyusup-tod/index.ts`: Dashboard → **Edge Functions** →
+   *Create a new function* → nama `penyusup-tod` → tempel isi file → Deploy (biarkan
+   *Verify JWT* aktif). Atau CLI: `supabase functions deploy penyusup-tod`.
+3. Tidak perlu secret baru kalau `OPENAI_API_KEY` sudah diisi untuk Naskah AI. Fitur ini
+   tidak ikut gerbang divisi Naskah AI: semua pemain game bisa melihatnya.
+
+Kalau function belum di-deploy atau OpenAI gagal, pilihan cadangan muncul ±12–15 detik
+kemudian dengan keterangan "Pilihan cadangan".
 
 ## Game Coret Tebak
 

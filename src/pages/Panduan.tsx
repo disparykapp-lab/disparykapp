@@ -244,6 +244,14 @@ export default function Panduan() {
           <strong> Papan Skor</strong> (minggu ini &amp; sepanjang waktu, per pemain dan per divisi).
         </Langkah>
         <Langkah no={7}>
+          <strong>Truth or Dare</strong>: di layar akhir, pihak yang kalah (penyusup yang
+          ketahuan, atau para pemandu kalau penyusup lolos) kena hukuman. Kalau yang kalah lebih
+          dari satu, roda nama memilih siapa yang kena; lalu roda menentukan Truth atau Dare, dan
+          AI memberi 3 pilihan. Layarnya sama di HP semua pemain, jadi semua bisa ikut membaca.
+          Tekan <strong>"Putar Lagi"</strong> sebanyak yang kalian mau — yang belum kebagian
+          didahulukan.
+        </Langkah>
+        <Langkah no={8}>
           Kalau menutup aplikasi lebih dari 1 menit di tengah permainan, kamu dianggap keluar dan
           tidak mendapat poin game itu. Tombol speaker 🔊 mengatur musik dan efek suara.
         </Langkah>

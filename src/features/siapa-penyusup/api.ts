@@ -25,6 +25,8 @@ export interface PenyusupRoom {
   fase_berakhir: string | null;
   hasil_vote: HasilVote | null;
   akhir: AkhirGame | null;
+  /** Truth or Dare untuk yang kalah (migrasi 0037); berlaku kalau game_ke-nya sama. */
+  tod: TruthOrDare | null;
   dibuat_at: string;
   diperbarui_at: string;
 }
@@ -119,6 +121,31 @@ export interface AkhirGame {
   penebak_benar: string | null;
   skor: SkorAkhir[];
   skor_divisi: { divisi_id: string; poin: number }[];
+}
+
+export interface PutaranTod {
+  ke: number;
+  korban_id: string;
+  jenis: "truth" | "dare";
+  pertanyaan: string[] | null;
+  sumber: "ai" | "cadangan" | null;
+}
+
+/** Putaran Truth or Dare yang sedang tampil (sama di layar semua pemain) + riwayatnya. */
+export interface TruthOrDare {
+  game_ke: number;
+  /** nomor putaran; naik tiap "Putar Lagi" */
+  ke: number;
+  /** tidak_ada = semua yang kalah sudah keluar room */
+  status: "menunggu_ai" | "membuat" | "siap" | "tidak_ada";
+  korban_id?: string;
+  jenis?: "truth" | "dare";
+  pertanyaan?: string[] | null;
+  sumber?: "ai" | "cadangan" | null;
+  dibuat_at?: string;
+  /** semua yang kalah & masih di room, urutan tetap — isi roda nama */
+  calon: string[];
+  riwayat: PutaranTod[];
 }
 
 export interface PapanSkor {
@@ -245,6 +272,31 @@ export async function ambilPapanSkor(rentang: "minggu" | "semua"): Promise<Papan
 export async function mainLagi(roomId: string) {
   const { error } = await supabase.rpc("penyusup_main_lagi", { p_room: roomId });
   cekError(error);
+}
+
+/**
+ * Putaran Truth or Dare di server; semua pemain dapat hasil yang sama.
+ * `ke` = 0: pastikan putaran pertama ada. `ke` = putaran yang sedang tampil: Putar Lagi
+ * (diabaikan server kalau orang lain sudah memutar atau pilihannya belum siap).
+ */
+export async function putarTod(roomId: string, ke = 0): Promise<TruthOrDare | null> {
+  const { data, error } = await supabase.rpc("penyusup_tod", { p_room: roomId, p_ke: ke });
+  cekError(error);
+  return data as TruthOrDare | null;
+}
+
+/** Minta 3 pilihan ke Edge Function penyusup-tod (OpenAI, kunci yang sama dengan Naskah AI). */
+export async function buatPilihanTod(roomId: string): Promise<TruthOrDare | null> {
+  const { data, error } = await supabase.functions.invoke("penyusup-tod", { body: { room_id: roomId } });
+  if (error) throw new Error(error.message);
+  return (data as { tod: TruthOrDare | null }).tod;
+}
+
+/** Pilihan cadangan kalau AI tidak ada/gagal; server yang menentukan sudah boleh atau belum. */
+export async function todCadangan(roomId: string): Promise<TruthOrDare | null> {
+  const { data, error } = await supabase.rpc("penyusup_tod_cadangan", { p_room: roomId });
+  cekError(error);
+  return data as TruthOrDare | null;
 }
 
 /** Detak kehadiran + pemicu kemajuan state. Mengembalikan jam server (ms). */
