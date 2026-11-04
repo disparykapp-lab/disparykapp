@@ -37,6 +37,11 @@ Selama channel Realtime belum/tidak `SUBSCRIBED` (WebSocket diblokir jaringan ka
 - Semua layar meminta pilihan AI untuk putaran yang `menunggu_ai` (jeda acak, sekali per putaran per layar), jadi tetap jalan walau yang menekan Putar Lagi menutup aplikasi. Selama belum siap, `penyusup_tod_cadangan` dicoba tiap 15 dtk (server mengizinkan setelah 12 dtk tanpa klaim, atau 40 dtk kalau AI macet).
 - Diuji: skenario SQL (6 pemandu kalah → 12 putaran, tiap orang tepat 2x, tidak pernah berturut-turut; tekan bersamaan = 1 putaran; batas riwayat 20; pemain keluar hilang dari roda; saringan kata terlarang; waktu cadangan), function asli di image `edge-runtime` dengan OpenAI tiruan, dan 4 pemain di Chrome (roda nama & jarum berhenti di hasil server, isi panel identik di 4 layar, 3 putaran = 3 panggilan OpenAI, tanpa function → cadangan).
 
+### Ubah pengaturan di lobi (0038, `komponen/UbahPengaturan.tsx`, `komponen/FormPengaturan.tsx`)
+- Host menekan "Ubah Pengaturan" di lobi (termasuk setelah Main Lagi). Formnya sama dengan Buat Room (komponen bersama), diisi dari room yang berjalan; Simpan aktif hanya kalau ada yang berubah.
+- `penyusup_ubah_pengaturan`: hanya host, hanya status `menunggu`, validasi sama dengan `penyusup_buat_room` (tes memastikan rentang 0034, 0038, dan `BATAS` sama). Pindah ke Satu Divisi butuh semua pemain aktif sedivisi dengan host. Log `pengaturan` → toast "Host mengubah pengaturan room" di layar pemain lain.
+- Diuji: skenario SQL (semua penolakan + pindah mode) dan 4 pemain di Chrome (Main Lagi → ubah kategori & aturan → ringkasan pemain lain ikut berubah → game berikutnya memakai kategori baru).
+
 ### Perbaikan atas CSS paket (di `tambahan.css`)
 - `.sp-toast`: `translate: -50%` tertimpa animasi `sp-anim-slide-up` → toast bergeser & terpotong; kini dipusatkan dengan margin dan dipindah ke atas agar tidak menutup kotak input.
 - "Kurangi gerakan" tidak mematikan animasi anak `.sp-anim-stagger`.

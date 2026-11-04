@@ -60,6 +60,35 @@ export const PENGATURAN_AWAL: PengaturanRoom = {
   privat: true,
 };
 
+/** Pengaturan room yang sedang berlaku (kolom penyusup_room), untuk diisi ke form Ubah Pengaturan. */
+export function pengaturanDariRoom(r: {
+  mode: ModeRoom;
+  kategori_id: string | null;
+  jumlah_penyusup: number;
+  waktu_petunjuk: number;
+  waktu_diskusi: number;
+  waktu_voting: number;
+  penyusup_tahu: boolean;
+  tebakan_terakhir: boolean;
+  privat: boolean;
+}): PengaturanRoom {
+  return {
+    mode: r.mode,
+    kategori: r.kategori_id,
+    jumlahPenyusup: r.jumlah_penyusup,
+    waktuPetunjuk: r.waktu_petunjuk,
+    waktuDiskusi: r.waktu_diskusi,
+    waktuVoting: r.waktu_voting,
+    penyusupTahu: r.penyusup_tahu,
+    tebakanTerakhir: r.tebakan_terakhir,
+    privat: r.privat,
+  };
+}
+
+export function samaPengaturan(a: PengaturanRoom, b: PengaturanRoom): boolean {
+  return (Object.keys(a) as (keyof PengaturanRoom)[]).every((k) => a[k] === b[k]);
+}
+
 /** Naik/turun satu langkah, tetap di dalam batas. */
 export function geser(nilai: number, arah: 1 | -1, b: Batas): number {
   return Math.min(b.maks, Math.max(b.min, nilai + arah * b.langkah));

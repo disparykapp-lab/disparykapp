@@ -26,10 +26,13 @@ import {
   kodeValid,
   nomorWarnaDivisi,
   normalKata,
+  PENGATURAN_AWAL,
+  pengaturanDariRoom,
   poinPemain,
   penyusupDipakai,
   rapikanKode,
   putarRoda,
+  samaPengaturan,
   sisaDetik,
   todTerkini,
 } from "../src/features/siapa-penyusup/logika.ts";
@@ -342,4 +345,37 @@ test("fungsi Truth or Dare khusus server tidak bisa dipanggil klien", () => {
   for (const f of ["_penyusup_tod_baru(uuid, int, jsonb)", "_penyusup_tod_cadangan(text, jsonb)"]) {
     assert.ok(todSql.includes(`revoke execute on function ${f} from public, anon, authenticated;`), f);
   }
+});
+
+// ---------------------------------------------------------
+// Ubah pengaturan room di lobi (migrasi 0038)
+// ---------------------------------------------------------
+
+test("form Ubah Pengaturan diisi dari room & tahu kalau ada yang berubah", () => {
+  const room = {
+    mode: "satu_divisi" as const, kategori_id: "hewan", jumlah_penyusup: 2, waktu_petunjuk: 45, waktu_diskusi: 120,
+    waktu_voting: 20, penyusup_tahu: true, tebakan_terakhir: true, privat: false,
+  };
+  const p = pengaturanDariRoom(room);
+  assert.deepEqual(p, {
+    mode: "satu_divisi", kategori: "hewan", jumlahPenyusup: 2, waktuPetunjuk: 45, waktuDiskusi: 120,
+    waktuVoting: 20, penyusupTahu: true, tebakanTerakhir: true, privat: false,
+  });
+  assert.ok(samaPengaturan(p, { ...p }));
+  assert.ok(!samaPengaturan(p, { ...p, kategori: null }), "kategori diganti Acak");
+  assert.ok(!samaPengaturan(p, { ...p, waktuDiskusi: 105 }));
+  assert.deepEqual(Object.keys(p).sort(), Object.keys(PENGATURAN_AWAL).sort(), "semua isian form terpetakan");
+});
+
+test("batas pengaturan di server (buat room 0034 & ubah 0038) sama dengan form", () => {
+  const rentang = (sql: string) =>
+    Object.fromEntries([...sql.matchAll(/p_(jumlah_penyusup|waktu_petunjuk|waktu_diskusi|waktu_voting) not between (\d+) and (\d+)/g)].map((m) => [m[1], [Number(m[2]), Number(m[3])]]));
+  const ubah = rentang(readFileSync(new URL("0038_siapa_penyusup_ubah_pengaturan.sql", MIGRASI), "utf8"));
+  assert.deepEqual(ubah, rentang(bankKata), "0038 sama dengan penyusup_buat_room terbaru (0034)");
+  assert.deepEqual(ubah, {
+    jumlah_penyusup: [BATAS.jumlahPenyusup.min, BATAS.jumlahPenyusup.maks],
+    waktu_petunjuk: [BATAS.waktuPetunjuk.min, BATAS.waktuPetunjuk.maks],
+    waktu_diskusi: [BATAS.waktuDiskusi.min, BATAS.waktuDiskusi.maks],
+    waktu_voting: [BATAS.waktuVoting.min, BATAS.waktuVoting.maks],
+  });
 });

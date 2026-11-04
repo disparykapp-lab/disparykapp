@@ -216,7 +216,8 @@ export default function Panduan() {
           Tekan <strong>"Buat Room"</strong> dan pilih mode: <strong>Satu Divisi</strong> (hanya
           teman satu divisi yang bisa gabung) atau <strong>Antar Divisi</strong> (semua divisi
           boleh gabung, poin dikumpulkan per divisi). Atur juga jumlah penyusup, waktu tiap fase,
-          dan kategori kata.
+          dan kategori kata. Semua ini bisa diganti lagi oleh host lewat tombol{" "}
+          <strong>"Ubah Pengaturan"</strong> di lobi, misalnya setelah Main Lagi.
         </Langkah>
         <Langkah no={2}>
           Bagikan <strong>kode room</strong> 5 huruf atau tombol <strong>Undang</strong>. Rekan

@@ -159,6 +159,16 @@
 .sp-root .sp-poin-melayang { position: absolute; left: 50%; top: -12px; font-size: 32px; translate: -50% 0; pointer-events: none; }
 .sp-root .sp-row > .sp-hint { flex: 1; }
 
+/* Ubah Pengaturan (host, lobi): form panjang, jadi modalnya bisa digulir */
+.sp-root .sp-modal--gulir { max-height: calc(100dvh - 2 * var(--gutter)); overflow-y: auto; overscroll-behavior: contain; }
+/* tombol Simpan/Batal selalu terlihat di bawah walau isinya digulir */
+.sp-root .sp-modal--gulir .sp-modal__aksi {
+  position: sticky; bottom: calc(-1 * var(--space-4)); z-index: 1;
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4)); padding: 10px var(--space-4) var(--space-4);
+  background: var(--cream); border-top: 2px solid rgba(43, 30, 22, .12);
+}
+.sp-root .sp-atur-room { align-self: center; }
+
 /* Truth or Dare untuk yang kalah (layar akhir) */
 .sp-root .sp-tod { text-align: center; color: var(--ink); }
 .sp-root .sp-tod__judul { justify-content: center; margin-bottom: var(--space-2); }
