@@ -113,6 +113,9 @@ npm run dev
    27. `0031_bukti_izin.sql` — bucket privat **bukti_izin** untuk foto bukti izin/sakit (surat
        dokter, dll.). Foto dikompres di HP lalu diunggah dengan progres 0–100%; hanya pemilik &
        admin yang bisa melihat. Menggantikan isian link Google Drive.
+   28. `0035_twibbon.sql` — twibbon foto absen bisa diganti admin lewat *Kelola → Twibbon
+       Foto Absen*. Bucket publik **twibbon** (PNG, maks. 2 MB, hanya admin yang menulis) dan
+       kolom `pengaturan.twibbon_path` (kosong = pakai `public/twibbon.png` bawaan).
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
