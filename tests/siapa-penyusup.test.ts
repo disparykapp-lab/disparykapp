@@ -2,6 +2,8 @@
 // bisa langsung menjalankan TypeScript dengan menghapus anotasi tipenya)
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { DAFTAR_KATEGORI } from "../src/features/siapa-penyusup/kategori.ts";
 import {
   aksiGabung,
   BATAS,
@@ -219,4 +221,47 @@ test("skor sesuai tabel README (sama dengan skenario uji SQL)", () => {
   assert.equal(poinPemain({ ...dasar, peran: "penyusup", pemenang: "pemandu", hidup: false }), 0);
   // keluar sebelum selesai: 0
   assert.equal(poinPemain({ ...dasar, peran: "pemandu", pemenang: "pemandu", aktif: false, voteTepat: 3 }), 0);
+});
+
+// Bank kata ada di migrasi SQL; uji ini menjaga daftar kategori di klien tetap
+// sama dengan database, dan memastikan pasangan kata layak dimainkan. Yang dibaca
+// pernyataan insert-nya (diikuti baris baru), bukan contoh di komentar header.
+const MIGRASI = new URL("../supabase/migrations/", import.meta.url);
+const bankKata = readFileSync(new URL("0034_siapa_penyusup_bank_kata_umum.sql", MIGRASI), "utf8");
+const blokKategori = bankKata.split("insert into penyusup_kategori (id, nama, ikon, urutan, aktif) values\n")[1].split("on conflict")[0];
+const kategoriSql = [...blokKategori.matchAll(/\('([a-z_]+)', '([^']+)'/g)].map((m) => ({ id: m[1], nama: m[2] }));
+const blokPasangan = bankKata.split("insert into penyusup_pasangan (kategori_id, kata_a, kata_b) values\n")[1].split("on conflict")[0];
+const pasanganSql = [...blokPasangan.matchAll(/\('([a-z_]+)', '([^']+)', '([^']+)'\)/g)].map((m) => ({ kategori: m[1], a: m[2], b: m[3] }));
+const terlarang = [
+  ...readFileSync(new URL("0032_game_siapa_penyusup.sql", MIGRASI), "utf8")
+    .split("insert into penyusup_kata_terlarang (kata) values\n")[1]
+    .split("on conflict")[0]
+    .matchAll(/\('([a-z]+)'\)/g),
+].map((m) => m[1]);
+
+test("kategori di klien sama dengan bank kata aktif di migrasi", () => {
+  assert.deepEqual(
+    DAFTAR_KATEGORI.map((k) => ({ id: k.id, nama: k.nama })),
+    kategoriSql
+  );
+});
+
+test("bank kata: tiap kategori cukup pasangan, kata dalam pasangan berbeda, tidak ada yang dobel", () => {
+  assert.ok(pasanganSql.length >= 60);
+  for (const k of kategoriSql) {
+    const isi = pasanganSql.filter((p) => p.kategori === k.id);
+    assert.ok(isi.length >= 8, `${k.id} hanya ${isi.length} pasangan`);
+    const kata = isi.flatMap((p) => [normalKata(p.a), normalKata(p.b)]);
+    assert.equal(new Set(kata).size, kata.length, `${k.id}: ada kata dobel`);
+  }
+  for (const p of pasanganSql) assert.notEqual(normalKata(p.a), normalKata(p.b), `${p.a} / ${p.b}`);
+});
+
+test("bank kata tidak memuat kata terlarang (petunjuk & chat yang wajar tidak akan tertolak)", () => {
+  assert.ok(terlarang.includes("anjing"));
+  for (const p of pasanganSql) {
+    for (const kata of [p.a, p.b]) {
+      for (const bagian of normalKata(kata).split(" ")) assert.ok(!terlarang.includes(bagian), `${kata} memuat kata terlarang`);
+    }
+  }
 });
