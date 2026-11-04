@@ -9,6 +9,7 @@ import UcapanUlangTahun from "../components/UcapanUlangTahun";
 import { ambilAbsensiHariIni } from "../lib/absensi";
 import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
+import FotoAbsenHariIni from "../components/FotoAbsenHariIni";
 import { hitungProgressMagang } from "../lib/profil";
 import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
 import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
@@ -127,6 +128,7 @@ export default function Beranda() {
                 <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
               )}
             </div>
+            {absensi && <FotoAbsenHariIni absensi={absensi} />}
           </section>
           </div>
 

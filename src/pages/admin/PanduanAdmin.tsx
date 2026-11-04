@@ -145,6 +145,11 @@ export default function PanduanAdmin() {
           Foto yang lebih tua dari batas retensi (lihat bagian Retensi Data Otomatis) tidak akan
           muncul lagi di sini — sudah terhapus otomatis duluan.
         </Catatan>
+        <Catatan>
+          Pegawai hanya bisa melihat foto absennya sendiri di Beranda pada hari itu saja (mulai
+          pukul 00.00 besoknya tidak tampil lagi). Fotonya tidak dihapus — admin tetap bisa
+          melihatnya di sini sampai batas retensi.
+        </Catatan>
       </Bagian>
 
       <Bagian judul="📸 Twibbon Foto Absen">
