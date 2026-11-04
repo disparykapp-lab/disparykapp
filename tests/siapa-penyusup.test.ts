@@ -17,6 +17,11 @@ import {
   HURUF_KODE,
   jumlahPenyusupOtomatis,
   jumlahPenyusupValid,
+  arahRoda,
+  arahRodaTod,
+  jenisJuring,
+  JURING_RODA,
+  juringDiJarum,
   kelasTimer,
   kodeValid,
   nomorWarnaDivisi,
@@ -24,7 +29,9 @@ import {
   poinPemain,
   penyusupDipakai,
   rapikanKode,
+  putarRoda,
   sisaDetik,
+  todTerkini,
 } from "../src/features/siapa-penyusup/logika.ts";
 
 test("huruf kode tanpa O/0/I/1", () => {
@@ -263,5 +270,76 @@ test("bank kata tidak memuat kata terlarang (petunjuk & chat yang wajar tidak ak
     for (const kata of [p.a, p.b]) {
       for (const bagian of normalKata(kata).split(" ")) assert.ok(!terlarang.includes(bagian), `${kata} memuat kata terlarang`);
     }
+  }
+});
+
+// ---------------------------------------------------------
+// Truth or Dare (migrasi 0037)
+// ---------------------------------------------------------
+
+test("roda TRUTH/DARE selalu berhenti di jenis hasil server, putaran demi putaran", () => {
+  assert.equal(JURING_RODA % 2, 0);
+  let sudut = 0;
+  for (let k = 0; k <= 200; k++) {
+    const jenis = k % 3 === 0 ? "truth" : "dare";
+    const berikut = putarRoda(sudut, arahRodaTod(jenis, k / 200));
+    assert.ok(berikut >= sudut + 5 * 360, "selalu maju minimal 5 putaran penuh");
+    assert.equal(jenisJuring(juringDiJarum(berikut)), jenis, `${jenis} k=${k}`);
+    sudut = berikut;
+  }
+});
+
+test("roda nama 2–11 pemain berhenti di korban dari server, tidak mepet batas juring", () => {
+  for (let n = 2; n <= 11; n++) {
+    let sudut = 0;
+    for (let i = 0; i < n; i++) {
+      for (const acak of [0, 0.37, 1]) {
+        sudut = putarRoda(sudut, arahRoda(i, n, acak));
+        assert.equal(juringDiJarum(sudut, n), i, `n=${n} i=${i} acak=${acak}`);
+        const lebar = 360 / n;
+        const posisi = ((((360 - (sudut % 360)) % 360) + 360) % 360) % lebar;
+        assert.ok(posisi >= lebar * 0.19 && posisi <= lebar * 0.81, `n=${n} terlalu mepet batas: ${posisi}`);
+      }
+    }
+  }
+  assert.equal(putarRoda(725, 90, 0) % 360, 90, "tanpa putaran (kurangi gerakan) tetap di arah yang benar");
+});
+
+test("status Truth or Dare: putaran terbaru, lalu status paling maju, game ini saja", () => {
+  const t = (game_ke: number, ke: number, status: string) => ({ game_ke, ke, status });
+  assert.equal(todTerkini(2, null, undefined), null);
+  assert.deepEqual(todTerkini(2, t(2, 1, "menunggu_ai"), t(2, 1, "siap")), t(2, 1, "siap"));
+  assert.deepEqual(todTerkini(2, t(2, 1, "siap"), t(2, 1, "membuat")), t(2, 1, "siap"), "balasan lama tidak menimpa");
+  assert.deepEqual(todTerkini(2, t(2, 1, "siap"), t(2, 2, "menunggu_ai")), t(2, 2, "menunggu_ai"), "Putar Lagi menang dari putaran lama yang sudah siap");
+  assert.deepEqual(todTerkini(2, t(1, 5, "siap"), t(2, 1, "membuat")), t(2, 1, "membuat"), "data game sebelumnya diabaikan");
+  assert.equal(todTerkini(3, t(2, 1, "siap")), null);
+});
+
+const todSql = readFileSync(new URL("0037_siapa_penyusup_truth_or_dare.sql", MIGRASI), "utf8");
+const cadangan = (jenis: "truth" | "dare") => {
+  const blok = todSql.split(jenis === "truth" ? "when p_jenis = 'truth' then array[\n" : "] else array[\n")[1].split("\n    ]")[0];
+  return [...blok.matchAll(/^\s+'((?:[^']|'')+)'/gm)].map((m) => m[1]);
+};
+
+test("pilihan cadangan Truth or Dare cukup, singkat, dan bebas kata terlarang", () => {
+  for (const jenis of ["truth", "dare"] as const) {
+    const daftar = cadangan(jenis);
+    assert.ok(daftar.length >= 6, `${jenis}: hanya ${daftar.length} pilihan`);
+    assert.equal(new Set(daftar).size, daftar.length, `${jenis}: ada yang dobel`);
+    for (const teks of daftar) {
+      assert.ok(teks.length <= 140, `terlalu panjang: ${teks}`);
+      for (const bagian of normalKata(teks).split(" ")) assert.ok(!terlarang.includes(bagian), `kata terlarang: ${teks}`);
+    }
+  }
+  assert.ok(cadangan("truth").every((t) => t.includes("?")), "truth berupa pertanyaan");
+});
+
+test("fungsi Truth or Dare khusus server tidak bisa dipanggil klien", () => {
+  for (const f of ["penyusup_tod_klaim(uuid)", "penyusup_tod_simpan(uuid, int, int, jsonb)"]) {
+    assert.ok(todSql.includes(`revoke execute on function ${f} from public, anon, authenticated;`), f);
+    assert.ok(todSql.includes(`grant execute on function ${f} to service_role;`), f);
+  }
+  for (const f of ["_penyusup_tod_baru(uuid, int, jsonb)", "_penyusup_tod_cadangan(text, jsonb)"]) {
+    assert.ok(todSql.includes(`revoke execute on function ${f} from public, anon, authenticated;`), f);
   }
 });

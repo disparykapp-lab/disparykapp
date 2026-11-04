@@ -261,3 +261,62 @@ export function poinPemain(p: {
   }
   return (p.pemenang === "penyusup" ? 300 : 0) + 50 * p.rondeSelamat + (p.tebakanBenar ? 200 : 0);
 }
+
+// ---------------------------------------------------------
+// Truth or Dare untuk yang kalah (migrasi 0037)
+// ---------------------------------------------------------
+
+/** Roda TRUTH/DARE: 8 juring, dihitung searah jarum jam dari atas; juring genap TRUTH, ganjil DARE. */
+export const JURING_RODA = 8;
+
+export function jenisJuring(i: number): "truth" | "dare" {
+  return i % 2 === 0 ? "truth" : "dare";
+}
+
+/**
+ * Arah akhir roda (0–360°, searah jarum jam) supaya jarum di atas menunjuk
+ * juring `indeks` dari `jumlah` juring. `acak` 0..1 menggeser posisi di dalam
+ * juring, tapi tidak pernah mepet garis batas.
+ */
+export function arahRoda(indeks: number, jumlah: number, acak: number): number {
+  const lebar = 360 / jumlah;
+  const tengah = indeks * lebar + lebar / 2 + (Math.min(Math.max(acak, 0), 1) - 0.5) * lebar * 0.6;
+  return (360 - tengah + 360) % 360;
+}
+
+/** Arah akhir roda TRUTH/DARE untuk `jenis`; `acak` memilih salah satu juringnya & posisinya. */
+export function arahRodaTod(jenis: "truth" | "dare", acak: number): number {
+  const calon = Array.from({ length: JURING_RODA }, (_, i) => i).filter((i) => jenisJuring(i) === jenis);
+  const x = Math.min(Math.max(acak, 0), 0.999999) * calon.length;
+  return arahRoda(calon[Math.floor(x)], JURING_RODA, x - Math.floor(x));
+}
+
+/** Sudut putar berikutnya dari posisi `sekarang`: maju `putaran` kali penuh lalu berhenti di `arah`. */
+export function putarRoda(sekarang: number, arah: number, putaran = 5): number {
+  return Math.ceil(sekarang / 360) * 360 + putaran * 360 + arah;
+}
+
+/** Juring yang ada di bawah jarum setelah roda diputar `sudut` derajat. */
+export function juringDiJarum(sudut: number, jumlah = JURING_RODA): number {
+  const lebar = 360 / jumlah;
+  return Math.floor(((((360 - (sudut % 360)) % 360) + 360) % 360) / lebar);
+}
+
+const URUTAN_STATUS_TOD: Record<string, number> = { menunggu_ai: 0, membuat: 1, siap: 2, tidak_ada: 2 };
+
+/**
+ * Data Truth or Dare paling baru untuk game ini, dari baris room (Realtime /
+ * detak) atau balasan RPC sendiri — putaran terbaru, lalu status paling maju.
+ */
+export function todTerkini<T extends { game_ke: number; ke?: number; status: string }>(
+  gameKe: number,
+  ...daftar: (T | null | undefined)[]
+): T | null {
+  const nilai = (t: T) => (t.ke ?? 0) * 10 + (URUTAN_STATUS_TOD[t.status] ?? 0);
+  let hasil: T | null = null;
+  for (const t of daftar) {
+    if (!t || t.game_ke !== gameKe) continue;
+    if (!hasil || nilai(t) > nilai(hasil)) hasil = t;
+  }
+  return hasil;
+}

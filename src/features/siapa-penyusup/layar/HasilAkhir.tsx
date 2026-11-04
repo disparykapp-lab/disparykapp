@@ -6,6 +6,7 @@ import { avatar, ikon, ui } from "../aset";
 import { sfx } from "../audio";
 import DaftarPeringkat from "../komponen/DaftarPeringkat";
 import Layar from "../komponen/Layar";
+import TruthOrDare from "../komponen/TruthOrDare";
 import { Konfeti } from "../komponen/efek";
 import { BATAS_RONDE } from "../logika";
 import type { StatePenyusupRoom } from "../usePenyusupRoom";
@@ -100,6 +101,8 @@ export default function HasilAkhir({ s }: { s: StatePenyusupRoom }) {
         </div>
       </div>
       {pemandu && <p className="sp-ringkas">Penyusupnya: {namaPenyusup}</p>}
+
+      <TruthOrDare key={room.game_ke} s={s} />
 
       <div className="sp-panel sp-stack sp-anim-slide-up" style={{ animationDelay: ".15s" }}>
         {antarDivisi && (
