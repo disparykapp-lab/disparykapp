@@ -169,6 +169,20 @@ export async function urlLampiran(paths: string[]): Promise<Record<string, strin
   return hasil;
 }
 
+/** Isi file lampiran (untuk pratinjau di aplikasi) — lewat sesi login, jadi tidak ada link yang kedaluwarsa. */
+export async function ambilIsiLampiran(path: string): Promise<Blob> {
+  const { data, error } = await supabase.storage.from(BUCKET_LAMPIRAN).download(path);
+  if (error || !data) throw new Error("File tidak bisa dibuka. Mungkin sudah dihapus, atau koneksi terputus.");
+  return data;
+}
+
+/** Link unduh 5 menit dengan nama file asli (bukan nama acak di Storage). Dibuat saat tombol ditekan. */
+export async function urlUnduhLampiran(path: string, nama: string): Promise<string> {
+  const { data, error } = await supabase.storage.from(BUCKET_LAMPIRAN).createSignedUrl(path, 300, { download: nama });
+  if (error || !data) throw new Error("File tidak bisa diunduh. Mungkin sudah dihapus, atau koneksi terputus.");
+  return data.signedUrl;
+}
+
 export function pathLampiran(lampiran: Lampiran[] | undefined): string[] {
   return (lampiran ?? []).flatMap((l) => (l.path ? [l.path] : []));
 }
