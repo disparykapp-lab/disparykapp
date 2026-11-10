@@ -10,21 +10,16 @@ import {
   tipeKonten,
   type Lampiran,
 } from "./tugasLampiranMeta";
+import type { PilihanTugas, StatusTugas } from "./tugasAturan";
 import { kompresGambar, unggahDenganProgres } from "./unggah";
 import type { Profile } from "../types/database";
 
-// Tugas umum dari admin (tabel tugas + tugas_progres, migrasi 0020).
+// Tugas umum dari admin (tabel tugas + tugas_progres, migrasi 0020; pilihan 0041).
 
+export { LABEL_STATUS_TUGAS, type StatusTugas } from "./tugasAturan";
 export type SasaranTugas = "semua" | "divisi" | "personal";
-export type StatusTugas = "belum" | "selesai" | "kendala";
 
-export const LABEL_STATUS_TUGAS: Record<StatusTugas, string> = {
-  belum: "Belum",
-  selesai: "Selesai",
-  kendala: "Kendala",
-};
-
-export interface Tugas {
+export interface Tugas extends PilihanTugas {
   id: string;
   judul: string;
   deskripsi: string | null;
@@ -49,7 +44,21 @@ export interface ProgresTugas {
   catatan: string | null;
   /** migrasi 0039; tidak ada kalau migrasinya belum dijalankan */
   lampiran?: Lampiran[];
+  /** migrasi 0041: id langkah yang sudah dicentang, catatan & waktu pemeriksaan admin */
+  langkah_selesai?: string[];
+  catatan_admin?: string | null;
+  diperiksa_at?: string | null;
   diperbarui_at: string;
+}
+
+export interface TanyaTugas {
+  id: number;
+  tugas_id: string;
+  /** pemilik percakapan (pegawai yang bertanya) */
+  user_id: string;
+  pengirim_id: string | null;
+  isi: string;
+  dibuat_at: string;
 }
 
 export interface TugasDenganPembuat extends Tugas {
@@ -59,14 +68,20 @@ export interface TugasDenganPembuat extends Tugas {
 export type IsiTugas = Pick<
   Tugas,
   "judul" | "deskripsi" | "aktif" | "sasaran" | "divisi_ids" | "user_ids" | "mulai_at" | "deadline_at" | "tampilkan_pembuat" | "lampiran"
->;
+> &
+  Partial<Omit<PilihanTugas, "kuota_terisi">>;
 
 const BUCKET_LAMPIRAN = "tugas_lampiran";
 const PESAN_LAMPIRAN_BELUM_AKTIF = "Lampiran tugas belum aktif di database. Admin perlu menjalankan migrasi 0039_tugas_lampiran.sql di Supabase.";
 const PESAN_MATERI_BELUM_AKTIF = "Lampiran dari pemberi tugas belum aktif di database. Jalankan migrasi 0040_tugas_lampiran_admin.sql di Supabase.";
 
-/** Pesan yang lebih jelas kalau migrasi 0020/0039/0040 belum dijalankan di Supabase. */
+const PESAN_PILIHAN_BELUM_AKTIF = "Pilihan tugas ini belum aktif di database. Admin perlu menjalankan migrasi 0041_tugas_pilihan.sql di Supabase.";
+
+/** Pesan yang lebih jelas kalau migrasi 0020/0039/0040/0041 belum dijalankan di Supabase. */
 function galat(pesan: string): Error {
+  if (/perlu_cek|mendesak|kuota|wajib_baca|langkah|arsip_hari|ingatkan|tanya_jawab|disematkan_at|tugas_dibaca|tugas_tanya|ambil_tugas|lepas_tugas|periksa_tugas/.test(pesan)) {
+    return new Error(PESAN_PILIHAN_BELUM_AKTIF);
+  }
   if (/lampiran/i.test(pesan) && /column|kolom/i.test(pesan)) {
     return new Error(/'tugas'/.test(pesan) ? PESAN_MATERI_BELUM_AKTIF : PESAN_LAMPIRAN_BELUM_AKTIF);
   }
@@ -76,17 +91,76 @@ function galat(pesan: string): Error {
   return new Error(pesan);
 }
 
-/** Tugas aktif untuk pegawai yang login (RLS sudah menyaring sasaran), plus progresnya. */
-export async function ambilTugasUmumSaya(userId: string): Promise<{ tugas: TugasDenganPembuat[]; progres: Record<string, ProgresTugas> }> {
-  const [t, p] = await Promise.all([
+/**
+ * Tugas aktif untuk pegawai yang login (RLS sudah menyaring sasaran & arsip), plus
+ * progres & waktu "sudah dibaca" miliknya sendiri.
+ */
+export async function ambilTugasUmumSaya(
+  userId: string
+): Promise<{ tugas: TugasDenganPembuat[]; progres: Record<string, ProgresTugas>; dibaca: Record<string, string> }> {
+  const [t, p, b] = await Promise.all([
     supabase.from("tugas").select("*, pembuat:dibuat_oleh(nama)").eq("aktif", true).or(`mulai_at.is.null,mulai_at.lte.${new Date().toISOString()}`).order("deadline_at", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
     supabase.from("tugas_progres").select("*").eq("user_id", userId),
+    supabase.from("tugas_dibaca").select("tugas_id, dibaca_at").eq("user_id", userId),
   ]);
   if (t.error) throw galat(t.error.message);
   if (p.error) throw galat(p.error.message);
   const progres: Record<string, ProgresTugas> = {};
   for (const r of (p.data as ProgresTugas[]) ?? []) progres[r.tugas_id] = r;
-  return { tugas: (t.data as TugasDenganPembuat[]) ?? [], progres };
+  // tabel tugas_dibaca baru ada setelah 0041 — sebelum itu dianggap belum ada yang dibaca
+  const dibaca: Record<string, string> = {};
+  for (const r of (b.error ? [] : (b.data as { tugas_id: string; dibaca_at: string }[])) ?? []) dibaca[r.tugas_id] = r.dibaca_at;
+  return { tugas: (t.data as TugasDenganPembuat[]) ?? [], progres, dibaca };
+}
+
+/* ---------- Pilihan tugas (migrasi 0041) ---------- */
+
+/** Ambil tugas sukarela (kuota) — siapa cepat dia dapat; server yang menjaga kuotanya. */
+export async function ikutTugas(tugasId: string): Promise<void> {
+  const { error } = await supabase.rpc("ambil_tugas", { p_tugas: tugasId });
+  if (error) throw galat(error.message);
+}
+
+/** Batal mengambil tugas sukarela (hanya selama belum dikerjakan). */
+export async function lepasTugas(tugasId: string): Promise<void> {
+  const { error } = await supabase.rpc("lepas_tugas", { p_tugas: tugasId });
+  if (error) throw galat(error.message);
+}
+
+export async function tandaiDibaca(tugasId: string, userId: string): Promise<string> {
+  const dibaca_at = new Date().toISOString();
+  const { error } = await supabase.from("tugas_dibaca").upsert({ tugas_id: tugasId, user_id: userId }, { onConflict: "tugas_id,user_id", ignoreDuplicates: true });
+  if (error) throw galat(error.message);
+  return dibaca_at;
+}
+
+/** Simpan centangan langkah langsung (tanpa menunggu tombol Simpan). */
+export async function simpanLangkahSelesai(tugasId: string, userId: string, ids: string[]): Promise<void> {
+  const { error } = await supabase
+    .from("tugas_progres")
+    .upsert({ tugas_id: tugasId, user_id: userId, langkah_selesai: ids, diperbarui_at: new Date().toISOString() }, { onConflict: "tugas_id,user_id" });
+  if (error) throw galat(error.message);
+}
+
+/** Admin: setujui hasil kerja (→ selesai) atau minta revisi dengan catatan. */
+export async function periksaTugas(tugasId: string, userId: string, setuju: boolean, catatan: string): Promise<void> {
+  const { error } = await supabase.rpc("periksa_tugas", { p_tugas: tugasId, p_user: userId, p_setuju: setuju, p_catatan: catatan });
+  if (error) throw galat(error.message);
+}
+
+/** Percakapan tanya-jawab satu tugas: pegawai hanya miliknya (RLS), admin semuanya (atau satu pegawai). */
+export async function ambilTanya(tugasId: string, userId?: string): Promise<TanyaTugas[]> {
+  let q = supabase.from("tugas_tanya").select("*").eq("tugas_id", tugasId).order("dibuat_at");
+  if (userId) q = q.eq("user_id", userId);
+  const { data, error } = await q;
+  if (error) throw galat(error.message);
+  return (data as TanyaTugas[]) ?? [];
+}
+
+/** Kirim pesan ke percakapan milik `userId` (pegawai: dirinya sendiri; admin: pegawai yang dijawab). */
+export async function kirimTanya(tugasId: string, userId: string, isi: string): Promise<void> {
+  const { error } = await supabase.from("tugas_tanya").insert({ tugas_id: tugasId, user_id: userId, isi: isi.trim() });
+  if (error) throw galat(error.message);
 }
 
 /**
@@ -183,20 +257,48 @@ export async function urlUnduhLampiran(path: string, nama: string): Promise<stri
   return data.signedUrl;
 }
 
+/** Duplikat tugas: salin file materi ke folder tugas baru (materi/{id baru}/…). */
+export async function salinLampiranMateri(lampiran: Lampiran[], tugasIdBaru: string): Promise<Lampiran[]> {
+  const hasil: Lampiran[] = [];
+  for (const l of lampiran) {
+    if (!l.path) {
+      hasil.push(l);
+      continue;
+    }
+    const tujuan = `materi/${tugasIdBaru}/${l.path.split("/").pop()}`;
+    const { error } = await supabase.storage.from(BUCKET_LAMPIRAN).copy(l.path, tujuan);
+    if (!error) hasil.push({ ...l, path: tujuan });
+  }
+  return hasil;
+}
+
 export function pathLampiran(lampiran: Lampiran[] | undefined): string[] {
   return (lampiran ?? []).flatMap((l) => (l.path ? [l.path] : []));
 }
 
 /* ---------- Admin ---------- */
 
-export async function ambilSemuaTugas(): Promise<{ tugas: TugasDenganPembuat[]; progres: ProgresTugas[] }> {
-  const [t, p] = await Promise.all([
+export async function ambilSemuaTugas(): Promise<{
+  tugas: TugasDenganPembuat[];
+  progres: ProgresTugas[];
+  dibaca: { tugas_id: string; user_id: string; dibaca_at: string }[];
+  tanya: TanyaTugas[];
+}> {
+  const [t, p, b, q] = await Promise.all([
     supabase.from("tugas").select("*, pembuat:dibuat_oleh(nama)").order("created_at", { ascending: false }),
     supabase.from("tugas_progres").select("*"),
+    supabase.from("tugas_dibaca").select("*"),
+    supabase.from("tugas_tanya").select("*").order("dibuat_at"),
   ]);
   if (t.error) throw galat(t.error.message);
   if (p.error) throw galat(p.error.message);
-  return { tugas: (t.data as TugasDenganPembuat[]) ?? [], progres: (p.data as ProgresTugas[]) ?? [] };
+  // tugas_dibaca & tugas_tanya baru ada setelah 0041
+  return {
+    tugas: (t.data as TugasDenganPembuat[]) ?? [],
+    progres: (p.data as ProgresTugas[]) ?? [],
+    dibaca: b.error ? [] : ((b.data as { tugas_id: string; user_id: string; dibaca_at: string }[]) ?? []),
+    tanya: q.error ? [] : ((q.data as TanyaTugas[]) ?? []),
+  };
 }
 
 /**
@@ -208,6 +310,14 @@ export async function simpanTugas(id: string | null, isi: IsiTugas, idBaru?: str
   const baru: Record<string, unknown> = idBaru ? { id: idBaru, ...isi } : { ...isi };
   const { error } = id ? await supabase.from("tugas").update(isi).eq("id", id) : await supabase.from("tugas").insert(baru);
   if (error) throw galat(error.message);
+}
+
+/** Pin dari admin: tugas tetap paling atas di daftar admin & pegawai. Mengembalikan waktu sematan (null = dilepas). */
+export async function sematkanTugas(id: string, sematkan: boolean): Promise<string | null> {
+  const disematkan_at = sematkan ? new Date().toISOString() : null;
+  const { error } = await supabase.from("tugas").update({ disematkan_at }).eq("id", id);
+  if (error) throw galat(error.message);
+  return disematkan_at;
 }
 
 export async function ubahAktifTugas(id: string, aktif: boolean): Promise<void> {

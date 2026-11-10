@@ -136,6 +136,17 @@ export default function Panduan() {
           lewat link.
         </Langkah>
         <Langkah no={4}>Tekan "Simpan". Lampiran baru terkirim ke admin setelah disimpan.</Langkah>
+        <Langkah no={5}>
+          Sesuai pilihan admin, sebuah tugas bisa: minta kamu menekan <strong>"Sudah saya baca"</strong>,
+          punya <strong>langkah-langkah</strong> untuk dicentang, perlu <strong>dicek admin</strong>{" "}
+          (status "Menunggu dicek", atau "Perlu revisi" berisi catatan perbaikan), atau berupa{" "}
+          <strong>tugas sukarela</strong> yang diambil lewat tombol "Ambil tugas ini" selama kuota
+          belum penuh. Pakai "💬 Tanya admin" kalau ada yang kurang jelas.
+        </Langkah>
+        <p className="text-sm text-gray-600">
+          Tugas bertanda 📌 Disematkan selalu paling atas di daftar. Tugas mendesak, atau yang
+          deadline-nya tinggal kurang dari 24 jam, muncul di kartu "Tugas perlu perhatian" di Beranda.
+        </p>
       </Bagian>
 
       <Bagian judul="✉️ Tugas Undangan">

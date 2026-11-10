@@ -13,7 +13,8 @@ import FotoAbsenHariIni from "../components/FotoAbsenHariIni";
 import { hitungProgressMagang } from "../lib/profil";
 import { formatTanggal } from "../lib/tanggal";
 import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
-import { ambilFiturTugasUndangan, ambilTugasUmumSaya } from "../lib/tugas";
+import { ambilFiturTugasUndangan, ambilTugasUmumSaya, infoDeadline, type TugasDenganPembuat } from "../lib/tugas";
+import { belumDiambil, perluPerhatian, sudahBeres, urutkanTugas } from "../lib/tugasAturan";
 import type { Absensi } from "../types/database";
 
 // Pop-up Zona Game dimuat terpisah (berikut aset game-nya) baru saat tombol Game dibuka.
@@ -28,6 +29,7 @@ export default function Beranda() {
   const [error, setError] = useState<string | null>(null);
   const [tugasBelum, setTugasBelum] = useState(0);
   const [tugasTotal, setTugasTotal] = useState(0);
+  const [perhatian, setPerhatian] = useState<{ tugas: TugasDenganPembuat; alasan: "mendesak" | "deadline" }[]>([]);
   const [bukaGame, setBukaGame] = useState(false);
   const tombolGame = useRef<HTMLButtonElement>(null);
 
@@ -52,10 +54,17 @@ export default function Beranda() {
         .then((rows) => hitungRingkasanUndangan(rows))
         .catch(() => ({ belum: 0, total: 0 })),
       ambilTugasUmumSaya(profile.id)
-        .then(({ tugas, progres }) => ({
-          belum: tugas.filter((t) => progres[t.id]?.status !== "selesai").length,
-          total: tugas.length,
-        }))
+        .then(({ tugas, progres }) => {
+          // tugas sukarela yang belum diambil bukan tanggungan; "menunggu dicek" dianggap sudah dikerjakan
+          const tanggungan = tugas.filter((t) => !belumDiambil(t, !!progres[t.id]));
+          setPerhatian(
+            urutkanTugas(tanggungan).flatMap((t) => {
+              const alasan = perluPerhatian(t, progres[t.id]?.status, !!progres[t.id]);
+              return alasan ? [{ tugas: t, alasan }] : [];
+            })
+          );
+          return { belum: tanggungan.filter((t) => !sudahBeres(progres[t.id]?.status)).length, total: tanggungan.length };
+        })
         .catch(() => ({ belum: 0, total: 0 })),
     ]).then(([u, t]) => {
       setTugasBelum(u.belum + t.belum);
@@ -155,6 +164,8 @@ export default function Beranda() {
           </section>
           </div>
 
+          {perhatian.length > 0 && <KartuPerhatian daftar={perhatian} />}
+
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {/* Absen Masuk & Pulang sebaris, tombol bulat Izin/Sakit tepat di tengahnya */}
             <div className="relative col-span-2 grid grid-cols-2 gap-3">
@@ -241,6 +252,36 @@ export default function Beranda() {
         </Suspense>
       )}
     </div>
+  );
+}
+
+/** Pengingat tugas: yang ditandai mendesak, atau deadline-nya tinggal < 24 jam (pilihan tugas, migrasi 0041). */
+function KartuPerhatian({ daftar }: { daftar: { tugas: TugasDenganPembuat; alasan: "mendesak" | "deadline" }[] }) {
+  const tampil = daftar.slice(0, 3);
+  return (
+    <Link
+      to="/tugas"
+      className={`flex flex-col gap-2 rounded-2xl border border-red-100 bg-white p-4 shadow-sm transition active:scale-[0.99] ${
+        daftar.some((d) => d.alasan === "mendesak") ? "tugas-mendesak" : ""
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-red-700">Tugas perlu perhatian</h2>
+        <span className="shrink-0 text-xs font-semibold text-brand-masuk">Buka Tugas ›</span>
+      </div>
+      <ul className="flex flex-col gap-1.5">
+        {tampil.map(({ tugas, alasan }) => (
+          <li key={tugas.id} className="flex min-w-0 items-center gap-2 text-sm">
+            <span aria-hidden="true">{alasan === "mendesak" ? "🔥" : "⏰"}</span>
+            <span className="min-w-0 flex-1 truncate font-medium text-brand-text">{tugas.judul}</span>
+            <span className="shrink-0 text-xs text-gray-500">
+              {alasan === "mendesak" && !tugas.deadline_at ? "Mendesak" : tugas.deadline_at ? infoDeadline(tugas.deadline_at).teks : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {daftar.length > tampil.length && <p className="text-xs text-gray-500">+{daftar.length - tampil.length} tugas lain</p>}
+    </Link>
   );
 }
 

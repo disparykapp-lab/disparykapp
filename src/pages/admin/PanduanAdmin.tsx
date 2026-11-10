@@ -266,6 +266,21 @@ export default function PanduanAdmin() {
           pegawai: gambar tampil sebagai thumbnail, lagu bisa langsung diputar, file dan link
           dibuka di tab baru.
         </Langkah>
+        <Langkah no={3}>
+          Di bagian <strong>Pilihan</strong>: perlu dicek admin (Setujui / Minta revisi dari
+          rincian progres), langkah-langkah, kuota sukarela (siapa cepat dia dapat), konfirmasi
+          dibaca, tandai mendesak, pengingat di Beranda, tanya-jawab, dan arsip otomatis beberapa
+          hari setelah deadline.
+        </Langkah>
+        <Langkah no={4}>
+          Tombol <strong>Duplikat</strong> menyalin tugas (isi, sasaran, lampiran, pilihan) jadi tugas
+          baru — tinggal atur deadline-nya. Pertanyaan pegawai yang belum dijawab terlihat dari
+          lencana "💬 belum dibalas" di kartu tugas.
+        </Langkah>
+        <Langkah no={5}>
+          Tekan ikon <strong>📌 pin</strong> di kartu tugas (atau saklar "Sematkan di atas" di form)
+          supaya tugas itu tetap paling atas di daftar admin dan pegawai. Tekan lagi untuk melepas.
+        </Langkah>
         <Catatan>
           File lampiran disimpan privat (hanya pegawai pemiliknya dan admin yang bisa membuka) dan
           ikut terhapus saat tugasnya dihapus. Batasnya 20 MB per file; gambar dikompres otomatis di

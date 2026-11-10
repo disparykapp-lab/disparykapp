@@ -135,6 +135,12 @@ npm run dev
        tugas (template, contoh desain, lagu acuan, link). Kolom `tugas.lampiran`, file di folder
        `materi/{tugas_id}/` bucket yang sama; hanya admin yang mengunggah, pegawai sasaran bisa
        membukanya selama tugas itu tampil untuknya.
+   34. `0041_tugas_pilihan.sql` — pilihan tambahan di form tugas: perlu dicek admin (status
+       *diperiksa*/*revisi* + RPC `periksa_tugas`), tandai mendesak, kuota sukarela (RPC
+       `ambil_tugas`/`lepas_tugas`), konfirmasi dibaca (`tugas_dibaca`), langkah-langkah,
+       arsip otomatis, pengingat di Beranda, tanya-jawab per pegawai (`tugas_tanya`), dan
+       sematan/pin admin (`disematkan_at`: tugas tetap paling atas di daftar admin & pegawai).
+       Sebelum migrasi ini dijalankan, tugas tanpa pilihan baru tetap bisa dibuat & dikerjakan.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
