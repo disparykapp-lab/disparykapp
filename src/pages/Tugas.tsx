@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../components/HeaderHalaman";
-import { InputLampiran } from "../components/LampiranTugas";
+import { DaftarLampiran, InputLampiran } from "../components/LampiranTugas";
 import Loading from "../components/Loading";
 import { useAuth } from "../contexts/AuthContext";
 import { teksDenganLink } from "../lib/linkify";
@@ -19,7 +19,7 @@ import {
   type StatusTugas,
   type TugasDenganPembuat,
 } from "../lib/tugas";
-import type { Lampiran } from "../lib/tugasLampiranMeta";
+import { folderLampiranPegawai, type Lampiran } from "../lib/tugasLampiranMeta";
 
 type Tab = "belum" | "selesai" | "semua";
 
@@ -234,8 +234,11 @@ function KartuTugas({
               {tugas.sasaran === "personal" ? "Khusus kamu" : tugas.sasaran === "divisi" ? "Divisi kamu" : "Semua pegawai"}
             </span>
             {tugas.tampilkan_pembuat && tugas.pembuat && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">Dari {tugas.pembuat.nama}</span>}
+            {(tugas.lampiran?.length ?? 0) > 0 && (
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">📁 {tugas.lampiran!.length} lampiran tugas</span>
+            )}
             {(progres?.lampiran?.length ?? 0) > 0 && (
-              <span className="rounded-full bg-blue-50 px-2 py-0.5 font-semibold text-brand-info">📎 {progres!.lampiran!.length} lampiran</span>
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 font-semibold text-brand-info">📎 {progres!.lampiran!.length} lampiran kamu</span>
             )}
           </div>
         </div>
@@ -292,6 +295,12 @@ function FormProgres({ tugas, progres, onTersimpan }: { tugas: TugasDenganPembua
   return (
     <div className="flex flex-col gap-3 border-t border-gray-100 p-4">
       {tugas.deskripsi && <p className="whitespace-pre-line text-sm text-gray-700">{teksDenganLink(tugas.deskripsi)}</p>}
+      {(tugas.lampiran?.length ?? 0) > 0 && (
+        <div>
+          <p className="mb-1.5 text-xs font-medium text-gray-500">Lampiran dari pemberi tugas</p>
+          <DaftarLampiran lampiran={tugas.lampiran} />
+        </div>
+      )}
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
         {tugas.deadline_at && (
@@ -342,8 +351,8 @@ function FormProgres({ tugas, progres, onTersimpan }: { tugas: TugasDenganPembua
 
       {profile && (
         <InputLampiran
-          userId={profile.id}
-          tugasId={tugas.id}
+          folder={folderLampiranPegawai(profile.id, tugas.id)}
+          label="Lampiran hasil kerja (opsional)"
           nilai={lampiran}
           onUbah={setLampiran}
           onSibuk={aturSibuk}

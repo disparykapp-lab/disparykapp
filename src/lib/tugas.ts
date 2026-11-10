@@ -36,6 +36,8 @@ export interface Tugas {
   deadline_at: string | null;
   tampilkan_pembuat: boolean;
   dibuat_oleh: string | null;
+  /** materi dari pemberi tugas (migrasi 0040); tidak ada kalau migrasinya belum dijalankan */
+  lampiran?: Lampiran[];
   created_at: string;
   updated_at: string;
 }
@@ -56,15 +58,18 @@ export interface TugasDenganPembuat extends Tugas {
 
 export type IsiTugas = Pick<
   Tugas,
-  "judul" | "deskripsi" | "aktif" | "sasaran" | "divisi_ids" | "user_ids" | "mulai_at" | "deadline_at" | "tampilkan_pembuat"
+  "judul" | "deskripsi" | "aktif" | "sasaran" | "divisi_ids" | "user_ids" | "mulai_at" | "deadline_at" | "tampilkan_pembuat" | "lampiran"
 >;
 
 const BUCKET_LAMPIRAN = "tugas_lampiran";
 const PESAN_LAMPIRAN_BELUM_AKTIF = "Lampiran tugas belum aktif di database. Admin perlu menjalankan migrasi 0039_tugas_lampiran.sql di Supabase.";
+const PESAN_MATERI_BELUM_AKTIF = "Lampiran dari pemberi tugas belum aktif di database. Jalankan migrasi 0040_tugas_lampiran_admin.sql di Supabase.";
 
-/** Pesan yang lebih jelas kalau migrasi 0020/0039 belum dijalankan di Supabase. */
+/** Pesan yang lebih jelas kalau migrasi 0020/0039/0040 belum dijalankan di Supabase. */
 function galat(pesan: string): Error {
-  if (/lampiran/i.test(pesan) && /column|kolom/i.test(pesan)) return new Error(PESAN_LAMPIRAN_BELUM_AKTIF);
+  if (/lampiran/i.test(pesan) && /column|kolom/i.test(pesan)) {
+    return new Error(/'tugas'/.test(pesan) ? PESAN_MATERI_BELUM_AKTIF : PESAN_LAMPIRAN_BELUM_AKTIF);
+  }
   if (/relation .*tugas.* does not exist|Could not find the table/i.test(pesan)) {
     return new Error("Fitur Tugas belum aktif di database. Admin perlu menjalankan migrasi 0020_tugas.sql di Supabase.");
   }
@@ -105,12 +110,11 @@ export async function simpanProgresTugas(
 /* ---------- Lampiran pengerjaan (bucket privat tugas_lampiran, migrasi 0039) ---------- */
 
 /**
- * Unggah satu file lampiran ke {user_id}/{tugas_id}/…. Gambar foto dikompres
- * dulu (JPEG ±1 MB); kalau tidak bisa dikompres (mis. HEIC), file asli dipakai.
+ * Unggah satu file lampiran ke `folder` (lihat folderLampiran…). Gambar foto
+ * dikompres dulu (JPEG ±1 MB); kalau tidak bisa dikompres (mis. HEIC), file asli dipakai.
  */
-export async function unggahLampiranTugas(
-  userId: string,
-  tugasId: string,
+export async function unggahLampiran(
+  folder: string,
   file: File,
   onProgres: (persen: number) => void,
   onKompres?: () => void
@@ -135,8 +139,17 @@ export async function unggahLampiranTugas(
   if (isi.size > MAKS_UKURAN_FILE) {
     throw new Error(`terlalu besar (${formatUkuran(isi.size)}), maksimal ${formatUkuran(MAKS_UKURAN_FILE)}. Kirim lewat link saja.`);
   }
-  const path = `${userId}/${tugasId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${namaFileAman(nama)}`;
-  await unggahDenganProgres({ bucket: BUCKET_LAMPIRAN, path, isi, tipe, onProgres, pesanBelumAktif: PESAN_LAMPIRAN_BELUM_AKTIF });
+  const path = `${folder}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${namaFileAman(nama)}`;
+  await unggahDenganProgres({
+    bucket: BUCKET_LAMPIRAN,
+    path,
+    isi,
+    tipe,
+    onProgres,
+    pesanBelumAktif: PESAN_LAMPIRAN_BELUM_AKTIF,
+    // folder materi/ ditolak RLS kalau policy 0040 belum ada
+    pesanDitolak: folder.startsWith("materi/") ? PESAN_MATERI_BELUM_AKTIF : undefined,
+  });
   return { jenis: jenisDariTipe(tipe), nama, path, ukuran: isi.size, tipe };
 }
 
@@ -172,8 +185,14 @@ export async function ambilSemuaTugas(): Promise<{ tugas: TugasDenganPembuat[]; 
   return { tugas: (t.data as TugasDenganPembuat[]) ?? [], progres: (p.data as ProgresTugas[]) ?? [] };
 }
 
-export async function simpanTugas(id: string | null, isi: IsiTugas): Promise<void> {
-  const { error } = id ? await supabase.from("tugas").update(isi).eq("id", id) : await supabase.from("tugas").insert(isi);
+/**
+ * Simpan tugas. Tugas baru memakai `idBaru` yang dibuat di aplikasi, supaya
+ * lampirannya bisa diunggah ke materi/{id}/ sebelum tugasnya ada di database.
+ * Kolom lampiran hanya dikirim kalau ada isinya (simpan tetap jalan sebelum 0040).
+ */
+export async function simpanTugas(id: string | null, isi: IsiTugas, idBaru?: string): Promise<void> {
+  const baru: Record<string, unknown> = idBaru ? { id: idBaru, ...isi } : { ...isi };
+  const { error } = id ? await supabase.from("tugas").update(isi).eq("id", id) : await supabase.from("tugas").insert(baru);
   if (error) throw galat(error.message);
 }
 
@@ -183,9 +202,14 @@ export async function ubahAktifTugas(id: string, aktif: boolean): Promise<void> 
 }
 
 export async function hapusTugas(id: string): Promise<void> {
-  // file lampiran ikut dibersihkan (baris progres terhapus otomatis lewat cascade)
-  const { data } = await supabase.from("tugas_progres").select("lampiran").eq("tugas_id", id);
-  const paths = ((data as { lampiran?: Lampiran[] }[] | null) ?? []).flatMap((r) => pathLampiran(r.lampiran));
+  // file lampiran pegawai & materi ikut dibersihkan (baris progres terhapus otomatis lewat cascade)
+  const [progres, tugas] = await Promise.all([
+    supabase.from("tugas_progres").select("lampiran").eq("tugas_id", id),
+    supabase.from("tugas").select("lampiran").eq("id", id),
+  ]);
+  const paths = [...((progres.data as { lampiran?: Lampiran[] }[] | null) ?? []), ...((tugas.data as { lampiran?: Lampiran[] }[] | null) ?? [])].flatMap((r) =>
+    pathLampiran(r.lampiran)
+  );
   await hapusFileLampiran(paths).catch(() => {});
   const { error } = await supabase.from("tugas").delete().eq("id", id);
   if (error) throw galat(error.message);
