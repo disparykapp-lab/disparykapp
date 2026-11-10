@@ -117,6 +117,24 @@ export default function Panduan() {
         </p>
       </Bagian>
 
+      <Bagian judul="📋 Tugas dari Admin">
+        <Langkah no={1}>
+          Buka menu <strong>Tugas</strong> di Beranda, lalu ketuk tugasnya untuk melihat detail dan
+          deadline.
+        </Langkah>
+        <Langkah no={2}>
+          Pilih status <strong>Belum / Selesai / Kendala</strong> dan tulis catatan kalau perlu.
+        </Langkah>
+        <Langkah no={3}>
+          Lampirkan hasil kerja dengan tombol <strong>File</strong> (PDF, Word, Excel, PowerPoint,
+          ZIP/RAR), <strong>Gambar</strong> (otomatis dikompres supaya hemat kuota),{" "}
+          <strong>Lagu</strong> (MP3, M4A, WAV, …), atau <strong>Link</strong> (mis. Google Drive,
+          Canva, YouTube). Maksimal 8 lampiran dan 20 MB per file — file yang lebih besar kirim
+          lewat link.
+        </Langkah>
+        <Langkah no={4}>Tekan "Simpan". Lampiran baru terkirim ke admin setelah disimpan.</Langkah>
+      </Bagian>
+
       <Bagian judul="✉️ Tugas Undangan">
         <p className="text-sm text-gray-600">
           Kalau admin menugaskan kamu untuk mengantar undangan, menu "Tugas Undangan" di Beranda

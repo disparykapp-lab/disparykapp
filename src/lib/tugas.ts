@@ -1,4 +1,16 @@
 import { supabase } from "./supabase";
+import {
+  MAKS_UKURAN_FILE,
+  SISI_MAKS_GAMBAR,
+  TARGET_UKURAN_GAMBAR,
+  formatUkuran,
+  jenisDariTipe,
+  namaFileAman,
+  perluKompres,
+  tipeKonten,
+  type Lampiran,
+} from "./tugasLampiranMeta";
+import { kompresGambar, unggahDenganProgres } from "./unggah";
 import type { Profile } from "../types/database";
 
 // Tugas umum dari admin (tabel tugas + tugas_progres, migrasi 0020).
@@ -33,6 +45,8 @@ export interface ProgresTugas {
   user_id: string;
   status: StatusTugas;
   catatan: string | null;
+  /** migrasi 0039; tidak ada kalau migrasinya belum dijalankan */
+  lampiran?: Lampiran[];
   diperbarui_at: string;
 }
 
@@ -45,8 +59,12 @@ export type IsiTugas = Pick<
   "judul" | "deskripsi" | "aktif" | "sasaran" | "divisi_ids" | "user_ids" | "mulai_at" | "deadline_at" | "tampilkan_pembuat"
 >;
 
-/** Pesan yang lebih jelas kalau migrasi 0020 belum dijalankan di Supabase. */
+const BUCKET_LAMPIRAN = "tugas_lampiran";
+const PESAN_LAMPIRAN_BELUM_AKTIF = "Lampiran tugas belum aktif di database. Admin perlu menjalankan migrasi 0039_tugas_lampiran.sql di Supabase.";
+
+/** Pesan yang lebih jelas kalau migrasi 0020/0039 belum dijalankan di Supabase. */
 function galat(pesan: string): Error {
+  if (/lampiran/i.test(pesan) && /column|kolom/i.test(pesan)) return new Error(PESAN_LAMPIRAN_BELUM_AKTIF);
   if (/relation .*tugas.* does not exist|Could not find the table/i.test(pesan)) {
     return new Error("Fitur Tugas belum aktif di database. Admin perlu menjalankan migrasi 0020_tugas.sql di Supabase.");
   }
@@ -66,11 +84,80 @@ export async function ambilTugasUmumSaya(userId: string): Promise<{ tugas: Tugas
   return { tugas: (t.data as TugasDenganPembuat[]) ?? [], progres };
 }
 
-export async function simpanProgresTugas(tugasId: string, userId: string, status: StatusTugas, catatan: string | null): Promise<void> {
-  const { error } = await supabase
-    .from("tugas_progres")
-    .upsert({ tugas_id: tugasId, user_id: userId, status, catatan, diperbarui_at: new Date().toISOString() }, { onConflict: "tugas_id,user_id" });
+/**
+ * Simpan status, catatan, dan lampiran. Lampiran hanya dikirim kalau ada (atau
+ * sebelumnya ada), supaya simpan status tetap jalan sebelum migrasi 0039.
+ */
+export async function simpanProgresTugas(
+  tugasId: string,
+  userId: string,
+  status: StatusTugas,
+  catatan: string | null,
+  lampiran: Lampiran[] = [],
+  adaLampiranLama = false
+): Promise<void> {
+  const baris: Record<string, unknown> = { tugas_id: tugasId, user_id: userId, status, catatan, diperbarui_at: new Date().toISOString() };
+  if (lampiran.length > 0 || adaLampiranLama) baris.lampiran = lampiran;
+  const { error } = await supabase.from("tugas_progres").upsert(baris, { onConflict: "tugas_id,user_id" });
   if (error) throw galat(error.message);
+}
+
+/* ---------- Lampiran pengerjaan (bucket privat tugas_lampiran, migrasi 0039) ---------- */
+
+/**
+ * Unggah satu file lampiran ke {user_id}/{tugas_id}/…. Gambar foto dikompres
+ * dulu (JPEG ±1 MB); kalau tidak bisa dikompres (mis. HEIC), file asli dipakai.
+ */
+export async function unggahLampiranTugas(
+  userId: string,
+  tugasId: string,
+  file: File,
+  onProgres: (persen: number) => void,
+  onKompres?: () => void
+): Promise<Lampiran> {
+  let tipe = tipeKonten(file.name);
+  if (!tipe) throw new Error(`Jenis file "${file.name}" belum didukung.`);
+  let isi: Blob = file;
+  let nama = file.name;
+  if (perluKompres(tipe)) {
+    onKompres?.();
+    try {
+      const kecil = await kompresGambar(file, SISI_MAKS_GAMBAR, TARGET_UKURAN_GAMBAR);
+      if (kecil.size < file.size) {
+        isi = kecil;
+        tipe = "image/jpeg";
+        nama = `${nama.replace(/\.[^.]+$/, "")}.jpg`;
+      }
+    } catch {
+      // tidak bisa dibaca browser ini — unggah apa adanya
+    }
+  }
+  if (isi.size > MAKS_UKURAN_FILE) {
+    throw new Error(`terlalu besar (${formatUkuran(isi.size)}), maksimal ${formatUkuran(MAKS_UKURAN_FILE)}. Kirim lewat link saja.`);
+  }
+  const path = `${userId}/${tugasId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}-${namaFileAman(nama)}`;
+  await unggahDenganProgres({ bucket: BUCKET_LAMPIRAN, path, isi, tipe, onProgres, pesanBelumAktif: PESAN_LAMPIRAN_BELUM_AKTIF });
+  return { jenis: jenisDariTipe(tipe), nama, path, ukuran: isi.size, tipe };
+}
+
+/** Hapus file lampiran dari Storage (gagal pun tidak apa-apa — paling jadi file yatim). */
+export async function hapusFileLampiran(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  await supabase.storage.from(BUCKET_LAMPIRAN).remove(paths);
+}
+
+/** URL sementara (1 jam) untuk membuka/memutar lampiran: path → URL. */
+export async function urlLampiran(paths: string[]): Promise<Record<string, string>> {
+  if (paths.length === 0) return {};
+  const { data, error } = await supabase.storage.from(BUCKET_LAMPIRAN).createSignedUrls(paths, 3600);
+  if (error || !data) return {};
+  const hasil: Record<string, string> = {};
+  for (const x of data) if (x.path && x.signedUrl) hasil[x.path] = x.signedUrl;
+  return hasil;
+}
+
+export function pathLampiran(lampiran: Lampiran[] | undefined): string[] {
+  return (lampiran ?? []).flatMap((l) => (l.path ? [l.path] : []));
 }
 
 /* ---------- Admin ---------- */
@@ -96,6 +183,10 @@ export async function ubahAktifTugas(id: string, aktif: boolean): Promise<void> 
 }
 
 export async function hapusTugas(id: string): Promise<void> {
+  // file lampiran ikut dibersihkan (baris progres terhapus otomatis lewat cascade)
+  const { data } = await supabase.from("tugas_progres").select("lampiran").eq("tugas_id", id);
+  const paths = ((data as { lampiran?: Lampiran[] }[] | null) ?? []).flatMap((r) => pathLampiran(r.lampiran));
+  await hapusFileLampiran(paths).catch(() => {});
   const { error } = await supabase.from("tugas").delete().eq("id", id);
   if (error) throw galat(error.message);
 }

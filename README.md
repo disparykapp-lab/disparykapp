@@ -126,6 +126,11 @@ npm run dev
    31. `0038_siapa_penyusup_ubah_pengaturan.sql` — host bisa mengubah mode, kategori, dan aturan
        room di lobi (mis. setelah Main Lagi) tanpa membuat room baru. Validasinya sama dengan
        membuat room; pindah ke Satu Divisi ditolak kalau ada pemain dari divisi lain.
+   32. `0039_tugas_lampiran.sql` — pegawai bisa melampirkan hasil kerja tugas: file (PDF, Office,
+       ZIP/RAR), gambar (dikompres di HP), lagu/audio, dan link. File di bucket privat
+       **tugas_lampiran** (maks. 20 MB per file, hanya pemilik & admin yang bisa membuka);
+       daftar lampiran di kolom `tugas_progres.lampiran`, divalidasi trigger. Sebelum migrasi ini
+       dijalankan, simpan status/catatan tugas tetap jalan seperti biasa.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).
