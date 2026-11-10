@@ -141,6 +141,9 @@ npm run dev
        arsip otomatis, pengingat di Beranda, tanya-jawab per pegawai (`tugas_tanya`), dan
        sematan/pin admin (`disematkan_at`: tugas tetap paling atas di daftar admin & pegawai).
        Sebelum migrasi ini dijalankan, tugas tanpa pilihan baru tetap bisa dibuat & dikerjakan.
+   35. `0042_tugas_tanya_realtime.sql` — tanya-jawab tugas tampil langsung lewat websocket
+       (Supabase Realtime): `tugas_tanya` masuk publikasi `supabase_realtime`, RLS 0041 tetap
+       berlaku. Sebelum dijalankan, pesan baru tetap sampai lewat cek berkala tiap 15 detik.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

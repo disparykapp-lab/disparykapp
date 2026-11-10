@@ -99,6 +99,19 @@ export function urutkanTugas<T extends PilihanTugas & { deadline_at: string | nu
   );
 }
 
+/**
+ * Gabungkan pesan tanya-jawab (dari muat ulang, kiriman sendiri, atau Realtime):
+ * tanpa dobel (per id), urut waktu kirim. Pesan yang sama bisa datang dua kali —
+ * dari balasan insert dan dari websocket.
+ */
+export function gabungTanya<T extends { id: number; dibuat_at: string }>(lama: T[], baru: T[]): T[] {
+  if (baru.length === 0) return lama;
+  const peta = new Map<number, T>();
+  for (const m of lama) peta.set(m.id, m);
+  for (const m of baru) peta.set(m.id, m);
+  return [...peta.values()].sort((a, b) => new Date(a.dibuat_at).getTime() - new Date(b.dibuat_at).getTime() || a.id - b.id);
+}
+
 /** Sudah disembunyikan otomatis dari pegawai (arsip N hari setelah deadline)? */
 export function sudahDiarsip(t: PilihanTugas & { deadline_at: string | null }, sekarang = Date.now()): boolean {
   if (t.arsip_hari == null || !t.deadline_at) return false;

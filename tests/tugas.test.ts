@@ -21,6 +21,7 @@ import {
   PILIHAN_BAWAAN,
   belumDiambil,
   dahulukanSematan,
+  gabungTanya,
   hitungLangkah,
   idLangkah,
   kolomPilihan,
@@ -205,4 +206,24 @@ test("pin admin: tugas disematkan paling atas (sematan terbaru dulu), di atas ya
   // daftar admin: hanya sematan yang naik, urutan lain (terbaru dibuat) tidak diubah
   assert.deepEqual(dahulukanSematan(daftar).map((x) => x.id), ["pin-baru", "pin-lama", "biasa", "mendesak"]);
   assert.deepEqual(dahulukanSematan([t("a", {}), t("b", {})]).map((x) => x.id), ["a", "b"], "tanpa sematan: urutan tetap");
+});
+
+// Tanya-jawab langsung (websocket, migrasi 0042)
+test("gabung tanya: pesan yang datang dua kali (insert + websocket) tidak dobel, urut waktu", () => {
+  const m = (id: number, menit: number) => ({ id, dibuat_at: new Date(Date.UTC(2026, 10, 10, 4, menit)).toISOString(), isi: `p${id}` });
+  const lama = [m(1, 0), m(2, 1)];
+  const hasil = gabungTanya(lama, [m(3, 2), m(2, 1)]);
+  assert.deepEqual(hasil.map((x) => x.id), [1, 2, 3]);
+  // websocket bisa datang tidak berurutan
+  assert.deepEqual(gabungTanya([m(5, 9)], [m(4, 8)]).map((x) => x.id), [4, 5]);
+  // waktu sama → urut id
+  assert.deepEqual(gabungTanya([m(7, 3)], [m(6, 3)]).map((x) => x.id), [6, 7]);
+  // tidak ada yang baru → array yang sama (tidak memicu render ulang)
+  assert.equal(gabungTanya(lama, []), lama);
+});
+
+test("migrasi 0042 memasukkan tugas_tanya ke publikasi realtime tanpa dobel", () => {
+  const sql = readFileSync(new URL("../supabase/migrations/0042_tugas_tanya_realtime.sql", import.meta.url), "utf8");
+  assert.match(sql, /alter publication supabase_realtime add table public\.tugas_tanya/);
+  assert.match(sql, /pg_publication_tables[\s\S]*tablename = 'tugas_tanya'/);
 });

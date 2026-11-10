@@ -157,10 +157,63 @@ export async function ambilTanya(tugasId: string, userId?: string): Promise<Tany
   return (data as TanyaTugas[]) ?? [];
 }
 
-/** Kirim pesan ke percakapan milik `userId` (pegawai: dirinya sendiri; admin: pegawai yang dijawab). */
-export async function kirimTanya(tugasId: string, userId: string, isi: string): Promise<void> {
-  const { error } = await supabase.from("tugas_tanya").insert({ tugas_id: tugasId, user_id: userId, isi: isi.trim() });
+/** Semua percakapan (admin; RLS membatasi pegawai ke miliknya sendiri). */
+export async function ambilSemuaTanya(): Promise<TanyaTugas[]> {
+  const { data, error } = await supabase.from("tugas_tanya").select("*").order("dibuat_at");
   if (error) throw galat(error.message);
+  return (data as TanyaTugas[]) ?? [];
+}
+
+/** Kirim pesan ke percakapan milik `userId` (pegawai: dirinya sendiri; admin: pegawai yang dijawab). */
+export async function kirimTanya(tugasId: string, userId: string, isi: string): Promise<TanyaTugas> {
+  const { data, error } = await supabase.from("tugas_tanya").insert({ tugas_id: tugasId, user_id: userId, isi: isi.trim() }).select().single();
+  if (error) throw galat(error.message);
+  return data as TanyaTugas;
+}
+
+let nomorKanal = 0;
+
+/**
+ * Dengarkan pesan tanya-jawab baru lewat websocket Supabase Realtime (migrasi 0042).
+ * `tugasId` kosong = semua tugas (admin). RLS tetap berlaku, jadi pegawai hanya
+ * menerima pesan di percakapannya sendiri. `onStatus(true)` setiap kali server siap
+ * mengirim perubahan (termasuk setelah putus lalu tersambung lagi). Mengembalikan
+ * fungsi untuk berhenti.
+ */
+export function dengarTanya(
+  tugasId: string | null,
+  onBaru: (m: TanyaTugas) => void,
+  onStatus: (tersambung: boolean) => void
+): () => void {
+  let siap = false;
+  // nama kanal unik per pemakaian: kanal yang sedang ditutup tidak terpakai ulang
+  // (mis. pasang-lepas ganda React StrictMode, atau tugas dibuka-tutup cepat)
+  const ch = supabase
+    .channel(`tugas-tanya:${tugasId ?? "semua"}:${++nomorKanal}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "tugas_tanya", ...(tugasId ? { filter: `tugas_id=eq.${tugasId}` } : {}) },
+      (payload) => onBaru(payload.new as TanyaTugas)
+    )
+    // Status SUBSCRIBED saja belum cukup: server baru benar-benar mengirim perubahan
+    // setelah pesan sistem "Subscribed to PostgreSQL" (bisa ~2 dtk kemudian saat server
+    // baru bangun), dan kalau 0042 belum dijalankan kanal tetap SUBSCRIBED tapi
+    // pesan sistemnya error — jadi pesan sistem inilah tanda "siap".
+    .on("system", {}, (p: { extension?: string; status?: string }) => {
+      if (p?.extension !== "postgres_changes") return;
+      siap = p.status === "ok";
+      onStatus(siap);
+    })
+    .subscribe((status) => {
+      // putus / gagal / ditutup: kembali ke cek berkala sampai server siap lagi
+      if (status !== "SUBSCRIBED" && siap) {
+        siap = false;
+        onStatus(false);
+      }
+    });
+  return () => {
+    void supabase.removeChannel(ch);
+  };
 }
 
 /**

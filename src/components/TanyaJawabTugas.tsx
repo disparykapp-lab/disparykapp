@@ -1,17 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
-import { ambilTanya, formatWaktu, kirimTanya, type TanyaTugas } from "../lib/tugas";
+import { formatWaktu, kirimTanya, type TanyaTugas } from "../lib/tugas";
 
 /**
  * Percakapan tanya-jawab satu tugas antara satu pegawai dan admin (migrasi 0041).
- * Dipakai pegawai (percakapannya sendiri) dan admin (per pegawai di rincian progres).
+ * Pesannya dari induk (useTanyaLangsung), yang menerima pesan baru lewat websocket
+ * (0042) — jadi balasan muncul tanpa memuat ulang halaman.
  */
 export default function TanyaJawabTugas({
   tugasId,
   pemilik,
   saya,
   namaPengirim,
-  awal,
+  pesan,
+  tersambung,
+  galatMuat,
   onTerkirim,
 }: {
   tugasId: string;
@@ -19,43 +22,32 @@ export default function TanyaJawabTugas({
   pemilik: string;
   saya: string;
   namaPengirim: (id: string | null) => string;
-  /** pesan yang sudah dimuat induk (admin); kalau tidak ada, dimuat sendiri */
-  awal?: TanyaTugas[];
-  onTerkirim?: () => void;
+  pesan: TanyaTugas[];
+  /** websocket tersambung: pesan baru masuk otomatis */
+  tersambung: boolean;
+  galatMuat?: string | null;
+  /** pesan yang baru terkirim, supaya langsung tampil tanpa menunggu websocket */
+  onTerkirim: (m: TanyaTugas) => void;
 }) {
-  const [pesan, setPesan] = useState<TanyaTugas[]>(awal ?? []);
   const [isi, setIsi] = useState("");
   const [mengirim, setMengirim] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  const daftar = useRef<HTMLUListElement>(null);
+  const terakhir = pesan.length > 0 ? pesan[pesan.length - 1].id : null;
 
-  async function muat() {
-    try {
-      setPesan(await ambilTanya(tugasId, pemilik));
-    } catch (e) {
-      setGalat(e instanceof Error ? e.message : "Gagal memuat percakapan.");
-    }
-  }
-
+  // pesan baru (dari siapa pun) → gulir ke paling bawah
   useEffect(() => {
-    if (awal) return;
-    let batal = false;
-    ambilTanya(tugasId, pemilik)
-      .then((d) => !batal && setPesan(d))
-      .catch((e: unknown) => !batal && setGalat(e instanceof Error ? e.message : "Gagal memuat percakapan."));
-    return () => {
-      batal = true;
-    };
-  }, [tugasId, pemilik, awal]);
+    const el = daftar.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [terakhir]);
 
   async function kirim() {
-    if (!isi.trim()) return;
+    if (!isi.trim() || mengirim) return;
     setMengirim(true);
     setGalat(null);
     try {
-      await kirimTanya(tugasId, pemilik, isi);
+      onTerkirim(await kirimTanya(tugasId, pemilik, isi));
       setIsi("");
-      await muat();
-      onTerkirim?.();
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Pesan gagal dikirim.");
     } finally {
@@ -68,7 +60,7 @@ export default function TanyaJawabTugas({
       {pesan.length === 0 ? (
         <p className="text-xs text-gray-400">{pemilik === saya ? "Belum ada pertanyaan. Tanyakan hal yang kurang jelas ke admin di sini." : "Belum ada percakapan."}</p>
       ) : (
-        <ul className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
+        <ul ref={daftar} aria-live="polite" className="flex max-h-72 flex-col gap-1.5 overflow-y-auto">
           {pesan.map((m) => {
             const milikSaya = m.pengirim_id === saya;
             return (
@@ -108,7 +100,13 @@ export default function TanyaJawabTugas({
           <Send className="h-4 w-4" />
         </button>
       </div>
-      {galat && <p className="text-xs text-red-600">{galat}</p>}
+      {tersambung && (
+        <p className="flex items-center gap-1.5 text-[10px] text-gray-400">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true" />
+          Langsung — pesan baru muncul otomatis
+        </p>
+      )}
+      {(galat || galatMuat) && <p className="text-xs text-red-600">{galat ?? galatMuat}</p>}
     </div>
   );
 }

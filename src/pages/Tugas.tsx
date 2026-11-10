@@ -26,6 +26,7 @@ import {
 } from "../lib/tugas";
 import { belumDiambil, hitungLangkah, pilihanStatus, sudahBeres, urutkanTugas } from "../lib/tugasAturan";
 import { folderLampiranPegawai, type Lampiran } from "../lib/tugasLampiranMeta";
+import { useTanyaLangsung } from "../lib/useTanyaLangsung";
 
 type Tab = "belum" | "selesai" | "semua";
 
@@ -578,17 +579,38 @@ function FormProgres({
         </button>
       )}
 
-      {tugas.tanya_jawab !== false && profile && (
-        <details className="group rounded-lg border border-gray-100 p-3">
-          <summary className="cursor-pointer list-none text-xs font-semibold text-brand-text marker:content-none">
-            💬 Tanya admin tentang tugas ini <span className="text-gray-400 group-open:hidden">▾</span>
-          </summary>
-          <div className="mt-3">
-            <TanyaJawabTugas tugasId={tugas.id} pemilik={profile.id} saya={profile.id} namaPengirim={() => "Admin"} />
-          </div>
-        </details>
-      )}
+      {tugas.tanya_jawab !== false && profile && <TanyaAdmin tugasId={tugas.id} saya={profile.id} />}
     </div>
+  );
+}
+
+/** "Tanya admin" di form tugas: balasan admin masuk langsung lewat websocket (0042). */
+function TanyaAdmin({ tugasId, saya }: { tugasId: string; saya: string }) {
+  const { pesan, tersambung, galat, tambah } = useTanyaLangsung({ tugasId, pemilik: saya });
+  const terakhir = pesan[pesan.length - 1];
+  const dijawab = !!terakhir && terakhir.pengirim_id !== saya;
+  return (
+    <details className="group rounded-lg border border-gray-100 p-3">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold text-brand-text marker:content-none">
+        <span>
+          💬 Tanya admin tentang tugas ini{pesan.length > 0 && ` (${pesan.length})`}
+        </span>
+        {dijawab && <Chip warna="biru">Dijawab admin</Chip>}
+        <span className="text-gray-400 group-open:hidden">▾</span>
+      </summary>
+      <div className="mt-3">
+        <TanyaJawabTugas
+          tugasId={tugasId}
+          pemilik={saya}
+          saya={saya}
+          namaPengirim={() => "Admin"}
+          pesan={pesan}
+          tersambung={tersambung}
+          galatMuat={galat}
+          onTerkirim={tambah}
+        />
+      </div>
+    </details>
   );
 }
 
