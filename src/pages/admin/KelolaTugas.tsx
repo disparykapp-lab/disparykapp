@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../../components/HeaderHalaman";
-import { DaftarLampiran } from "../../components/LampiranTugas";
+import { DaftarLampiran, InputLampiran } from "../../components/LampiranTugas";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import { teksDenganLink } from "../../lib/linkify";
@@ -9,9 +9,11 @@ import {
   ambilFiturTugasUndangan,
   ambilSemuaTugas,
   formatWaktu,
+  hapusFileLampiran,
   hapusTugas,
   infoDeadline,
   keInputWaktu,
+  pathLampiran,
   sasaranPegawai,
   simpanFiturTugasUndangan,
   simpanTugas,
@@ -23,6 +25,7 @@ import {
   type StatusTugas,
   type TugasDenganPembuat,
 } from "../../lib/tugas";
+import { folderLampiranMateri, type Lampiran } from "../../lib/tugasLampiranMeta";
 import type { Divisi, Profile } from "../../types/database";
 
 type Filter = "semua" | "aktif" | "nonaktif";
@@ -187,6 +190,7 @@ export default function KelolaTugas() {
                     <Lencana warna="abu">{labelSasaran(t, divisi, pegawai)}</Lencana>
                     {deadline && <Lencana warna={deadline.nada === "lewat" ? "merah" : deadline.nada === "dekat" ? "oranye" : "abu"}>⏰ {deadline.teks}</Lencana>}
                     {t.mulai_at && new Date(t.mulai_at) > new Date() && <Lencana warna="biru">Tampil {formatWaktu(t.mulai_at)}</Lencana>}
+                    {(t.lampiran?.length ?? 0) > 0 && <Lencana warna="biru">📎 {t.lampiran!.length} lampiran</Lencana>}
                   </div>
                 </div>
                 <Saklar nyala={t.aktif} onUbah={() => void ubahAktif(t)} label={`Aktifkan ${t.judul}`} />
@@ -255,6 +259,12 @@ function RincianProgres({ tugas, target, progres }: { tugas: TugasDenganPembuat;
   return (
     <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
       {tugas.deskripsi && <p className="whitespace-pre-line rounded-lg bg-gray-50 p-3 text-xs text-gray-700">{teksDenganLink(tugas.deskripsi)}</p>}
+      {(tugas.lampiran?.length ?? 0) > 0 && (
+        <div>
+          <p className="mb-1.5 text-xs font-semibold text-gray-500">Lampiran tugas</p>
+          <DaftarLampiran lampiran={tugas.lampiran} />
+        </div>
+      )}
       {tugas.deadline_at && <p className="text-xs text-gray-500">Deadline: {formatWaktu(tugas.deadline_at)}</p>}
       {urut.length === 0 && <p className="text-xs text-gray-400">Belum ada pegawai aktif yang menjadi sasaran tugas ini.</p>}
       <ul className="flex flex-col divide-y divide-gray-100">
@@ -313,6 +323,26 @@ function FormTugas({
   const [cari, setCari] = useState("");
   const [menyimpan, setMenyimpan] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  // Tugas baru dapat id di sini, supaya lampirannya bisa diunggah ke materi/{id}/ sebelum disimpan.
+  const [idTugas] = useState(() => awal?.id ?? crypto.randomUUID());
+  const [lampiran, setLampiran] = useState<Lampiran[]>(awal?.lampiran ?? []);
+  const [mengunggah, setMengunggah] = useState(false);
+  // File yang diunggah di form ini tapi belum tersimpan: dihapus kalau form ditutup tanpa simpan.
+  const unggahanBaru = useRef(new Set<string>());
+  const tersimpan = useRef(false);
+  useEffect(() => {
+    const baru = unggahanBaru.current;
+    return () => {
+      if (!tersimpan.current) void hapusFileLampiran([...baru]);
+    };
+  }, []);
+  const aturSibuk = useCallback((sibuk: boolean) => setMengunggah(sibuk), []);
+
+  function hapusLampiran(l: Lampiran) {
+    setLampiran((daftar) => daftar.filter((x) => x !== l));
+    // file yang baru diunggah langsung dibuang; file lama baru dihapus setelah disimpan
+    if (l.path && unggahanBaru.current.delete(l.path)) void hapusFileLampiran([l.path]);
+  }
 
   const jumlahSasaran = sasaranPegawai({ sasaran, divisi_ids: divisiIds, user_ids: userIds }, pegawai).length;
   const pegawaiTersaring = pegawai.filter((p) => p.nama.toLowerCase().includes(cari.trim().toLowerCase()));
@@ -337,9 +367,15 @@ function FormTugas({
       mulai_at: pakaiMulai ? new Date(mulai).toISOString() : null,
       tampilkan_pembuat: tampilkanPembuat,
     };
+    const lama = pathLampiran(awal?.lampiran);
+    // kolom lampiran hanya dikirim kalau dipakai, supaya simpan tetap jalan sebelum migrasi 0040
+    if (lampiran.length > 0 || lama.length > 0) isi.lampiran = lampiran;
     setMenyimpan(true);
     try {
-      await simpanTugas(awal?.id ?? null, isi);
+      await simpanTugas(awal?.id ?? null, isi, idTugas);
+      tersimpan.current = true;
+      const dipakai = new Set(pathLampiran(lampiran));
+      void hapusFileLampiran(lama.filter((p) => !dipakai.has(p)));
       onTersimpan(!awal);
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal menyimpan tugas.");
@@ -365,6 +401,16 @@ function FormTugas({
         </span>
         <textarea value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} rows={3} placeholder="Detail tugas, tautan berkas, dan sebagainya." className={kelasInput} />
       </label>
+
+      <InputLampiran
+        folder={folderLampiranMateri(idTugas)}
+        label="Lampiran untuk pegawai (opsional) — mis. template, contoh desain, lagu acuan"
+        nilai={lampiran}
+        onUbah={setLampiran}
+        onSibuk={aturSibuk}
+        onUnggahBaru={(path) => unggahanBaru.current.add(path)}
+        onHapus={hapusLampiran}
+      />
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-semibold text-gray-700">Ditujukan untuk</span>
@@ -432,8 +478,13 @@ function FormTugas({
         <button type="button" onClick={onBatal} className="min-h-[44px] flex-1 rounded-lg border border-gray-300 text-sm font-semibold text-brand-text">
           Batal
         </button>
-        <button type="button" onClick={() => void simpan()} disabled={menyimpan} className="min-h-[44px] flex-1 rounded-lg bg-brand-masuk text-sm font-semibold text-white disabled:opacity-60">
-          {menyimpan ? "Menyimpan..." : awal ? "Simpan perubahan" : "Buat tugas"}
+        <button
+          type="button"
+          onClick={() => void simpan()}
+          disabled={menyimpan || mengunggah}
+          className="min-h-[44px] flex-1 rounded-lg bg-brand-masuk text-sm font-semibold text-white disabled:opacity-60"
+        >
+          {menyimpan ? "Menyimpan..." : mengunggah ? "Tunggu unggahan selesai..." : awal ? "Simpan perubahan" : "Buat tugas"}
         </button>
       </div>
     </section>

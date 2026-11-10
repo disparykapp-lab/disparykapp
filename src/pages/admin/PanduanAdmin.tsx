@@ -258,7 +258,8 @@ export default function PanduanAdmin() {
       <Bagian judul="📋 Kelola Tugas">
         <Langkah no={1}>
           Buka Kelola → Tugas, tekan "+ Buat tugas baru", lalu pilih sasaran: semua pegawai, divisi
-          tertentu, atau pegawai tertentu.
+          tertentu, atau pegawai tertentu. Kalau perlu, lampirkan materi untuk pegawai lewat tombol
+          File / Gambar / Lagu / Link (mis. template, contoh desain, lagu acuan).
         </Langkah>
         <Langkah no={2}>
           Tekan "Lihat progres" untuk melihat status, catatan, dan <strong>lampiran</strong> tiap

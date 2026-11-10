@@ -16,6 +16,10 @@ export interface Lampiran {
   tipe?: string;
 }
 
+/** Folder file di bucket tugas_lampiran: hasil kerja pegawai (0039), atau materi dari pemberi tugas (0040). */
+export const folderLampiranPegawai = (userId: string, tugasId: string) => `${userId}/${tugasId}`;
+export const folderLampiranMateri = (tugasId: string) => `materi/${tugasId}`;
+
 export const MAKS_LAMPIRAN = 8;
 export const MAKS_UKURAN_FILE = 20 * 1024 * 1024;
 /** Gambar dikecilkan ke sisi terpanjang ini & sekitar ukuran ini (JPEG) sebelum diunggah. */

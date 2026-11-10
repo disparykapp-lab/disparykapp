@@ -119,8 +119,9 @@ export default function Panduan() {
 
       <Bagian judul="📋 Tugas dari Admin">
         <Langkah no={1}>
-          Buka menu <strong>Tugas</strong> di Beranda, lalu ketuk tugasnya untuk melihat detail dan
-          deadline.
+          Buka menu <strong>Tugas</strong> di Beranda, lalu ketuk tugasnya untuk melihat detail,
+          deadline, dan <strong>lampiran dari pemberi tugas</strong> (mis. template, contoh desain,
+          lagu acuan — ketuk untuk membuka atau memutar).
         </Langkah>
         <Langkah no={2}>
           Pilih status <strong>Belum / Selesai / Kendala</strong> dan tulis catatan kalau perlu.

@@ -131,6 +131,10 @@ npm run dev
        **tugas_lampiran** (maks. 20 MB per file, hanya pemilik & admin yang bisa membuka);
        daftar lampiran di kolom `tugas_progres.lampiran`, divalidasi trigger. Sebelum migrasi ini
        dijalankan, simpan status/catatan tugas tetap jalan seperti biasa.
+   33. `0040_tugas_lampiran_admin.sql` — pemberi tugas (admin) juga bisa melampirkan materi ke
+       tugas (template, contoh desain, lagu acuan, link). Kolom `tugas.lampiran`, file di folder
+       `materi/{tugas_id}/` bucket yang sama; hanya admin yang mengunggah, pegawai sasaran bisa
+       membukanya selama tugas itu tampil untuknya.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

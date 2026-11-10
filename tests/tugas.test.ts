@@ -7,6 +7,8 @@ import {
   MAKS_UKURAN_FILE,
   TIPE_PER_EKSTENSI,
   cekFileLampiran,
+  folderLampiranMateri,
+  folderLampiranPegawai,
   jenisDariTipe,
   judulLink,
   namaFileAman,
@@ -73,4 +75,14 @@ test("aturan di migrasi 0039 sama dengan aplikasi", () => {
   assert.deepEqual([...new Set(Object.values(TIPE_PER_EKSTENSI))].sort(), [...diBucket].sort(), "tipe bucket = tipe yang dikirim aplikasi");
   assert.ok(sql.includes(`jsonb_array_length(new.lampiran) > ${MAKS_LAMPIRAN}`), "batas jumlah lampiran sama");
   assert.ok(!diBucket.has("image/svg+xml") && !diBucket.has("text/html"), "tidak menerima jenis yang bisa menjalankan skrip");
+});
+
+test("lampiran dari pemberi tugas (0040): folder & aturan sama dengan aplikasi", () => {
+  const sql = readFileSync(new URL("../supabase/migrations/0040_tugas_lampiran_admin.sql", import.meta.url), "utf8");
+  assert.equal(folderLampiranMateri("t1"), "materi/t1");
+  assert.equal(folderLampiranPegawai("u1", "t1"), "u1/t1");
+  assert.ok(sql.includes("'materi/' || new.id::text || '/'"), "trigger materi memakai folder materi/{tugas_id}/");
+  assert.ok(sql.includes("new.user_id::text || '/' || new.tugas_id::text || '/'"), "trigger pegawai tetap {user_id}/{tugas_id}/");
+  assert.ok(sql.includes("(storage.foldername(name))[1] = 'materi' and is_admin()"), "hanya admin yang mengunggah materi");
+  assert.ok(sql.includes(`jsonb_array_length(p_lampiran) > ${MAKS_LAMPIRAN}`), "batas jumlah lampiran sama");
 });

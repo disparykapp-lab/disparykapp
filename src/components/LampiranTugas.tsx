@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FileText, ImageIcon, Link2, LoaderCircle, Music, Paperclip, X } from "lucide-react";
-import { unggahLampiranTugas, urlLampiran } from "../lib/tugas";
+import { unggahLampiran, urlLampiran } from "../lib/tugas";
 import {
   MAKS_LAMPIRAN,
   MAKS_UKURAN_FILE,
@@ -24,21 +24,22 @@ interface Antrian {
 }
 
 /**
- * Isian lampiran pengerjaan tugas: file, gambar (dikompres dulu), lagu, link.
- * File langsung diunggah begitu dipilih (dengan progres); daftarnya baru
- * tersimpan ke database saat form induk disimpan.
+ * Isian lampiran tugas — hasil kerja pegawai atau materi dari pemberi tugas:
+ * file, gambar (dikompres dulu), lagu, link. File langsung diunggah begitu
+ * dipilih (dengan progres); daftarnya baru tersimpan saat form induk disimpan.
  */
 export function InputLampiran({
-  userId,
-  tugasId,
+  folder,
+  label,
   nilai,
   onUbah,
   onSibuk,
   onUnggahBaru,
   onHapus,
 }: {
-  userId: string;
-  tugasId: string;
+  /** folderLampiranPegawai / folderLampiranMateri */
+  folder: string;
+  label: string;
   nilai: Lampiran[];
   onUbah: (lampiran: Lampiran[]) => void;
   onSibuk: (sibuk: boolean) => void;
@@ -81,7 +82,7 @@ export function InputLampiran({
       setAntrian((a) => [...a, { id, nama: f.name, tahap: "unggah", persen: 0 }]);
       const ubahItem = (x: Partial<Antrian>) => setAntrian((a) => a.map((it) => (it.id === id ? { ...it, ...x } : it)));
       try {
-        const l = await unggahLampiranTugas(userId, tugasId, f, (persen) => ubahItem({ tahap: "unggah", persen }), () => ubahItem({ tahap: "kompres" }));
+        const l = await unggahLampiran(folder, f, (persen) => ubahItem({ tahap: "unggah", persen }), () => ubahItem({ tahap: "kompres" }));
         onUnggahBaru(l.path!);
         onUbah([...terkini.current, l]);
         terkini.current = [...terkini.current, l];
@@ -112,7 +113,7 @@ export function InputLampiran({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium text-gray-500">Lampiran hasil kerja (opsional)</span>
+      <span className="text-xs font-medium text-gray-500">{label}</span>
 
       <DaftarLampiran lampiran={nilai} onHapus={onHapus} />
 

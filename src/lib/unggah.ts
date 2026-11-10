@@ -71,6 +71,8 @@ export async function unggahDenganProgres(opsi: {
   onProgres: (persen: number) => void;
   /** pesan kalau bucket belum ada (migrasi belum dijalankan) */
   pesanBelumAktif: string;
+  /** pesan kalau ditolak aturan akses (403) */
+  pesanDitolak?: string;
 }): Promise<void> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -93,6 +95,8 @@ export async function unggahDenganProgres(opsi: {
         resolve();
       } else if (xhr.status === 404 || /bucket not found/i.test(xhr.responseText)) {
         reject(new Error(opsi.pesanBelumAktif));
+      } else if (xhr.status === 403 || /row-level security/i.test(xhr.responseText)) {
+        reject(new Error(opsi.pesanDitolak ?? "Kamu tidak punya izin mengunggah lampiran untuk tugas ini."));
       } else if (xhr.status === 413 || /maximum allowed size|too large/i.test(xhr.responseText)) {
         reject(new Error("File terlalu besar untuk diunggah."));
       } else if (/mime type/i.test(xhr.responseText)) {
