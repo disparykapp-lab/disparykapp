@@ -43,6 +43,7 @@ import {
   type LangkahTugas,
 } from "../../lib/tugasAturan";
 import { folderLampiranMateri, type Lampiran } from "../../lib/tugasLampiranMeta";
+import { useTanyaLangsung } from "../../lib/useTanyaLangsung";
 import type { Divisi, Profile } from "../../types/database";
 
 type Filter = "semua" | "aktif" | "nonaktif";
@@ -52,7 +53,8 @@ export default function KelolaTugas() {
   const [tugas, setTugas] = useState<TugasDenganPembuat[]>([]);
   const [progres, setProgres] = useState<ProgresTugas[]>([]);
   const [dibaca, setDibaca] = useState<Dibaca[]>([]);
-  const [tanya, setTanya] = useState<TanyaTugas[]>([]);
+  // semua percakapan tanya-jawab; pesan baru dari pegawai masuk langsung lewat websocket (0042)
+  const { pesan: tanya, tersambung: tanyaTersambung, tambah: tambahTanya } = useTanyaLangsung({ muatAwal: false });
   const [pegawai, setPegawai] = useState<Profile[]>([]);
   const [divisi, setDivisi] = useState<Divisi[]>([]);
   const [fiturUndangan, setFiturUndangan] = useState<boolean | null>(null);
@@ -64,18 +66,18 @@ export default function KelolaTugas() {
   const [form, setForm] = useState<string | null>(null);
   const [rinci, setRinci] = useState<string | null>(null);
 
-  async function muat() {
+  const muat = useCallback(async () => {
     try {
       const d = await ambilSemuaTugas();
       setTugas(d.tugas);
       setProgres(d.progres);
       setDibaca(d.dibaca);
-      setTanya(d.tanya);
+      tambahTanya(d.tanya);
       setGalat(null);
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal memuat tugas.");
     }
-  }
+  }, [tambahTanya]);
 
   useEffect(() => {
     Promise.all([
@@ -84,7 +86,7 @@ export default function KelolaTugas() {
       supabase.from("divisi").select("*").order("nama").then(({ data }) => setDivisi((data as Divisi[]) ?? [])),
       ambilFiturTugasUndangan().then(setFiturUndangan),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [muat]);
 
   useEffect(() => {
     if (!pesan) return;
@@ -222,6 +224,8 @@ export default function KelolaTugas() {
             progres={progresPerTugas[t.id] ?? []}
             dibaca={dibaca.filter((d) => d.tugas_id === t.id)}
             tanya={tanya.filter((q) => q.tugas_id === t.id)}
+            tanyaTersambung={tanyaTersambung}
+            onTanyaTerkirim={tambahTanya}
             rinci={rinci === t.id}
             onRinci={() => setRinci(rinci === t.id ? null : t.id)}
             onUbahAktif={() => void ubahAktif(t)}
@@ -267,6 +271,8 @@ function KartuTugasAdmin({
   progres: prog,
   dibaca,
   tanya,
+  tanyaTersambung,
+  onTanyaTerkirim,
   rinci,
   onRinci,
   onUbahAktif,
@@ -283,6 +289,8 @@ function KartuTugasAdmin({
   progres: ProgresTugas[];
   dibaca: Dibaca[];
   tanya: TanyaTugas[];
+  tanyaTersambung: boolean;
+  onTanyaTerkirim: (m: TanyaTugas) => void;
   rinci: boolean;
   onRinci: () => void;
   onUbahAktif: () => void;
@@ -379,7 +387,20 @@ function KartuTugasAdmin({
         </TombolKecil>
       </div>
 
-      {rinci && <RincianProgres tugas={t} target={target} progres={prog} dibaca={dibaca} tanya={tanya} pegawai={pegawai} onPesan={onPesan} onMuat={onMuat} />}
+      {rinci && (
+        <RincianProgres
+          tugas={t}
+          target={target}
+          progres={prog}
+          dibaca={dibaca}
+          tanya={tanya}
+          tanyaTersambung={tanyaTersambung}
+          onTanyaTerkirim={onTanyaTerkirim}
+          pegawai={pegawai}
+          onPesan={onPesan}
+          onMuat={onMuat}
+        />
+      )}
     </article>
   );
 }
@@ -402,6 +423,8 @@ function RincianProgres({
   progres,
   dibaca,
   tanya,
+  tanyaTersambung,
+  onTanyaTerkirim,
   pegawai,
   onPesan,
   onMuat,
@@ -411,6 +434,8 @@ function RincianProgres({
   progres: ProgresTugas[];
   dibaca: Dibaca[];
   tanya: TanyaTugas[];
+  tanyaTersambung: boolean;
+  onTanyaTerkirim: (m: TanyaTugas) => void;
   pegawai: Profile[];
   onPesan: (pesan: string) => void;
   onMuat: () => void;
@@ -481,12 +506,17 @@ function RincianProgres({
               )}
               {/* hanya pegawai yang sudah bertanya — supaya rincian 15 pegawai tidak penuh kotak kosong */}
               {profile && pesanPegawai.length > 0 && (
-                <details className="rounded-lg bg-gray-50 px-3 py-2" open={pesanPegawai.length > 0 && pesanPegawai[pesanPegawai.length - 1].pengirim_id === p.id}>
-                  <summary className="cursor-pointer text-xs font-semibold text-brand-text">💬 Tanya-jawab ({pesanPegawai.length})</summary>
-                  <div className="mt-2">
-                    <TanyaJawabTugas tugasId={tugas.id} pemilik={p.id} saya={profile.id} namaPengirim={namaPengirim} awal={pesanPegawai} onTerkirim={onMuat} />
-                  </div>
-                </details>
+                <PercakapanPegawai pesan={pesanPegawai}>
+                  <TanyaJawabTugas
+                    tugasId={tugas.id}
+                    pemilik={p.id}
+                    saya={profile.id}
+                    namaPengirim={namaPengirim}
+                    pesan={pesanPegawai}
+                    tersambung={tanyaTersambung}
+                    onTerkirim={onTanyaTerkirim}
+                  />
+                </PercakapanPegawai>
               )}
             </li>
           );
@@ -498,12 +528,44 @@ function RincianProgres({
           {penanyaLain.map((id) => (
             <div key={id} className="rounded-lg bg-gray-50 px-3 py-2">
               <p className="mb-2 text-xs font-semibold text-brand-text">{namaPengirim(id)}</p>
-              <TanyaJawabTugas tugasId={tugas.id} pemilik={id} saya={profile.id} namaPengirim={namaPengirim} awal={tanya.filter((q) => q.user_id === id)} onTerkirim={onMuat} />
+              <TanyaJawabTugas
+                tugasId={tugas.id}
+                pemilik={id}
+                saya={profile.id}
+                namaPengirim={namaPengirim}
+                pesan={tanya.filter((q) => q.user_id === id)}
+                tersambung={tanyaTersambung}
+                onTerkirim={onTanyaTerkirim}
+              />
             </div>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Tanya-jawab satu pegawai di rincian progres. Terbuka kalau pertanyaannya belum
+ * dibalas, dan terbuka sendiri saat pertanyaan baru masuk (websocket) — tapi tidak
+ * menutup sendiri setelah admin membalas.
+ */
+function PercakapanPegawai({ pesan, children }: { pesan: TanyaTugas[]; children: ReactNode }) {
+  const terakhir = pesan[pesan.length - 1];
+  const perluDibalas = terakhir.pengirim_id === terakhir.user_id;
+  const [buka, setBuka] = useState(perluDibalas);
+  const [idTerakhir, setIdTerakhir] = useState(terakhir.id);
+  if (terakhir.id !== idTerakhir) {
+    setIdTerakhir(terakhir.id);
+    if (perluDibalas) setBuka(true);
+  }
+  return (
+    <details className="rounded-lg bg-gray-50 px-3 py-2" open={buka} onToggle={(e) => setBuka(e.currentTarget.open)}>
+      <summary className="cursor-pointer text-xs font-semibold text-brand-text">
+        💬 Tanya-jawab ({pesan.length}){perluDibalas && <span className="ml-1.5 text-red-600">· belum dibalas</span>}
+      </summary>
+      <div className="mt-2">{children}</div>
+    </details>
   );
 }
 
