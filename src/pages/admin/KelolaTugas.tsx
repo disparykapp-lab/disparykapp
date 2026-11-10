@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../../components/HeaderHalaman";
+import { DaftarLampiran } from "../../components/LampiranTugas";
 import Loading from "../../components/Loading";
 import { supabase } from "../../lib/supabase";
 import { teksDenganLink } from "../../lib/linkify";
@@ -262,9 +263,14 @@ function RincianProgres({ tugas, target, progres }: { tugas: TugasDenganPembuat;
           const s: StatusTugas = pr?.status ?? "belum";
           return (
             <li key={p.id} className="flex items-start justify-between gap-3 py-2">
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-brand-text">{p.nama}</p>
                 {pr?.catatan && <p className="text-xs text-gray-500">“{pr.catatan}”</p>}
+                {(pr?.lampiran?.length ?? 0) > 0 && (
+                  <div className="mt-1.5">
+                    <DaftarLampiran lampiran={pr!.lampiran} />
+                  </div>
+                )}
                 {pr && pr.status !== "belum" && <p className="text-[11px] text-gray-400">{formatWaktu(pr.diperbarui_at)}</p>}
               </div>
               <Lencana warna={s === "selesai" ? "hijau" : s === "kendala" ? "merah" : "abu"}>{LABEL_STATUS_TUGAS[s]}</Lencana>

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderHalaman from "../components/HeaderHalaman";
+import { InputLampiran } from "../components/LampiranTugas";
 import Loading from "../components/Loading";
 import { useAuth } from "../contexts/AuthContext";
 import { teksDenganLink } from "../lib/linkify";
@@ -9,13 +10,16 @@ import {
   ambilFiturTugasUndangan,
   ambilTugasUmumSaya,
   formatWaktu,
+  hapusFileLampiran,
   infoDeadline,
+  pathLampiran,
   simpanProgresTugas,
   LABEL_STATUS_TUGAS,
   type ProgresTugas,
   type StatusTugas,
   type TugasDenganPembuat,
 } from "../lib/tugas";
+import type { Lampiran } from "../lib/tugasLampiranMeta";
 
 type Tab = "belum" | "selesai" | "semua";
 
@@ -230,6 +234,9 @@ function KartuTugas({
               {tugas.sasaran === "personal" ? "Khusus kamu" : tugas.sasaran === "divisi" ? "Divisi kamu" : "Semua pegawai"}
             </span>
             {tugas.tampilkan_pembuat && tugas.pembuat && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">Dari {tugas.pembuat.nama}</span>}
+            {(progres?.lampiran?.length ?? 0) > 0 && (
+              <span className="rounded-full bg-blue-50 px-2 py-0.5 font-semibold text-brand-info">📎 {progres!.lampiran!.length} lampiran</span>
+            )}
           </div>
         </div>
         <BadgeStatus status={status} />
@@ -243,15 +250,37 @@ function FormProgres({ tugas, progres, onTersimpan }: { tugas: TugasDenganPembua
   const { profile } = useAuth();
   const [status, setStatus] = useState<StatusTugas>(progres?.status ?? "belum");
   const [catatan, setCatatan] = useState(progres?.catatan ?? "");
+  const [lampiran, setLampiran] = useState<Lampiran[]>(progres?.lampiran ?? []);
+  const [mengunggah, setMengunggah] = useState(false);
   const [menyimpan, setMenyimpan] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  // File yang diunggah di form ini tapi belum tersimpan: dihapus kalau form ditutup tanpa Simpan.
+  const unggahanBaru = useRef(new Set<string>());
+  const tersimpan = useRef(false);
+  useEffect(() => {
+    const baru = unggahanBaru.current;
+    return () => {
+      if (!tersimpan.current) void hapusFileLampiran([...baru]);
+    };
+  }, []);
+  const aturSibuk = useCallback((sibuk: boolean) => setMengunggah(sibuk), []);
+
+  function hapusLampiran(l: Lampiran) {
+    setLampiran((daftar) => daftar.filter((x) => x !== l));
+    // file yang baru diunggah langsung dibuang; file lama baru dihapus setelah Simpan
+    if (l.path && unggahanBaru.current.delete(l.path)) void hapusFileLampiran([l.path]);
+  }
 
   async function simpan() {
     if (!profile) return;
     setMenyimpan(true);
     setGalat(null);
     try {
-      await simpanProgresTugas(tugas.id, profile.id, status, catatan.trim() || null);
+      const lama = pathLampiran(progres?.lampiran);
+      await simpanProgresTugas(tugas.id, profile.id, status, catatan.trim() || null, lampiran, lama.length > 0);
+      tersimpan.current = true;
+      const dipakai = new Set(pathLampiran(lampiran));
+      void hapusFileLampiran(lama.filter((p) => !dipakai.has(p)));
       onTersimpan();
     } catch (e) {
       setGalat(e instanceof Error ? e.message : "Gagal menyimpan.");
@@ -311,15 +340,27 @@ function FormProgres({ tugas, progres, onTersimpan }: { tugas: TugasDenganPembua
         />
       </label>
 
+      {profile && (
+        <InputLampiran
+          userId={profile.id}
+          tugasId={tugas.id}
+          nilai={lampiran}
+          onUbah={setLampiran}
+          onSibuk={aturSibuk}
+          onUnggahBaru={(path) => unggahanBaru.current.add(path)}
+          onHapus={hapusLampiran}
+        />
+      )}
+
       {galat && <p className="text-xs text-red-600">{galat}</p>}
 
       <button
         type="button"
         onClick={() => void simpan()}
-        disabled={menyimpan}
+        disabled={menyimpan || mengunggah}
         className="min-h-[44px] rounded-lg bg-brand-masuk text-sm font-semibold text-white disabled:opacity-60"
       >
-        {menyimpan ? "Menyimpan..." : "Simpan"}
+        {menyimpan ? "Menyimpan..." : mengunggah ? "Tunggu unggahan selesai..." : "Simpan"}
       </button>
     </div>
   );

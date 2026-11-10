@@ -255,6 +255,23 @@ export default function PanduanAdmin() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="📋 Kelola Tugas">
+        <Langkah no={1}>
+          Buka Kelola → Tugas, tekan "+ Buat tugas baru", lalu pilih sasaran: semua pegawai, divisi
+          tertentu, atau pegawai tertentu.
+        </Langkah>
+        <Langkah no={2}>
+          Tekan "Lihat progres" untuk melihat status, catatan, dan <strong>lampiran</strong> tiap
+          pegawai: gambar tampil sebagai thumbnail, lagu bisa langsung diputar, file dan link
+          dibuka di tab baru.
+        </Langkah>
+        <Catatan>
+          File lampiran disimpan privat (hanya pegawai pemiliknya dan admin yang bisa membuka) dan
+          ikut terhapus saat tugasnya dihapus. Batasnya 20 MB per file; gambar dikompres otomatis di
+          HP pegawai.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="✉️ Distribusi Undangan">
         <Langkah no={1}>
           Buka Kelola → Distribusi Undangan. Halaman ini dibagi jadi{" "}
