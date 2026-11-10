@@ -121,7 +121,9 @@ export default function Panduan() {
         <Langkah no={1}>
           Buka menu <strong>Tugas</strong> di Beranda, lalu ketuk tugasnya untuk melihat detail,
           deadline, dan <strong>lampiran dari pemberi tugas</strong> (mis. template, contoh desain,
-          lagu acuan — ketuk untuk membuka atau memutar).
+          lagu acuan — ketuk untuk membuka atau memutar). File Word (.docx) bisa langsung dibaca
+          lewat tombol <strong>Lihat</strong> tanpa aplikasi Word; tombol <strong>Unduh</strong>{" "}
+          menyimpan file dengan nama aslinya.
         </Langkah>
         <Langkah no={2}>
           Pilih status <strong>Belum / Selesai / Kendala</strong> dan tulis catatan kalau perlu.

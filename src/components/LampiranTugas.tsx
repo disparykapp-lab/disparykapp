@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { FileText, ImageIcon, Link2, LoaderCircle, Music, Paperclip, X } from "lucide-react";
-import { unggahLampiran, urlLampiran } from "../lib/tugas";
+import { Download, Eye, FileText, ImageIcon, Link2, LoaderCircle, Music, Paperclip, X } from "lucide-react";
+import { unggahLampiran, urlLampiran, urlUnduhLampiran } from "../lib/tugas";
+import PratinjauDocx from "./PratinjauDocx";
 import {
   MAKS_LAMPIRAN,
   MAKS_UKURAN_FILE,
@@ -196,14 +197,30 @@ function TombolJenis({ ikon, label, disabled, onKlik }: { ikon: ReactNode; label
   );
 }
 
+/** .docx bisa dibaca langsung di aplikasi (lib/docx); file lain dibuka/diunduh. */
+const bisaDilihat = (l: Lampiran) => l.jenis === "file" && !!l.path && /\.docx$/i.test(l.nama);
+
 /**
- * Daftar lampiran: gambar sebagai thumbnail, lagu bisa diputar, file & link
- * dibuka di tab baru. File privat dibuka lewat signed URL (1 jam).
+ * Daftar lampiran: gambar sebagai thumbnail, lagu bisa diputar, .docx dibaca di
+ * aplikasi, file & link dibuka di tab baru. File privat dibuka lewat signed URL
+ * (1 jam); tombol Unduh membuat link baru dengan nama file asli setiap ditekan.
  */
 export function DaftarLampiran({ lampiran, onHapus }: { lampiran: Lampiran[] | undefined; onHapus?: (l: Lampiran) => void }) {
   const daftar = lampiran ?? [];
   const kunci = daftar.flatMap((l) => (l.path ? [l.path] : [])).join("|");
   const [url, setUrl] = useState<Record<string, string>>({});
+  const [pratinjau, setPratinjau] = useState<Lampiran | null>(null);
+  const [galat, setGalat] = useState<string | null>(null);
+
+  async function unduh(l: Lampiran) {
+    setGalat(null);
+    try {
+      // Content-Disposition: attachment → halaman tidak berpindah, file tersimpan dengan nama aslinya
+      window.location.assign(await urlUnduhLampiran(l.path!, l.nama));
+    } catch (e) {
+      setGalat(e instanceof Error ? e.message : "File tidak bisa diunduh.");
+    }
+  }
 
   useEffect(() => {
     if (!kunci) return;
@@ -217,49 +234,78 @@ export function DaftarLampiran({ lampiran, onHapus }: { lampiran: Lampiran[] | u
   if (daftar.length === 0) return null;
 
   return (
-    <ul className="flex flex-col gap-1.5">
-      {daftar.map((l, i) => {
-        const href = l.jenis === "link" ? l.url : l.path ? url[l.path] : undefined;
-        return (
-          <li key={`${l.path ?? l.url}-${i}`} className="flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-2">
-            <div className="flex items-center gap-2">
-              {l.jenis === "gambar" && href ? (
-                <a href={href} target="_blank" rel="noreferrer" className="shrink-0">
-                  <img src={href} alt="" className="h-12 w-12 rounded-md object-cover" />
-                </a>
-              ) : (
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white text-brand-masuk" aria-hidden="true">
-                  {l.jenis === "link" ? <Link2 className="h-4 w-4" /> : l.jenis === "audio" ? <Music className="h-4 w-4" /> : l.jenis === "gambar" ? <ImageIcon className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                </span>
-              )}
-              <div className="min-w-0 flex-1">
-                {href ? (
-                  <a href={href} target="_blank" rel="noopener noreferrer" className="block truncate text-xs font-semibold text-brand-info underline-offset-2 hover:underline">
-                    {l.nama}
+    <>
+      <ul className="flex flex-col gap-1.5">
+        {daftar.map((l, i) => {
+          const href = l.jenis === "link" ? l.url : l.path ? url[l.path] : undefined;
+          return (
+            <li key={`${l.path ?? l.url}-${i}`} className="flex flex-col gap-1.5 rounded-lg border border-gray-100 bg-gray-50 p-2">
+              <div className="flex items-center gap-2">
+                {l.jenis === "gambar" && href ? (
+                  <a href={href} target="_blank" rel="noreferrer" className="shrink-0">
+                    <img src={href} alt="" className="h-12 w-12 rounded-md object-cover" />
                   </a>
                 ) : (
-                  <p className="truncate text-xs font-semibold text-brand-text">{l.nama}</p>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white text-brand-masuk" aria-hidden="true">
+                    {l.jenis === "link" ? <Link2 className="h-4 w-4" /> : l.jenis === "audio" ? <Music className="h-4 w-4" /> : l.jenis === "gambar" ? <ImageIcon className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                  </span>
                 )}
-                <p className="text-[11px] text-gray-400">
-                  {l.jenis === "link" ? "Link" : l.jenis === "gambar" ? "Gambar" : l.jenis === "audio" ? "Lagu/audio" : "File"}
-                  {l.ukuran ? ` · ${formatUkuran(l.ukuran)}` : ""}
-                </p>
+                <div className="min-w-0 flex-1">
+                  {bisaDilihat(l) ? (
+                    <button type="button" onClick={() => setPratinjau(l)} className="block max-w-full truncate text-left text-xs font-semibold text-brand-info underline-offset-2 hover:underline">
+                      {l.nama}
+                    </button>
+                  ) : href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="block truncate text-xs font-semibold text-brand-info underline-offset-2 hover:underline">
+                      {l.nama}
+                    </a>
+                  ) : (
+                    <p className="truncate text-xs font-semibold text-brand-text">{l.nama}</p>
+                  )}
+                  <p className="text-[11px] text-gray-400">
+                    {l.jenis === "link" ? "Link" : l.jenis === "gambar" ? "Gambar" : l.jenis === "audio" ? "Lagu/audio" : "File"}
+                    {l.ukuran ? ` · ${formatUkuran(l.ukuran)}` : ""}
+                  </p>
+                  {l.path && (
+                    <div className="mt-1 flex gap-1.5">
+                      {bisaDilihat(l) && (
+                        <button type="button" onClick={() => setPratinjau(l)} className="flex min-h-[32px] items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 text-[11px] font-semibold text-brand-text">
+                          <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                          Lihat
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void unduh(l)}
+                        aria-label={`Unduh ${l.nama}`}
+                        className="flex min-h-[32px] items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 text-[11px] font-semibold text-brand-text"
+                      >
+                        <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                        Unduh
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {onHapus && (
+                  <button
+                    type="button"
+                    onClick={() => onHapus(l)}
+                    aria-label={`Hapus lampiran ${l.nama}`}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-white hover:text-red-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
               </div>
-              {onHapus && (
-                <button
-                  type="button"
-                  onClick={() => onHapus(l)}
-                  aria-label={`Hapus lampiran ${l.nama}`}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 hover:bg-white hover:text-red-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            {l.jenis === "audio" && href && <audio controls preload="none" src={href} className="h-9 w-full" />}
-          </li>
-        );
-      })}
-    </ul>
+              {l.jenis === "audio" && href && <audio controls preload="none" src={href} className="h-9 w-full" />}
+            </li>
+          );
+        })}
+      </ul>
+      {galat && <p className="mt-1 text-xs text-red-600">{galat}</p>}
+      {pratinjau?.path && (
+        <PratinjauDocx path={pratinjau.path} nama={pratinjau.nama} onUnduh={() => void unduh(pratinjau)} onTutup={() => setPratinjau(null)} />
+      )}
+    </>
   );
 }
