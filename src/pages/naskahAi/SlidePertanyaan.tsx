@@ -1,28 +1,29 @@
 import { useEffect, useRef, useState } from "react";
+import { CalendarDays, MapPin, Mic, Tag, Ticket } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { buatPertanyaanWawancara, ambilRiwayatNaskahAi, type FormPertanyaanWawancara } from "../../lib/naskahAi";
 import type { NaskahAi } from "../../types/database";
 import {
   ChipSaran,
   Galat,
-  InputIkon,
+  Isian,
+  KartuGaya,
   KartuHasil,
-  KartuVibe,
   KotakCerita,
   Langkah,
-  LoadingAi,
   PratinjauKosong,
   RiwayatList,
+  SedangMenulis,
   Segmen,
   SubJudul,
   TombolBikin,
-  type OpsiVibe,
+  type OpsiGaya,
   type RiwayatBaris,
 } from "./bersama";
 
-const GAYA_OPSI: OpsiVibe[] = [
-  { value: "formal", emoji: "👔", judul: "Formal", ket: "Pejabat / narasumber resmi" },
-  { value: "santai", emoji: "😎", judul: "Santai", ket: "Buat konten sosmed" },
+const GAYA_OPSI: OpsiGaya[] = [
+  { value: "formal", gambar: "/naskah-ai/formal.png", judul: "Formal", ket: "Pejabat / narasumber resmi" },
+  { value: "santai", gambar: "/naskah-ai/caption.png", judul: "Santai", ket: "Buat konten sosmed" },
 ];
 
 const JUMLAH_OPSI = [3, 5, 8].map((j) => ({ value: j, judul: String(j), ket: "pertanyaan" }));
@@ -110,51 +111,51 @@ export default function SlidePertanyaan() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start lg:gap-5">
       <div className="flex min-w-0 flex-col gap-3">
-        <Langkah no={1} judul="Mau ngulik apa?" ket="Topik atau poin yang ingin digali dari narasumber.">
+        <Langkah no={1} judul="Mau tanya soal apa?" ket="Topik atau poin yang ingin digali dari narasumber.">
           <KotakCerita
             label="Topik / poin yang ingin digali"
             value={form.poinPenting}
             onChange={ubah("poinPenting")}
             saran={SARAN_POIN}
-            placeholder={"Spill topiknya, mis.:\n- Latar belakang acara ini diadakan\n- Target jumlah pengunjung\n- Rencana ke depan"}
+            placeholder={"Contoh:\n- Latar belakang acara ini diadakan\n- Target jumlah pengunjung\n- Rencana ke depan"}
           />
         </Langkah>
 
-        <Langkah no={2} judul="Siapa & acara apa?" opsional ket="Biar pertanyaannya pas sama narasumbernya.">
-          <InputIkon
-            ikon="🎙️"
+        <Langkah no={2} judul="Narasumber & acara" opsional ket="Biar pertanyaannya pas dengan narasumbernya.">
+          <Isian
+            ikon={Mic}
             label="Narasumber yang diwawancara"
             value={form.narasumber}
             onChange={ubah("narasumber")}
             placeholder="mis. Kepala Dinas Pariwisata Kota Yogyakarta"
           />
-          <InputIkon ikon="🎪" label="Jenis acara" value={form.jenisAcara} onChange={ubah("jenisAcara")} placeholder="Ketik atau pilih di bawah">
+          <Isian ikon={Tag} label="Jenis acara" value={form.jenisAcara} onChange={ubah("jenisAcara")} placeholder="Ketik atau pilih di bawah">
             <ChipSaran label="Saran jenis acara" opsi={JENIS_ACARA} value={form.jenisAcara} onChange={ubah("jenisAcara")} />
-          </InputIkon>
-          <InputIkon ikon="✨" label="Nama acara" value={form.namaAcara} onChange={ubah("namaAcara")} placeholder="mis. Jogja Cultural Week 2026" />
+          </Isian>
+          <Isian ikon={Ticket} label="Nama acara" value={form.namaAcara} onChange={ubah("namaAcara")} placeholder="mis. Jogja Cultural Week 2026" />
           <div className="grid grid-cols-2 gap-3">
-            <InputIkon ikon="📍" label="Lokasi" value={form.lokasi} onChange={ubah("lokasi")} placeholder="mis. Malioboro" />
-            <InputIkon ikon="📅" label="Tanggal" type="date" value={form.tanggal} onChange={ubah("tanggal")} />
+            <Isian ikon={MapPin} label="Lokasi" value={form.lokasi} onChange={ubah("lokasi")} placeholder="mis. Malioboro" />
+            <Isian ikon={CalendarDays} label="Tanggal" type="date" value={form.tanggal} onChange={ubah("tanggal")} />
           </div>
         </Langkah>
 
-        <Langkah no={3} judul="Pilih vibe-nya" ket="Gaya bertanya ke narasumber.">
-          <KartuVibe label="Gaya wawancara" opsi={GAYA_OPSI} value={form.gaya} onChange={ubah("gaya")} />
+        <Langkah no={3} judul="Pilih gaya bertanya" ket="Sesuaikan dengan narasumbernya.">
+          <KartuGaya label="Gaya wawancara" opsi={GAYA_OPSI} value={form.gaya} onChange={ubah("gaya")} />
           <SubJudul>Jumlah pertanyaan</SubJudul>
           <Segmen label="Jumlah pertanyaan" opsi={JUMLAH_OPSI} value={form.jumlahPertanyaan} onChange={ubah("jumlahPertanyaan")} />
         </Langkah>
 
         {error && <Galat>{error}</Galat>}
-        <TombolBikin onClick={() => void buat()} siap={siap} memuat={membuat} teks="Bikin pertanyaannya" teksBelumSiap="🎤 Isi topiknya dulu ya" />
+        <TombolBikin onClick={() => void buat()} siap={siap} memuat={membuat} teks="Bikin pertanyaan" teksBelumSiap="Isi topiknya dulu ya" />
       </div>
 
       <div ref={hasilRef} className="flex min-w-0 scroll-mt-4 flex-col gap-4">
         {membuat ? (
-          <LoadingAi pesan="pertanyaan" />
+          <SedangMenulis pesan="pertanyaan" />
         ) : hasilTerakhir ? (
           <KartuHasil hasil={hasilTerakhir} label={labelGaya} memuat={membuat} onUlang={() => void buat()} />
         ) : (
-          <PratinjauKosong judul="Pertanyaanmu muncul di sini" ket="Isi topiknya, pilih vibe, lalu tekan Bikin pertanyaannya 🎤" />
+          <PratinjauKosong judul="Pertanyaanmu muncul di sini" ket="Isi topiknya, pilih gaya, lalu tekan Bikin pertanyaan." />
         )}
         <RiwayatList
           riwayat={riwayat}
@@ -163,7 +164,7 @@ export default function SlidePertanyaan() {
           superAdmin={superAdmin}
           onHapus={() => void muatRiwayat()}
           onPakai={pakai}
-          kosongTeks="Belum ada pertanyaan. Bikin yang pertama!"
+          kosongTeks="Belum ada pertanyaan. Yuk bikin yang pertama."
         />
       </div>
     </div>

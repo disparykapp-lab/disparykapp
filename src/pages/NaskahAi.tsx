@@ -1,19 +1,18 @@
 import { useId, useRef, useState, type TouchEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import HeaderHalaman from "../components/HeaderHalaman";
 import SlideNaskah from "./naskahAi/SlideNaskah";
 import SlidePertanyaan from "./naskahAi/SlidePertanyaan";
 
 const MODE = [
-  { id: "naskah", emoji: "✍️", label: "Naskah", sorot: "Ceritain acaranya,", lanjut: "AI yang nulis naskahnya." },
-  { id: "pertanyaan", emoji: "🎤", label: "Wawancara", sorot: "Mau wawancara?", lanjut: "Pertanyaannya langsung beres." },
+  { id: "naskah", label: "📝 Naskah", judul: "Bikin naskah liputan", ket: "Tulis poin-poin acaranya, AI yang merangkai jadi naskah." },
+  { id: "pertanyaan", label: "🎤 Wawancara", judul: "Bikin pertanyaan wawancara", ket: "Tulis topiknya, AI yang menyusun daftar pertanyaannya." },
 ] as const;
 type Mode = (typeof MODE)[number]["id"];
 
 const AMBANG_GESER = 60;
 
-/** Halaman Naskah AI: "studio" dua mode (naskah liputan & pertanyaan wawancara). */
+/** Halaman Naskah AI: dua mode (naskah liputan & pertanyaan wawancara), bisa digeser. */
 export default function NaskahAi() {
-  const navigate = useNavigate();
   const idDasar = useId();
   const [mode, setMode] = useState<Mode>("naskah");
   const mulai = useRef<{ x: number; y: number } | null>(null);
@@ -40,59 +39,17 @@ export default function NaskahAi() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="naskah-hero -mx-4 -mt-4 rounded-b-[2rem] px-4 pb-5 pt-5 text-white shadow-lg">
-        <span className="naskah-blob" style={{ width: 230, height: 230, left: -80, top: -100, background: "#c0334f" }} aria-hidden="true" />
-        <span className="naskah-blob" style={{ width: 250, height: 250, right: -100, top: 0, background: "#7c3aed", animationDelay: "-4s" }} aria-hidden="true" />
-        <span
-          className="naskah-blob"
-          style={{ width: 170, height: 170, left: "30%", bottom: -110, background: "#ff8a65", opacity: 0.55, animationDelay: "-8s" }}
-          aria-hidden="true"
-        />
+      <HeaderHalaman judul="Naskah AI" kembaliKe="/beranda" />
 
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => navigate("/beranda")}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg text-brand-masuk shadow-sm"
-            aria-label="Kembali"
-          >
-            ←
-          </button>
-          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold ring-1 ring-white/15 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" aria-hidden="true" />
-            RAFAEL AI
-          </span>
-        </div>
-
-        <div className="relative mt-5 min-h-[5.5rem]">
-          {/* stiker melayang — hiasan saja */}
-          <div className="pointer-events-none absolute right-0 top-0 flex w-24 flex-wrap justify-end gap-2" aria-hidden="true">
-            {[
-              { e: "✍️", putar: "-10deg", jeda: "0s" },
-              { e: "🎤", putar: "9deg", jeda: "-1.4s" },
-              { e: "✨", putar: "-6deg", jeda: "-2.6s" },
-            ].map((s) => (
-              <span
-                key={s.e}
-                className="stiker-ai flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-xl ring-1 ring-white/20 backdrop-blur"
-                style={{ ["--putar" as string]: s.putar, animationDelay: s.jeda }}
-              >
-                {s.e}
-              </span>
-            ))}
+      <section className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-3">
+          <img src="/naskah-ai/naskah.png" alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="font-bold text-brand-text">{aktif.judul}</p>
+            <p className="text-xs text-gray-500">{aktif.ket}</p>
           </div>
-          <h1 className="text-[2rem] font-black leading-none tracking-tight">Naskah AI</h1>
-          <p className="mt-2 max-w-[15rem] text-lg font-extrabold leading-snug tracking-tight sm:max-w-md" aria-live="polite">
-            <span className="teks-gradasi-ai">{aktif.sorot}</span> {aktif.lanjut}
-          </p>
         </div>
-
-        <div role="tablist" aria-label="Mode Naskah AI" className="relative mt-4 grid grid-cols-2 rounded-2xl bg-white/10 p-1 ring-1 ring-white/15 backdrop-blur sm:max-w-sm">
-          <span
-            aria-hidden="true"
-            className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-xl bg-white shadow-md transition-transform duration-300 ease-out"
-            style={{ transform: `translateX(${indeks * 100}%)` }}
-          />
+        <div role="tablist" aria-label="Mode Naskah AI" className="grid grid-cols-2 gap-1.5 rounded-full bg-gray-100 p-1 lg:w-80 lg:shrink-0">
           {MODE.map((m) => (
             <button
               key={m.id}
@@ -102,15 +59,13 @@ export default function NaskahAi() {
               aria-selected={mode === m.id}
               aria-controls={`${idDasar}-panel-${m.id}`}
               onClick={() => setMode(m.id)}
-              className={`relative z-10 flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition-colors ${
-                mode === m.id ? "text-[#170b26]" : "text-white/75 hover:text-white"
-              }`}
+              className={`min-h-[40px] rounded-full px-2 text-sm font-semibold transition-colors ${mode === m.id ? "bg-brand-masuk text-white" : "text-gray-500"}`}
             >
-              <span aria-hidden="true">{m.emoji}</span> {m.label}
+              {m.label}
             </button>
           ))}
         </div>
-      </header>
+      </section>
 
       {/* overflow-x-clip (bukan hidden) supaya tombol "Bikin" tetap bisa menempel di bawah layar */}
       <div className="overflow-x-clip" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
