@@ -6,8 +6,9 @@ import { teksDenganLink } from "../../../lib/linkify";
 import type { BarisAbsensi } from "../../../lib/rekap";
 import type { KartuTinjau } from "../../../lib/tinjauAbsenAturan";
 import { ChipStatus, FotoKecil } from "./KartuAbsen";
-import { Lembar } from "./bersama";
-import { jam, useModal } from "./util";
+import Lembar from "../../../components/Lembar";
+import { useModal } from "../../../lib/useModal";
+import { jam } from "./util";
 
 const fmtTanggal = new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const AMBANG_GESER = 60;
@@ -44,6 +45,12 @@ export default function DetailAbsen({
   const r = kartu.row;
   const sentuh = useRef<{ x: number; y: number } | null>(null);
   const [arah, setArah] = useState<"kanan" | "kiri" | null>(null);
+
+  const isi = useRef<HTMLDivElement>(null);
+  // pindah orang = mulai lagi dari atas lembar, bukan di posisi gulir orang sebelumnya
+  useEffect(() => {
+    isi.current?.closest("[role=dialog]")?.scrollTo({ top: 0 });
+  }, [kartu.kunci]);
 
   function pindah(ke: "kanan" | "kiri") {
     const aksi = ke === "kanan" ? onBerikut : onSebelum;
@@ -87,7 +94,7 @@ export default function DetailAbsen({
         </>
       }
     >
-      <div key={kartu.kunci} className={`flex flex-col gap-3 ${arah ? `anim-geser-${arah}` : ""}`} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div key={kartu.kunci} ref={isi} className={`flex flex-col gap-3 ${arah ? `anim-geser-${arah}` : ""}`} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div className="-mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-500">
           <span>{fmtTanggal.format(new Date(`${r.tanggal}T00:00:00Z`))}</span>
           {namaDivisi && <span>· {namaDivisi}</span>}

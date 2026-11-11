@@ -1,152 +1,130 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePresence } from "../../contexts/PresenceContext";
-import { simpanMasaMagang, hitungProgressMagang } from "../../lib/profil";
-import { formatTanggal } from "../../lib/tanggal";
-import type { Divisi, Profile, Role } from "../../types/database";
+import { tanggalHariIniWIB } from "../../lib/absensi";
+import {
+  KOTAK_PEGAWAI,
+  TANPA_DIVISI,
+  cocokCari,
+  cocokDivisi,
+  cocokSaring,
+  hitungKotak,
+  urutkanPegawai,
+  type SaringPegawai,
+} from "../../lib/pegawaiAturan";
+import type { Divisi, Profile } from "../../types/database";
+import KartuPegawai from "./pegawai/KartuPegawai";
+import DetailPegawai, { type Perubahan } from "./pegawai/DetailPegawai";
+import FormTambah, { type PegawaiBaru } from "./pegawai/FormTambah";
 
-const TANPA_DIVISI = "— Belum Ada Divisi —";
+const KOSONG: Record<SaringPegawai, string> = {
+  semua: "Tidak ada pegawai di sini.",
+  online: "Belum ada yang online.",
+  admin: "Tidak ada admin di sini.",
+  magang: "Tidak ada anak magang di sini.",
+  nonaktif: "Tidak ada akun nonaktif.",
+};
 
 export default function Pegawai() {
-  const { profile: profileSaya } = useAuth();
+  const { profile: saya } = useAuth();
   const { onlineIds } = usePresence();
+  const [hariIni] = useState(tanggalHariIniWIB);
   const [list, setList] = useState<Profile[]>([]);
-  const [menghapusId, setMenghapusId] = useState<string | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dimuat, setDimuat] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [menyimpan, setMenyimpan] = useState(false);
-  const [terbuka, setTerbuka] = useState<string | null>(null);
+
+  const [saring, setSaring] = useState<SaringPegawai>("semua");
+  const [divisi, setDivisi] = useState("semua");
   const [cari, setCari] = useState("");
-
-  const [nama, setNama] = useState("");
-  const [email, setEmail] = useState("");
-  const [divisiId, setDivisiId] = useState("");
-  const [jabatan, setJabatan] = useState("");
-
-  async function muat() {
-    setLoading(true);
-    const [{ data: profiles, error: e1 }, { data: divisi, error: e2 }] = await Promise.all([
-      supabase.from("profiles").select("*").order("created_at"),
-      supabase.from("divisi").select("*").order("nama"),
-    ]);
-    if (e1) setError(e1.message);
-    else if (e2) setError(e2.message);
-    setList((profiles as Profile[]) ?? []);
-    setDivisiList((divisi as Divisi[]) ?? []);
-    setLoading(false);
-  }
+  const [dibuka, setDibuka] = useState<string | null>(null);
+  const [tambah, setTambah] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const waktuToast = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    void muat();
+    let aktif = true;
+    void Promise.all([
+      supabase.from("profiles").select("*").order("nama"),
+      supabase.from("divisi").select("*").order("nama"),
+    ]).then(([p, d]) => {
+      if (!aktif) return;
+      setError(p.error?.message ?? d.error?.message ?? null);
+      setList((p.data as Profile[]) ?? []);
+      setDivisiList((d.data as Divisi[]) ?? []);
+      setDimuat(true);
+    });
+    const toastSekarang = waktuToast;
+    return () => {
+      aktif = false;
+      if (toastSekarang.current) clearTimeout(toastSekarang.current);
+    };
   }, []);
 
-  async function tambahPegawai() {
-    if (!nama.trim() || !email.trim()) {
-      setError("Nama dan email wajib diisi.");
-      return;
+  function beriTahu(pesan: string) {
+    if (waktuToast.current) clearTimeout(waktuToast.current);
+    setToast(pesan);
+    waktuToast.current = setTimeout(() => setToast(null), 2200);
+  }
+
+  async function simpan(id: string, perubahan: Perubahan) {
+    const { data, error } = await supabase.from("profiles").update(perubahan).eq("id", id).select().single();
+    if (error) throw new Error(error.message);
+    setList((l) => l.map((p) => (p.id === id ? { ...p, ...(data as Profile) } : p)));
+    beriTahu("Tersimpan");
+  }
+
+  async function hapus(id: string) {
+    const { error } = await supabase.from("profiles").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    setDibuka(null);
+    setList((l) => l.filter((p) => p.id !== id));
+    beriTahu("Pegawai dihapus");
+  }
+
+  async function daftarkan(baru: PegawaiBaru) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .insert({ ...baru, role: "user" })
+      .select()
+      .single();
+    if (error) throw new Error(error.message.includes("duplicate") ? "Email ini sudah terdaftar." : error.message);
+    setList((l) => [...l, data as Profile]);
+    setTambah(false);
+    beriTahu(`${baru.nama} didaftarkan`);
+  }
+
+  const petaDivisi = useMemo(() => new Map(divisiList.map((d) => [d.id, d.nama])), [divisiList]);
+  const hasilCari = useMemo(() => list.filter((p) => cocokCari(p, cari)), [list, cari]);
+  const perDivisi = useMemo(() => {
+    const n: Record<string, number> = {};
+    for (const p of hasilCari) {
+      const k = p.divisi_id ?? TANPA_DIVISI;
+      n[k] = (n[k] ?? 0) + 1;
     }
-    setMenyimpan(true);
-    setError(null);
-    const { error } = await supabase.from("profiles").insert({
-      nama: nama.trim(),
-      email: email.trim().toLowerCase(),
-      divisi_id: divisiId || null,
-      jabatan: jabatan.trim() || null,
-      role: "user",
-    });
-    if (error) {
-      setError(
-        error.message.includes("duplicate")
-          ? "Email ini sudah terdaftar."
-          : error.message
-      );
-    } else {
-      setNama("");
-      setEmail("");
-      setDivisiId("");
-      setJabatan("");
-      setShowForm(false);
-      await muat();
-    }
-    setMenyimpan(false);
-  }
+    return n;
+  }, [hasilCari]);
+  const diDivisi = useMemo(() => hasilCari.filter((p) => cocokDivisi(p, divisi)), [hasilCari, divisi]);
+  const hitungan = hitungKotak(diDivisi, onlineIds);
+  const tampil = useMemo(
+    () => urutkanPegawai(diDivisi.filter((p) => cocokSaring(p, saring, onlineIds)), onlineIds),
+    [diDivisi, saring, onlineIds]
+  );
 
-  async function ubahRole(id: string, role: Role) {
-    const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
-    if (error) setError(error.message);
-    else await muat();
-  }
+  const chipDivisi = [
+    { id: "semua", nama: "Semua", n: hasilCari.length },
+    ...divisiList.filter((d) => d.aktif || perDivisi[d.id]).map((d) => ({ id: d.id, nama: d.nama, n: perDivisi[d.id] ?? 0 })),
+    ...(perDivisi[TANPA_DIVISI] ? [{ id: TANPA_DIVISI, nama: "Tanpa divisi", n: perDivisi[TANPA_DIVISI] }] : []),
+  ];
 
-  async function ubahDivisi(id: string, divisi_id: string) {
-    const { error } = await supabase.from("profiles").update({ divisi_id: divisi_id || null }).eq("id", id);
-    if (error) setError(error.message);
-    else await muat();
-  }
-
-  async function ubahWajibAbsen(id: string, wajib: boolean) {
-    const { error } = await supabase.from("profiles").update({ wajib_absen: wajib }).eq("id", id);
-    if (error) setError(error.message);
-    else await muat();
-  }
-
-  async function toggleAktif(id: string, aktif: boolean) {
-    const { error } = await supabase.from("profiles").update({ aktif: !aktif }).eq("id", id);
-    if (error) setError(error.message);
-    else await muat();
-  }
-
-  async function hapusPegawai(p: Profile) {
-    const konfirmasi = confirm(
-      `Hapus "${p.nama}" (${p.email}) dari daftar pegawai?\n\n` +
-        `Ini hanya menghapus data pegawai di aplikasi — akun Google-nya di Supabase Auth ` +
-        `harus dihapus terpisah lewat dashboard Supabase kalau memang tidak dipakai lagi.\n\n` +
-        `Seluruh riwayat absensi pegawai ini juga akan ikut terhapus permanen. ` +
-        `Kalau hanya ingin menonaktifkan sementara, gunakan tombol "Aktif/Nonaktif" saja, jangan hapus.`
-    );
-    if (!konfirmasi) return;
-
-    setMenghapusId(p.id);
-    setError(null);
-    const { error } = await supabase.from("profiles").delete().eq("id", p.id);
-    if (error) setError(error.message);
-    else await muat();
-    setMenghapusId(null);
-  }
-
-  const listTersaring = useMemo(() => {
-    const q = cari.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter(
-      (p) =>
-        p.nama.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q) ||
-        (p.jabatan ?? "").toLowerCase().includes(q)
-    );
-  }, [list, cari]);
-
-  const kelompokDivisi = useMemo(() => {
-    const namaDivisi = new Map(divisiList.map((d) => [d.id, d.nama]));
-    const peta = new Map<string, Profile[]>();
-    for (const p of listTersaring) {
-      const key = (p.divisi_id && namaDivisi.get(p.divisi_id)) || TANPA_DIVISI;
-      const arr = peta.get(key) ?? [];
-      arr.push(p);
-      peta.set(key, arr);
-    }
-    return Array.from(peta.entries()).sort(([a], [b]) => {
-      if (a === TANPA_DIVISI) return 1;
-      if (b === TANPA_DIVISI) return -1;
-      return a.localeCompare(b);
-    });
-  }, [listTersaring, divisiList]);
-
-  if (loading) return <Loading teks="Memuat pegawai..." />;
+  const posisi = dibuka ? tampil.findIndex((p) => p.id === dibuka) : -1;
+  const pDibuka = posisi >= 0 ? tampil[posisi] : null;
+  const tutupDetail = useCallback(() => setDibuka(null), []);
+  const tutupTambah = useCallback(() => setTambah(false), []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -154,274 +132,118 @@ export default function Pegawai() {
         judul="Kelola Pegawai"
         aksi={
           <button
-            onClick={() => setShowForm((v) => !v)}
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-masuk-dark"
+            type="button"
+            onClick={() => setTambah(true)}
+            aria-haspopup="dialog"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-masuk-dark shadow-sm transition active:scale-95"
           >
-            {showForm ? "Tutup" : "+ Tambah"}
+            + Tambah
           </button>
         }
       />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
-      {showForm && (
-        <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500">
-            Daftarkan email Google pegawai. Pegawai bisa langsung masuk lewat "Masuk dengan Google" setelah didaftarkan.
-          </p>
-          <input
-            value={nama}
-            onChange={(e) => setNama(e.target.value)}
-            placeholder="Nama lengkap"
-            className="rounded-xl border border-gray-300 p-3 text-base"
-          />
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email Google"
-            type="email"
-            className="rounded-xl border border-gray-300 p-3 text-base"
-          />
-          <select
-            value={divisiId}
-            onChange={(e) => setDivisiId(e.target.value)}
-            className="rounded-xl border border-gray-300 p-3 text-base"
-          >
-            <option value="">- Pilih Divisi -</option>
-            {divisiList.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.nama}
-              </option>
-            ))}
-          </select>
-          <input
-            value={jabatan}
-            onChange={(e) => setJabatan(e.target.value)}
-            placeholder="Jabatan (opsional)"
-            className="rounded-xl border border-gray-300 p-3 text-base"
-          />
-          <button
-            onClick={() => void tambahPegawai()}
-            disabled={menyimpan}
-            className="min-h-[48px] rounded-xl bg-brand-masuk font-semibold text-white disabled:opacity-60"
-          >
-            Simpan Pegawai
-          </button>
-        </div>
-      )}
-
-      <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama, email, atau jabatan..." />
-
-      <div className="grid items-start gap-3 lg:grid-cols-2">
-        {kelompokDivisi.map(([namaDivisi, anggota]) => (
-          <details
-            key={namaDivisi}
-            className="group rounded-xl bg-white shadow-sm"
-            open={kelompokDivisi.length <= 3 || cari.trim().length > 0}
-          >
-            <summary className="flex cursor-pointer list-none items-center justify-between p-3 text-sm font-semibold text-brand-text marker:content-none">
-              <span>
-                📁 {namaDivisi} ({anggota.length})
-                {anggota.some((p) => onlineIds.has(p.id)) && (
-                  <span className="ml-2 text-xs font-medium text-green-600">
-                    🟢 {anggota.filter((p) => onlineIds.has(p.id)).length} online
+      {!dimuat ? (
+        <Loading teks="Memuat pegawai..." />
+      ) : (
+        <>
+          <div className="grid grid-cols-5 gap-2" role="group" aria-label="Saring pegawai">
+            {KOTAK_PEGAWAI.map((k) => {
+              const aktif = saring === k.id;
+              return (
+                <button
+                  key={k.id}
+                  type="button"
+                  aria-pressed={aktif}
+                  onClick={() => setSaring(aktif && k.id !== "semua" ? "semua" : k.id)}
+                  className={`flex min-h-[64px] flex-col items-center justify-center rounded-2xl px-1 py-2 text-center transition active:scale-95 ${
+                    aktif ? "bg-brand-masuk text-white shadow-md" : "bg-white text-brand-text shadow-sm ring-1 ring-black/5"
+                  }`}
+                >
+                  <span className="text-xl font-bold leading-none">{hitungan[k.id]}</span>
+                  <span className={`mt-1 flex items-center gap-1 text-[11px] font-medium leading-tight ${aktif ? "" : "text-gray-500"}`}>
+                    {k.id === "online" && <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true" />}
+                    {k.label}
                   </span>
-                )}
-              </span>
-              <span className="text-gray-400 transition group-open:rotate-180">▾</span>
-            </summary>
-            <div className="flex flex-col gap-2 border-t border-gray-100 p-2">
-              {anggota.map((p) => (
-                <div key={p.id} className="flex flex-col gap-2 rounded-lg border border-gray-100 p-3">
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div
+              className="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 pl-0.5 pr-6 [mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)] [scrollbar-width:none]"
+              role="group"
+              aria-label="Saring divisi"
+            >
+              {chipDivisi.map((d) => {
+                const aktif = divisi === d.id;
+                return (
                   <button
-                    onClick={() => setTerbuka(terbuka === p.id ? null : p.id)}
-                    className="flex items-start justify-between text-left"
+                    key={d.id}
+                    type="button"
+                    aria-pressed={aktif}
+                    onClick={() => setDivisi(d.id)}
+                    className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition active:scale-95 ${
+                      aktif ? "bg-brand-masuk text-white shadow-sm" : "bg-white text-brand-text shadow-sm ring-1 ring-black/5"
+                    }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="relative shrink-0">
-                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-brand-masuk/10 text-sm font-bold text-brand-masuk">
-                          {p.foto_url ? (
-                            <img src={p.foto_url} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            p.nama.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        {onlineIds.has(p.id) && (
-                          <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-green-500" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-brand-text">
-                          {p.nama}
-                          {onlineIds.has(p.id) && (
-                            <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
-                              Online
-                            </span>
-                          )}
-                          {p.wajib_absen === false && (
-                            <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
-                              Tidak wajib absen
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-gray-500">{p.email}</p>
-                      </div>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
-                        p.aktif ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {p.aktif ? "Aktif" : "Nonaktif"}
-                    </span>
+                    {d.nama}
+                    <span className={`rounded-full px-1.5 text-[11px] ${aktif ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>{d.n}</span>
                   </button>
+                );
+              })}
+            </div>
+            <div className="w-11 shrink-0 has-[input]:w-44 sm:has-[input]:w-64">
+              <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama, email, jabatan…" />
+            </div>
+          </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <select
-                      value={p.divisi_id ?? ""}
-                      onChange={(e) => void ubahDivisi(p.id, e.target.value)}
-                      className="rounded-lg border border-gray-300 p-2 text-xs"
-                    >
-                      <option value="">- Divisi -</option>
-                      {divisiList.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.nama}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={p.role}
-                      onChange={(e) => void ubahRole(p.id, e.target.value as Role)}
-                      className="rounded-lg border border-gray-300 p-2 text-xs"
-                    >
-                      <option value="user">Pegawai</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                    <select
-                      value={p.wajib_absen === false ? "tidak" : "ya"}
-                      onChange={(e) => void ubahWajibAbsen(p.id, e.target.value === "ya")}
-                      className="rounded-lg border border-gray-300 p-2 text-xs"
-                      aria-label="Wajib absen"
-                    >
-                      <option value="ya">Wajib absen</option>
-                      <option value="tidak">Tidak wajib absen</option>
-                    </select>
-                    <button
-                      onClick={() => void toggleAktif(p.id, p.aktif)}
-                      className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-brand-text"
-                    >
-                      {p.aktif ? "Nonaktifkan" : "Aktifkan"}
-                    </button>
-                    {p.id !== profileSaya?.id && (
-                      <button
-                        onClick={() => void hapusPegawai(p)}
-                        disabled={menghapusId === p.id}
-                        className="ml-auto rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 disabled:opacity-60"
-                      >
-                        {menghapusId === p.id ? "Menghapus..." : "Hapus"}
-                      </button>
-                    )}
-                  </div>
-
-                  {terbuka === p.id && <ProfilKaryawan pegawai={p} onUbah={muat} />}
-                </div>
+          {tampil.length === 0 ? (
+            <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+              {list.length === 0 ? "Belum ada pegawai terdaftar." : cari.trim() ? "Tidak ada pegawai yang cocok dengan pencarian." : KOSONG[saring]}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 px-0.5 sm:grid-cols-2 lg:grid-cols-3">
+              {tampil.map((p) => (
+                <KartuPegawai
+                  key={p.id}
+                  p={p}
+                  online={onlineIds.has(p.id)}
+                  namaDivisi={divisi === "semua" && p.divisi_id ? (petaDivisi.get(p.divisi_id) ?? null) : null}
+                  onBuka={() => setDibuka(p.id)}
+                />
               ))}
             </div>
-          </details>
-        ))}
-        {listTersaring.length === 0 && (
-          <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
-            {list.length === 0 ? "Belum ada pegawai terdaftar." : "Tidak ada pegawai yang cocok dengan pencarian."}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
+          )}
+        </>
+      )}
 
-function ProfilKaryawan({ pegawai, onUbah }: { pegawai: Profile; onUbah: () => void }) {
-  const [mulai, setMulai] = useState(pegawai.tanggal_mulai_magang ?? "");
-  const [selesai, setSelesai] = useState(pegawai.tanggal_selesai_magang ?? "");
-  const [menyimpan, setMenyimpan] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+      {pDibuka && (
+        <DetailPegawai
+          p={pDibuka}
+          online={onlineIds.has(pDibuka.id)}
+          divisiList={divisiList.filter((d) => d.aktif || d.id === pDibuka.divisi_id)}
+          sayaId={saya?.id}
+          hariIni={hariIni}
+          posisi={posisi}
+          total={tampil.length}
+          onSebelum={posisi > 0 ? () => setDibuka(tampil[posisi - 1].id) : null}
+          onBerikut={posisi < tampil.length - 1 ? () => setDibuka(tampil[posisi + 1].id) : null}
+          onTutup={tutupDetail}
+          onSimpan={(x) => simpan(pDibuka.id, x)}
+          onHapus={() => hapus(pDibuka.id)}
+        />
+      )}
 
-  const magang = mulai && selesai ? hitungProgressMagang(mulai, selesai) : null;
+      {tambah && <FormTambah divisiList={divisiList.filter((d) => d.aktif)} divisiAwal={divisi !== "semua" && divisi !== TANPA_DIVISI ? divisi : null} onTutup={tutupTambah} onSimpan={daftarkan} />}
 
-  async function simpan() {
-    setMenyimpan(true);
-    setError(null);
-    try {
-      await simpanMasaMagang(pegawai.id, mulai || null, selesai || null);
-      onUbah();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal menyimpan masa magang.");
-    } finally {
-      setMenyimpan(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-gray-100 pt-3">
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <p className="text-xs text-gray-400">Tanggal Lahir</p>
-          <p className="text-brand-text">
-            {pegawai.tanggal_lahir ? formatTanggal(pegawai.tanggal_lahir) : "- Belum diisi -"}
-          </p>
+      {toast && (
+        <div role="status" className="anim-buka fixed bottom-6 left-1/2 z-[70] -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-text px-4 py-2 text-sm font-semibold text-white shadow-lg">
+          {toast}
         </div>
-        <div>
-          <p className="text-xs text-gray-400">Asal Sekolah/Kampus</p>
-          <p className="text-brand-text">{pegawai.asal_sekolah || "- Belum diisi -"}</p>
-        </div>
-      </div>
-      <p className="text-[11px] text-gray-400">
-        Data ini diisi pegawai sendiri lewat halaman Profil Saya.
-      </p>
-
-      <div className="rounded-lg bg-gray-50 p-3">
-        <p className="mb-2 text-sm font-semibold text-brand-text">Masa Magang</p>
-        <div className="grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">Mulai</span>
-            <input
-              type="date"
-              value={mulai}
-              onChange={(e) => setMulai(e.target.value)}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-gray-500">Selesai</span>
-            <input
-              type="date"
-              value={selesai}
-              onChange={(e) => setSelesai(e.target.value)}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
-          </label>
-        </div>
-
-        {magang && (
-          <div className="mt-2">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-white">
-              <div className="h-full rounded-full bg-brand-masuk" style={{ width: `${magang.persen}%` }} />
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              {magang.persen}% berjalan · {magang.teksSisa}
-            </p>
-          </div>
-        )}
-
-        {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
-
-        <button
-          onClick={() => void simpan()}
-          disabled={menyimpan}
-          className="mt-3 min-h-[40px] w-full rounded-lg bg-brand-masuk text-xs font-semibold text-white disabled:opacity-60"
-        >
-          {menyimpan ? "Menyimpan..." : "Simpan Masa Magang"}
-        </button>
-      </div>
+      )}
     </div>
   );
 }
