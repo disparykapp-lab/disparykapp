@@ -1,37 +1,71 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
 import SearchBarAnimasi from "../../components/SearchBarAnimasi";
 import { supabase } from "../../lib/supabase";
-import { formatTanggal } from "../../lib/tanggal";
-import { tandaiAbsensi } from "../../lib/absensi";
-import { LABEL_STATUS_ABSEN } from "../../lib/absensiMeta";
-import { teksDenganLink } from "../../lib/linkify";
-import { bukaBukti, buktiDiStorage } from "../../lib/buktiIzin";
+import { tanggalHariIniWIB } from "../../lib/absensi";
 import type { BarisAbsensi } from "../../lib/rekap";
+import { ambilAbsensiTinjau, ambilPegawaiTinjau, urlFotoAbsensi } from "../../lib/tinjauAbsen";
+import { hariKerja } from "../../lib/izinAturan";
+import { hitungKategori, susunKartu, type Kategori, type KartuTinjau, type PegawaiTinjau } from "../../lib/tinjauAbsenAturan";
 import type { Divisi } from "../../types/database";
+import PilihTanggal from "./tinjau/PilihTanggal";
+import KartuAbsen from "./tinjau/KartuAbsen";
+import DetailAbsen from "./tinjau/DetailAbsen";
+
+type Saring = Kategori | "semua";
+type Kartu = KartuTinjau<BarisAbsensi>;
+
+/** Kotak ringkasan = legenda warna garis kartu = tombol saring. */
+const KOTAK: { id: Saring; label: string; garis: string; aktif: string }[] = [
+  { id: "semua", label: "Semua", garis: "ring-1 ring-black/5", aktif: "bg-brand-masuk text-white ring-brand-masuk" },
+  { id: "belum", label: "Belum absen", garis: "ring-2 ring-gray-900", aktif: "bg-gray-900 text-white ring-gray-900" },
+  { id: "telat", label: "Telat", garis: "ring-2 ring-amber-400", aktif: "bg-amber-400 text-amber-950 ring-amber-400" },
+  { id: "izin", label: "Izin/Sakit", garis: "ring-2 ring-red-500", aktif: "bg-red-500 text-white ring-red-500" },
+  { id: "hadir", label: "Hadir", garis: "ring-1 ring-black/5", aktif: "bg-brand-masuk text-white ring-brand-masuk" },
+];
+
+const KOSONG: Record<Saring, string> = {
+  semua: "Tidak ada data pada tanggal ini.",
+  belum: "Semua sudah absen 🎉",
+  telat: "Tidak ada yang telat.",
+  izin: "Tidak ada yang izin/sakit.",
+  hadir: "Belum ada yang hadir.",
+};
+
+const fmtGrup = new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "short", timeZone: "UTC" });
+const UMUR_FOTO_MS = 50 * 60 * 1000; // URL foto berlaku 1 jam; minta ulang sebelum kedaluwarsa
 
 export default function TinjauAbsensi() {
+  const [hariIni] = useState(tanggalHariIniWIB);
+  const [dari, setDari] = useState(hariIni);
+  const [sampai, setSampai] = useState(hariIni);
+
   const [rows, setRows] = useState<BarisAbsensi[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hanyaDitandai, setHanyaDitandai] = useState(false);
-
-  // dariInput/sampaiInput = nilai yang sedang diketik di form (belum tentu
-  // sudah aktif); dari/sampai = rentang yang BENAR-BENAR dipakai buat query,
-  // baru berubah saat tombol "Terapkan" ditekan supaya tidak fetch berkali-
-  // kali sambil pengguna masih mengetik tanggal.
-  const [dariInput, setDariInput] = useState(defaultHariIni());
-  const [sampaiInput, setSampaiInput] = useState(defaultHariIni());
-  const [dari, setDari] = useState(defaultHariIni());
-  const [sampai, setSampai] = useState(defaultHariIni());
-
-  const [terbuka, setTerbuka] = useState<string | null>(null);
+  const [pegawai, setPegawai] = useState<PegawaiTinjau[] | null>(null);
   const [divisiList, setDivisiList] = useState<Divisi[]>([]);
-  const [divisiId, setDivisiId] = useState<string>("semua");
+  const [error, setError] = useState<string | null>(null);
+  // rentang yang datanya sudah dimuat; beda dengan rentang terpilih = sedang memuat
+  const [dimuat, setDimuat] = useState<string | null>(null);
+  const loading = dimuat !== `${dari}|${sampai}`;
+
+  const [divisiId, setDivisiId] = useState("semua");
+  const [saring, setSaring] = useState<Saring>("semua");
   const [cari, setCari] = useState("");
+  const [dibuka, setDibuka] = useState<string | null>(null);
+
+  const [fotoUrl, setFotoUrl] = useState<Record<string, string | null>>({});
+  const sudahDiminta = useRef(new Set<string>());
+  const waktuFoto = useRef(0);
+  const nomorMuat = useRef(0);
 
   useEffect(() => {
+    ambilPegawaiTinjau()
+      .then(setPegawai)
+      .catch((e: unknown) => {
+        setPegawai([]);
+        setError(e instanceof Error ? e.message : "Gagal memuat daftar pegawai.");
+      });
     supabase
       .from("divisi")
       .select("*")
@@ -40,375 +74,215 @@ export default function TinjauAbsensi() {
       .then(({ data }) => setDivisiList((data as Divisi[]) ?? []));
   }, []);
 
-  async function muat() {
-    setLoading(true);
-    setError(null);
-    let query = supabase
-      .from("absensi")
-      .select("*, profiles(nama, divisi_id)")
-      .gte("tanggal", dari)
-      .lte("tanggal", sampai)
-      .order("tanggal", { ascending: false });
-
-    if (hanyaDitandai) query = query.eq("ditandai", true);
-
-    const { data, error } = await query;
-    if (error) setError(error.message);
-    setRows((data as BarisAbsensi[]) ?? []);
-    setLoading(false);
-  }
+  const muat = useCallback(async () => {
+    const ke = ++nomorMuat.current;
+    let data: BarisAbsensi[] = [];
+    let galat: string | null = null;
+    try {
+      data = await ambilAbsensiTinjau(dari, sampai);
+    } catch (e) {
+      galat = e instanceof Error ? e.message : "Gagal memuat absensi.";
+    }
+    if (ke !== nomorMuat.current) return; // sudah ada permintaan yang lebih baru
+    if (waktuFoto.current && Date.now() - waktuFoto.current > UMUR_FOTO_MS) {
+      sudahDiminta.current.clear();
+      waktuFoto.current = 0;
+      setFotoUrl({});
+    }
+    setRows(data);
+    setError(galat);
+    setDimuat(`${dari}|${sampai}`);
+  }, [dari, sampai]);
 
   useEffect(() => {
     void muat();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dari, sampai, hanyaDitandai]);
+  }, [muat]);
 
-  function terapkanFilter() {
-    setDari(dariInput);
-    setSampai(sampaiInput);
-  }
+  const semuaKartu = useMemo(
+    () => (pegawai ? susunKartu(rows, pegawai, dari, sampai, hariIni) : []),
+    [rows, pegawai, dari, sampai, hariIni]
+  );
 
-  const adaPerubahanBelumDiterapkan = dariInput !== dari || sampaiInput !== sampai;
   const cariNormal = cari.trim().toLowerCase();
+  const cocokCari = useMemo(
+    () => (cariNormal ? semuaKartu.filter((k) => k.nama.toLowerCase().includes(cariNormal)) : semuaKartu),
+    [semuaKartu, cariNormal]
+  );
+  const perDivisi = useMemo(() => {
+    const n: Record<string, number> = {};
+    for (const k of cocokCari) if (k.divisiId) n[k.divisiId] = (n[k.divisiId] ?? 0) + 1;
+    return n;
+  }, [cocokCari]);
+  const diDivisi = useMemo(
+    () => (divisiId === "semua" ? cocokCari : cocokCari.filter((k) => k.divisiId === divisiId)),
+    [cocokCari, divisiId]
+  );
+  const hitungan = hitungKategori(diDivisi);
+  const tampil = useMemo(() => (saring === "semua" ? diDivisi : diDivisi.filter((k) => k.kategori === saring)), [diDivisi, saring]);
+  const bisaDibuka = useMemo(() => tampil.filter((k): k is Kartu & { row: BarisAbsensi } => k.row !== null), [tampil]);
 
-  const rowsTersaring = rows.filter((r) => {
-    if (divisiId !== "semua" && r.profiles?.divisi_id !== divisiId) return false;
-    if (cariNormal && !(r.profiles?.nama ?? "").toLowerCase().includes(cariNormal)) return false;
-    return true;
-  });
+  // URL foto absen untuk kartu yang tampil (sekali minta per foto; gambar dimuat malas oleh browser)
+  useEffect(() => {
+    const perlu: string[] = [];
+    for (const k of bisaDibuka) {
+      for (const p of [k.row.masuk_foto_path, k.row.keluar_foto_path]) {
+        if (p && !sudahDiminta.current.has(p)) {
+          sudahDiminta.current.add(p);
+          perlu.push(p);
+        }
+      }
+    }
+    if (perlu.length === 0) return;
+    if (!waktuFoto.current) waktuFoto.current = Date.now();
+    void urlFotoAbsensi(perlu).then((h) => setFotoUrl((m) => ({ ...m, ...h })));
+  }, [bisaDibuka]);
 
-  const ringkasan = useMemo(() => {
-    const hasil = { total: rowsTersaring.length, hadir: 0, telat: 0, dinas_luar: 0, izin: 0 };
-    for (const r of rowsTersaring) {
-      if (r.status === "hadir") hasil.hadir++;
-      else if (r.status === "telat") hasil.telat++;
-      else if (r.status === "dinas_luar") hasil.dinas_luar++;
-      else if (r.status === "izin") hasil.izin++;
+  const petaPegawai = useMemo(() => new Map((pegawai ?? []).map((p) => [p.id, p])), [pegawai]);
+  const petaDivisi = useMemo(() => new Map(divisiList.map((d) => [d.id, d.nama])), [divisiList]);
+  const namaDivisi = (id: string | null) => (id ? (petaDivisi.get(id) ?? null) : null);
+
+  const grup = useMemo(() => {
+    const hasil: { tanggal: string; kartu: Kartu[] }[] = [];
+    for (const k of tampil) {
+      const akhir = hasil[hasil.length - 1];
+      if (akhir && akhir.tanggal === k.tanggal) akhir.kartu.push(k);
+      else hasil.push({ tanggal: k.tanggal, kartu: [k] });
     }
     return hasil;
-  }, [rowsTersaring]);
+  }, [tampil]);
+
+  const posisi = dibuka ? bisaDibuka.findIndex((k) => k.kunci === dibuka) : -1;
+  const kartuDibuka = posisi >= 0 ? bisaDibuka[posisi] : null;
+  const satuHari = dari === sampai;
+  const tutupDetail = useCallback(() => setDibuka(null), []);
 
   return (
     <div className="flex flex-col gap-4">
       <HeaderHalaman judul="Tinjau Absensi" />
 
-      <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="date"
-            value={dariInput}
-            onChange={(e) => setDariInput(e.target.value)}
-            className="rounded-lg border border-gray-300 p-2 text-sm"
-          />
-          <span className="text-gray-400">–</span>
-          <input
-            type="date"
-            value={sampaiInput}
-            onChange={(e) => setSampaiInput(e.target.value)}
-            className="rounded-lg border border-gray-300 p-2 text-sm"
-          />
-          <button
-            onClick={terapkanFilter}
-            className={`min-h-[40px] rounded-lg px-4 text-sm font-semibold transition ${
-              adaPerubahanBelumDiterapkan
-                ? "bg-brand-masuk text-white"
-                : "border border-gray-300 bg-white text-gray-400"
-            }`}
-          >
-            Terapkan
-          </button>
-        </div>
-        <p className="text-xs text-gray-400">
-          Menampilkan: <strong className="text-gray-600">{formatTanggal(ambilTanggal(dari), "d MMM yyyy")}</strong>
-          {dari !== sampai && (
-            <>
-              {" "}
-              – <strong className="text-gray-600">{formatTanggal(ambilTanggal(sampai), "d MMM yyyy")}</strong>
-            </>
-          )}
-          {adaPerubahanBelumDiterapkan && (
-            <span className="ml-1 text-amber-600">(ada perubahan tanggal, tekan Terapkan)</span>
-          )}
-        </p>
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <PilihTanggal
+          dari={dari}
+          sampai={sampai}
+          hariIni={hariIni}
+          onUbah={(d, s) => {
+            setDari(d);
+            setSampai(s);
+            setDibuka(null);
+          }}
+        />
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
-          <select
-            value={divisiId}
-            onChange={(e) => setDivisiId(e.target.value)}
-            className="rounded-lg border border-gray-300 bg-white p-2 text-sm"
-          >
-            <option value="semua">Semua Divisi</option>
-            {divisiList.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.nama}
-              </option>
-            ))}
-          </select>
-          <label className="flex items-center gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={hanyaDitandai}
-              onChange={(e) => setHanyaDitandai(e.target.checked)}
-            />
-            Hanya ditandai
-          </label>
-          <div className="ml-auto w-full max-w-[220px]">
-            <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama pegawai..." />
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <div
+              className="-my-1 flex min-w-0 flex-1 gap-2 overflow-x-auto py-1 pl-0.5 pr-6 [mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)] [scrollbar-width:none]"
+              role="group"
+              aria-label="Saring divisi"
+            >
+              {[{ id: "semua", nama: "Semua divisi" }, ...divisiList].map((d) => {
+                const aktif = divisiId === d.id;
+                const n = d.id === "semua" ? cocokCari.length : (perDivisi[d.id] ?? 0);
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    aria-pressed={aktif}
+                    onClick={() => setDivisiId(d.id)}
+                    className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold transition active:scale-95 ${
+                      aktif ? "bg-brand-masuk text-white shadow-sm" : "bg-white text-brand-text shadow-sm ring-1 ring-black/5"
+                    }`}
+                  >
+                    {d.nama}
+                    <span className={`rounded-full px-1.5 text-[11px] ${aktif ? "bg-white/20" : "bg-gray-100 text-gray-500"}`}>{n}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="w-11 shrink-0 has-[input]:w-44 sm:has-[input]:w-56">
+              <SearchBarAnimasi value={cari} onChange={setCari} placeholder="Cari nama…" />
+            </div>
           </div>
+
+          <div className="grid grid-cols-5 gap-2" role="group" aria-label="Saring kehadiran">
+            {KOTAK.map((k) => {
+              const aktif = saring === k.id;
+              return (
+                <button
+                  key={k.id}
+                  type="button"
+                  aria-pressed={aktif}
+                  onClick={() => setSaring(aktif && k.id !== "semua" ? "semua" : k.id)}
+                  className={`flex min-h-[64px] flex-col items-center justify-center rounded-2xl px-1 py-2 text-center transition active:scale-95 ${
+                    aktif ? `${k.aktif} shadow-md` : `bg-white text-brand-text shadow-sm ${k.garis}`
+                  }`}
+                >
+                  <span className="text-xl font-bold leading-none">{loading || !pegawai ? "–" : hitungan[k.id]}</span>
+                  <span className={`mt-1 text-[11px] font-medium leading-tight ${aktif ? "" : "text-gray-500"}`}>{k.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="-mt-1 text-[11px] text-gray-400">
+            Garis kartu: <b className="text-gray-700">hitam</b> belum absen · <b className="text-amber-600">kuning</b> telat ·{" "}
+            <b className="text-red-600">merah</b> izin/sakit · tanpa garis hadir. Ketuk kotak untuk menyaring.
+          </p>
         </div>
       </div>
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
-      {!loading && (
-        <div className="grid grid-cols-5 gap-2 rounded-xl bg-white p-3 shadow-sm text-center">
-          <Ringkas label="Total" nilai={ringkasan.total} />
-          <Ringkas label="Hadir" nilai={ringkasan.hadir} warna="text-green-600" />
-          <Ringkas label="Telat" nilai={ringkasan.telat} warna="text-amber-600" />
-          <Ringkas label="Dinas Luar" nilai={ringkasan.dinas_luar} warna="text-blue-600" />
-          <Ringkas label="Izin" nilai={ringkasan.izin} warna="text-gray-500" />
-        </div>
-      )}
-
-      {loading ? (
+      {loading || !pegawai ? (
         <Loading teks="Memuat data absensi..." />
+      ) : tampil.length === 0 ? (
+        <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
+          {saring === "semua" && satuHari && !hariKerja(dari) ? "Akhir pekan — tidak ada yang wajib absen." : KOSONG[saring]}
+        </p>
       ) : (
-        <div className="grid items-start gap-2 lg:grid-cols-2">
-          {rowsTersaring.map((r) => (
-            <div
-              key={r.id}
-              className={`rounded-xl bg-white shadow-sm ${r.ditandai ? "ring-2 ring-red-300" : ""}`}
-            >
-              <button
-                onClick={() => setTerbuka(terbuka === r.id ? null : r.id)}
-                className="flex w-full items-center justify-between p-4 text-left"
-              >
-                <div>
-                  <p className="font-semibold text-brand-text">
-                    {r.profiles?.nama ?? "-"} {r.ditandai && <span className="text-red-500">⚑</span>}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {formatTanggal(r.tanggal)} · {LABEL_STATUS_ABSEN[r.status] ?? r.status}
-                  </p>
+        <div className="flex flex-col gap-5">
+          {grup.map((g) => {
+            const belum = g.kartu.filter((k) => k.kategori === "belum").length;
+            return (
+              <section key={g.tanggal} className="flex flex-col gap-3" aria-label={fmtGrup.format(new Date(`${g.tanggal}T00:00:00Z`))}>
+                {!satuHari && (
+                  <h2 className="flex items-baseline gap-2 text-sm font-bold capitalize text-brand-text">
+                    {fmtGrup.format(new Date(`${g.tanggal}T00:00:00Z`))}
+                    <span className="text-xs font-normal normal-case text-gray-400">
+                      {g.kartu.length} orang{belum > 0 && saring !== "belum" ? ` · ${belum} belum absen` : ""}
+                    </span>
+                  </h2>
+                )}
+                <div className="grid grid-cols-1 gap-3 px-0.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {g.kartu.map((k) => (
+                    <KartuAbsen
+                      key={k.kunci}
+                      kartu={k}
+                      fotoUrl={fotoUrl}
+                      fotoProfil={petaPegawai.get(k.userId)?.foto_url}
+                      namaDivisi={divisiId === "semua" ? namaDivisi(k.divisiId) : null}
+                      onBuka={() => setDibuka(k.kunci)}
+                    />
+                  ))}
                 </div>
-                <span className="text-gray-400">{terbuka === r.id ? "▲" : "▼"}</span>
-              </button>
-
-              {terbuka === r.id && <DetailAbsensi row={r} onUbah={muat} />}
-            </div>
-          ))}
-          {rowsTersaring.length === 0 && (
-            <p className="rounded-xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
-              Tidak ada data pada rentang ini.
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DetailAbsensi({ row, onUbah }: { row: BarisAbsensi; onUbah: () => void }) {
-  const [alasan, setAlasan] = useState(row.alasan_tanda ?? "");
-  const [menyimpan, setMenyimpan] = useState(false);
-  const [errorTanda, setErrorTanda] = useState<string | null>(null);
-
-  async function simpanTanda(ditandai: boolean) {
-    if (ditandai && alasan.trim().length < 3) {
-      setErrorTanda("Isi alasan penandaan dulu (minimal 3 huruf).");
-      return;
-    }
-    setMenyimpan(true);
-    setErrorTanda(null);
-    try {
-      await tandaiAbsensi(row.id, ditandai, alasan.trim());
-      onUbah();
-    } catch (e) {
-      setErrorTanda(e instanceof Error ? e.message : "Gagal menyimpan tanda.");
-    } finally {
-      setMenyimpan(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-4 border-t border-gray-100 p-4">
-      {(row.catatan_klarifikasi || row.bukti_url) && (
-        <div className="rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
-          <p className="font-semibold">Keterangan dari pegawai</p>
-          {row.catatan_klarifikasi && <p className="mt-1">{teksDenganLink(row.catatan_klarifikasi)}</p>}
-          {row.bukti_url && buktiDiStorage(row.bukti_url) && (
-            <button
-              type="button"
-              onClick={() => bukaBukti(row.bukti_url!).catch((e: Error) => setErrorTanda(e.message))}
-              className="mt-1 inline-block text-blue-700 underline"
-            >
-              🖼️ Lihat foto bukti
-            </button>
-          )}
-          {row.bukti_url && !buktiDiStorage(row.bukti_url) && (
-            <a
-              href={row.bukti_url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 inline-block break-all text-blue-700 underline"
-            >
-              🔗 Buka link bukti
-            </a>
-          )}
+              </section>
+            );
+          })}
         </div>
       )}
 
-      <SesiAbsensi
-        judul="Masuk"
-        at={row.masuk_at}
-        lat={row.masuk_lat}
-        lng={row.masuk_lng}
-        akurasi={row.masuk_akurasi}
-        mode={row.masuk_mode}
-        catatan={row.masuk_catatan}
-        fotoPath={row.masuk_foto_path}
-        ip={row.masuk_ip}
-      />
-      <SesiAbsensi
-        judul="Pulang"
-        at={row.keluar_at}
-        lat={row.keluar_lat}
-        lng={row.keluar_lng}
-        akurasi={row.keluar_akurasi}
-        mode={row.keluar_mode}
-        catatan={row.keluar_catatan}
-        fotoPath={row.keluar_foto_path}
-        ip={row.keluar_ip}
-      />
-
-      <div className="rounded-lg bg-gray-50 p-3">
-        <p className="mb-2 text-sm font-semibold text-brand-text">Tandai untuk Ditinjau</p>
-        {row.ditandai ? (
-          <div className="flex flex-col gap-2">
-            {row.alasan_tanda && (
-              <p className="text-sm text-red-700">Alasan saat ini: {row.alasan_tanda}</p>
-            )}
-            <button
-              onClick={() => void simpanTanda(false)}
-              disabled={menyimpan}
-              className="min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold text-brand-text disabled:opacity-60"
-            >
-              {menyimpan ? "Menyimpan..." : "Batalkan Tanda"}
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={alasan}
-              onChange={(e) => setAlasan(e.target.value)}
-              rows={2}
-              placeholder="Alasan ditandai, mis. lokasi mencurigakan / foto tidak jelas"
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
-            {errorTanda && <p className="text-xs text-red-600">{errorTanda}</p>}
-            <button
-              onClick={() => void simpanTanda(true)}
-              disabled={menyimpan}
-              className="min-h-[40px] rounded-lg bg-red-600 text-sm font-semibold text-white disabled:opacity-60"
-            >
-              {menyimpan ? "Menyimpan..." : "⚑ Tandai Entri Ini"}
-            </button>
-          </div>
-        )}
-      </div>
+      {kartuDibuka && (
+        <DetailAbsen
+          kartu={kartuDibuka}
+          posisi={posisi}
+          total={bisaDibuka.length}
+          fotoUrl={fotoUrl}
+          fotoProfil={petaPegawai.get(kartuDibuka.userId)?.foto_url}
+          namaDivisi={namaDivisi(kartuDibuka.divisiId)}
+          onSebelum={posisi > 0 ? () => setDibuka(bisaDibuka[posisi - 1].kunci) : null}
+          onBerikut={posisi < bisaDibuka.length - 1 ? () => setDibuka(bisaDibuka[posisi + 1].kunci) : null}
+          onTutup={tutupDetail}
+          onUbah={muat}
+        />
+      )}
     </div>
   );
-}
-
-function SesiAbsensi({
-  judul,
-  at,
-  lat,
-  lng,
-  akurasi,
-  mode,
-  catatan,
-  fotoPath,
-  ip,
-}: {
-  judul: string;
-  at: string | null;
-  lat: number | null;
-  lng: number | null;
-  akurasi: number | null;
-  mode: string | null;
-  catatan: string | null;
-  fotoPath: string | null;
-  ip: string | null;
-}) {
-  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!fotoPath) return;
-    supabase.storage
-      .from("absensi")
-      .createSignedUrl(fotoPath, 300)
-      .then(({ data }) => setFotoUrl(data?.signedUrl ?? null));
-  }, [fotoPath]);
-
-  if (!at) {
-    return (
-      <div>
-        <p className="text-sm font-semibold text-gray-400">{judul}: belum absen</p>
-      </div>
-    );
-  }
-
-  // Absen "Di Kantor" sudah pasti lokasinya kantor (tervalidasi radius saat
-  // absen) — peta cuma ditampilkan untuk Dinas Luar, supaya tidak makan
-  // tempat percuma menampilkan titik yang sama berulang-ulang.
-  const petaUrl =
-    mode !== "kantor" && lat != null && lng != null
-      ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.003}%2C${lat - 0.003}%2C${
-          lng + 0.003
-        }%2C${lat + 0.003}&layer=mapnik&marker=${lat}%2C${lng}`
-      : null;
-
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-sm font-semibold text-brand-text">
-        {judul} · {new Date(at).toLocaleTimeString("id-ID")} · {mode === "kantor" ? "Di Kantor" : "Dinas Luar"}
-      </p>
-      {catatan && <p className="text-xs text-gray-500">Catatan: {teksDenganLink(catatan)}</p>}
-      <p className="text-xs text-gray-500">
-        Akurasi GPS: {akurasi != null ? `${Math.round(akurasi)} m` : "-"} · IP: {ip ?? "-"}
-      </p>
-      <div className="grid grid-cols-2 gap-2">
-        {fotoUrl && (
-          <img src={fotoUrl} alt={`Foto ${judul}`} className="aspect-square w-full rounded-lg object-cover" />
-        )}
-        {petaUrl && (
-          <iframe title={`Peta ${judul}`} src={petaUrl} className="aspect-square w-full rounded-lg border border-gray-200" />
-        )}
-        {!fotoUrl && fotoPath === null && (
-          <p className="col-span-2 text-xs text-gray-400">Foto sudah dihapus otomatis (retensi habis).</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Ringkas({ label, nilai, warna }: { label: string; nilai: number; warna?: string }) {
-  return (
-    <div>
-      <p className={`text-lg font-bold ${warna ?? "text-brand-text"}`}>{nilai}</p>
-      <p className="text-[11px] text-gray-500">{label}</p>
-    </div>
-  );
-}
-
-function defaultHariIni() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-/** Ubah string "yyyy-MM-dd" jadi Date di tengah malam waktu lokal (bukan UTC)
- * supaya tanggalnya tidak meleset dibanding yang diketik pengguna. */
-function ambilTanggal(ymd: string): Date {
-  const [tahun, bulan, tanggal] = ymd.split("-").map(Number);
-  return new Date(tahun, bulan - 1, tanggal);
 }

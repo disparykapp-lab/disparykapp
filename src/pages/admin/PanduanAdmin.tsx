@@ -178,36 +178,42 @@ export default function PanduanAdmin() {
       <Bagian judul="🔍 Tinjau Absensi">
         <Langkah no={1}>
           Buka Kelola → Tinjau Absensi. Secara default halaman ini menampilkan data{" "}
-          <strong>hari ini saja</strong>.
+          <strong>hari ini</strong>. Ketuk hari lain di strip minggu (geser kiri/kanan atau tekan
+          panah untuk pindah minggu) — datanya langsung berganti. Tombol "Hari ini" membawa kembali
+          ke hari ini.
         </Langkah>
         <Langkah no={2}>
-          Ganti tanggal "dari" dan "sampai" untuk lihat rentang lain, lalu tekan tombol{" "}
-          <strong>"Terapkan"</strong> (tombolnya berubah warna kalau ada tanggal yang belum
-          diterapkan) — supaya data tidak ikut berubah-ubah sambil kamu masih mengetik
-          tanggalnya. Filter divisi, "Hanya ditandai", dan pencarian nama langsung aktif tanpa
-          perlu menekan Terapkan.
+          Untuk beberapa hari sekaligus, tekan <strong>"Kalender"</strong>: ketuk tanggal awal lalu
+          tanggal akhir (seperti kalender izin), atau pilih chip cepat (Kemarin, Minggu ini, 7 hari
+          terakhir, Bulan ini), lalu tekan <strong>"Tampilkan"</strong>. Paling panjang 31 hari
+          sekali tampil; kartu dikelompokkan per tanggal.
         </Langkah>
         <Langkah no={3}>
-          Kartu ringkasan menampilkan total entri beserta jumlah Hadir/Telat/Dinas Luar/Izin
-          sesuai filter yang aktif.
+          Garis kartu menunjukkan kehadiran: <strong>tanpa garis</strong> = hadir tepat waktu (atau
+          Dinas Luar), <strong>kuning</strong> = telat, <strong>merah</strong> = izin/sakit,{" "}
+          <strong>hitam</strong> = belum absen. Pegawai wajib absen yang belum punya data hari itu
+          otomatis muncul sebagai kartu hitam (hari kerja saja, sampai hari ini). Kotak ringkasan di
+          atas menghitung tiap warna — ketuk salah satu untuk menampilkan warna itu saja. Chip divisi
+          dan pencarian nama menyaring langsung.
         </Langkah>
         <Langkah no={4}>
-          Tekan salah satu baris di daftar bawah untuk membuka detail: foto absen, akurasi GPS,
-          dan alamat IP — dipakai untuk mengecek kewajaran absen. Peta lokasi cuma ditampilkan
-          untuk absen <strong>Dinas Luar</strong>; absen "Di Kantor" tidak perlu peta karena
-          lokasinya sudah otomatis tervalidasi radius kantor saat absen.
+          Ketuk kartu untuk membuka detail di depan layar: foto masuk & pulang (ketuk foto untuk
+          ukuran penuh), jam, akurasi GPS, alamat IP, dan keterangan. Peta lokasi cuma ditampilkan
+          untuk absen <strong>Dinas Luar</strong>; absen "Di Kantor" sudah otomatis tervalidasi
+          radius kantor. Geser kiri/kanan (atau tombol Sebelumnya/Berikutnya, atau panah keyboard)
+          untuk pindah ke pegawai berikutnya tanpa menutup detail.
         </Langkah>
         <Langkah no={5}>
-          Kalau ada yang mencurigakan, isi alasan lalu tekan <strong>"⚑ Tandai Entri Ini"</strong>{" "}
-          di bagian bawah detail. Entri yang ditandai tampil dengan garis merah dan bisa
-          difilter lewat centang "Hanya ditandai". Tekan "Batalkan Tanda" kalau sudah beres.
+          Kalau ada yang mencurigakan, tekan <strong>"Tandai untuk ditinjau"</strong> di detail, isi
+          alasannya, lalu "Tandai". Kartu yang ditandai diberi ikon bendera merah. Tekan "Batalkan
+          tanda" kalau sudah beres.
         </Langkah>
         <Langkah no={6}>
           Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta foto bukti
           (mis. surat dokter) — lewat tombol bulat "Izin/Sakit" di Beranda, kolom keterangan
           opsional saat absen, atau tombol "+Keterangan" di Rekap mereka — keterangan itu muncul
-          di kotak biru paling atas detail entri ini. Tekan "🖼️ Lihat foto bukti" untuk membuka
-          fotonya (tersimpan privat di Supabase Storage, bucket bukti_izin). Keterangan lama yang
+          di kotak "Keterangan dari pegawai" pada detail entri ini, lengkap dengan foto buktinya
+          (tersimpan privat di Supabase Storage, bucket bukti_izin) — ketuk fotonya untuk ukuran penuh. Keterangan lama yang
           masih berupa link tampil sebagai "🔗 Buka link bukti".
         </Langkah>
         <Langkah no={7}>

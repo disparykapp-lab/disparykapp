@@ -258,6 +258,21 @@ button:disabled {
   .anim-buka { animation: none; }
 }
 
+/* Tinjau Absensi: strip minggu yang digeser (sekali jalan, bukan berulang). */
+@keyframes geser-dari-kanan {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes geser-dari-kiri {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.anim-geser-kanan { animation: geser-dari-kanan 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-geser-kiri { animation: geser-dari-kiri 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .anim-geser-kanan, .anim-geser-kiri { animation: none; }
+}
+
 /* Kartu "Terima kasih" di Beranda (petugas sudah selesai semua tugas
    undangan) — melayang halus terus-menerus + hati berdenyut pelan,
    dibuat lembut supaya tidak mengganggu di dashboard. */
