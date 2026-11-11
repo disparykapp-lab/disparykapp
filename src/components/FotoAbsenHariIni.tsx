@@ -4,7 +4,7 @@ import { msSampaiBesokWIB } from "../lib/absensiMeta";
 import type { Absensi } from "../types/database";
 
 /**
- * Foto absen masuk/pulang milik sendiri di kartu "Status Hari Ini". Hanya
+ * Foto absen masuk/pulang milik sendiri (kotak kecil) di bagian bawah tiket "Status Hari Ini". Hanya
  * foto hari ini yang bisa dibuka (dijaga policy Storage, migrasi 0036); pukul
  * 00.00 WIB foto disembunyikan walau Beranda masih terbuka.
  */
@@ -39,43 +39,40 @@ export default function FotoAbsenHariIni({ absensi }: { absensi: Absensi }) {
   const daftar = [
     { judul: "Masuk", path: masukPath, at: absensi.masuk_at },
     { judul: "Pulang", path: keluarPath, at: absensi.keluar_at },
-  ];
+  ].filter((f) => f.path);
 
   return (
-    <div className="mt-4 border-t border-gray-100 pt-4 lg:mt-0 lg:w-64 lg:shrink-0 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2">
-        <h3 className="text-sm font-semibold text-gray-500">Foto Absen Kamu</h3>
-        <span className="text-[11px] text-gray-400">Hanya tampil hari ini</span>
-      </div>
-      <div className="grid max-w-sm grid-cols-2 gap-3">
+    <div className="flex shrink-0 flex-col items-end gap-1" title="Foto absen hanya tampil hari ini">
+      <div className="flex gap-2">
         {daftar.map((f) => {
           const judul = f.at ? `${f.judul} · ${formatJam(f.at)}` : f.judul;
-          const u = f.path ? url[f.path] : null;
+          const u = url[f.path!];
           return (
-            <figure key={f.judul} className="flex flex-col gap-1">
-              {f.path && u ? (
+            <figure key={f.judul} className="flex flex-col items-center gap-0.5">
+              {u ? (
                 <button
                   type="button"
                   onClick={() => setDibuka({ url: u, judul })}
-                  className="overflow-hidden rounded-xl bg-gray-100 transition active:scale-95"
+                  className="h-14 w-14 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-2 ring-white transition active:scale-95"
                   aria-label={`Perbesar foto absen ${f.judul.toLowerCase()}`}
                 >
-                  <img src={u} alt="" className="aspect-[3/4] w-full object-cover" />
+                  <img src={u} alt="" className="h-full w-full object-cover" />
                 </button>
               ) : (
-                <div
-                  className={`flex aspect-[3/4] w-full items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-2 text-center text-xs text-gray-400 ${
-                    f.path && u === undefined ? "animate-pulse" : ""
+                <span
+                  className={`flex h-14 w-14 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-1 text-center text-[9px] leading-tight text-gray-400 ${
+                    u === undefined ? "animate-pulse" : ""
                   }`}
                 >
-                  {!f.path ? (f.at ? "Tanpa foto" : "Belum absen") : u === undefined ? "Memuat..." : "Foto tidak tersedia"}
-                </div>
+                  {u === undefined ? "" : "Foto tidak tersedia"}
+                </span>
               )}
-              <figcaption className="text-center text-xs font-medium text-gray-500">{judul}</figcaption>
+              <figcaption className="text-[10px] font-medium text-gray-500">{f.judul}</figcaption>
             </figure>
           );
         })}
       </div>
+      <span className="text-[9px] text-gray-400">foto hanya hari ini</span>
 
       {dibuka && <LihatFoto {...dibuka} onTutup={() => setDibuka(null)} />}
     </div>

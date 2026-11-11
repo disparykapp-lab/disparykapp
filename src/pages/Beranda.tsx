@@ -7,9 +7,8 @@ import IconTile from "../components/IconTile";
 import KartuOnline from "../components/KartuOnline";
 import UcapanUlangTahun from "../components/UcapanUlangTahun";
 import { ambilAbsensiHariIni } from "../lib/absensi";
-import { LABEL_STATUS_ABSEN } from "../lib/absensiMeta";
 import FormKeteranganAbsen from "../components/FormKeteranganAbsen";
-import FotoAbsenHariIni from "../components/FotoAbsenHariIni";
+import StatusHariIni from "../components/StatusHariIni";
 import { hitungProgressMagang } from "../lib/profil";
 import { formatTanggal } from "../lib/tanggal";
 import { ambilTugasSaya, hitungRingkasanUndangan } from "../lib/undangan";
@@ -141,33 +140,7 @@ export default function Beranda() {
             </section>
           )}
 
-          <section className="rounded-2xl bg-white p-5 shadow-sm lg:flex lg:items-start lg:gap-6">
-            {/* Desktop: status di kiri, foto absen di kanan (lebih pendek, tidak menyisakan
-                ruang kosong di kartu Progress sebelahnya) */}
-            <div className="lg:min-w-0 lg:flex-1">
-              <h2 className="mb-3 text-sm font-semibold text-gray-500">Status Hari Ini</h2>
-              <div className="flex flex-col gap-2 text-sm">
-                <BarisStatus
-                  label="Masuk"
-                  nilai={absensi?.masuk_at ? formatJam(absensi.masuk_at) : "Belum absen"}
-                />
-                <BarisStatus
-                  label="Pulang"
-                  nilai={absensi?.keluar_at ? formatJam(absensi.keluar_at) : "Belum absen"}
-                />
-                {absensi?.status && (
-                  <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
-                )}
-              </div>
-              {absensi?.status === "izin" && !absensi.masuk_at && (
-                <p className="mt-3 rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
-                  Hari ini kamu tercatat izin. Ternyata masuk kerja? Tekan <strong>Absen Masuk</strong> — izin hari ini
-                  otomatis jadi hadir.
-                </p>
-              )}
-            </div>
-            {absensi && <FotoAbsenHariIni absensi={absensi} />}
-          </section>
+          <StatusHariIni absensi={absensi} wajibAbsen={profile?.wajib_absen !== false} />
           </div>
 
           {perhatian.length > 0 && <KartuPerhatian daftar={perhatian} />}
@@ -289,17 +262,4 @@ function KartuPerhatian({ daftar }: { daftar: { tugas: TugasDenganPembuat; alasa
       {daftar.length > tampil.length && <p className="text-xs text-gray-500">+{daftar.length - tampil.length} tugas lain</p>}
     </Link>
   );
-}
-
-function BarisStatus({ label, nilai }: { label: string; nilai: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-semibold text-brand-text">{nilai}</span>
-    </div>
-  );
-}
-
-function formatJam(iso: string) {
-  return new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 }
