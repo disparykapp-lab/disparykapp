@@ -1,31 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import { CalendarDays, MapPin, Megaphone, Mic, Tag, Ticket } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { buatNaskahAi, ambilRiwayatNaskahAi, type FormNaskahAi } from "../../lib/naskahAi";
 import type { NaskahAi } from "../../types/database";
 import {
   ChipSaran,
   Galat,
-  InputIkon,
+  Isian,
+  KartuGaya,
   KartuHasil,
-  KartuVibe,
   KotakCerita,
   Langkah,
-  LoadingAi,
   PratinjauKosong,
   RiwayatList,
+  SedangMenulis,
   Segmen,
   SubJudul,
   Tips,
   TombolBikin,
-  type OpsiVibe,
+  type OpsiGaya,
   type RiwayatBaris,
 } from "./bersama";
 
-const GAYA_OPSI: OpsiVibe[] = [
-  { value: "berita", emoji: "📺", judul: "Berita", ket: "Formal ala TV/radio" },
-  { value: "siaran_pers", emoji: "📰", judul: "Siaran Pers", ket: "Resmi buat media" },
-  { value: "caption", emoji: "📱", judul: "Caption", ket: "Santai buat sosmed" },
-  { value: "voice_over", emoji: "🎬", judul: "Voice-over", ket: "Narasi video" },
+const GAYA_OPSI: OpsiGaya[] = [
+  { value: "berita", gambar: "/naskah-ai/berita.png", judul: "Berita", ket: "Formal ala TV/radio" },
+  { value: "siaran_pers", gambar: "/naskah-ai/siaran-pers.png", judul: "Siaran pers", ket: "Resmi untuk media" },
+  { value: "caption", gambar: "/naskah-ai/caption.png", judul: "Caption", ket: "Santai buat sosmed" },
+  { value: "voice_over", gambar: "/naskah-ai/naskah.png", judul: "Voice-over", ket: "Narasi video" },
 ];
 
 const PANJANG_OPSI = [
@@ -122,28 +123,28 @@ export default function SlideNaskah() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start lg:gap-5">
       <div className="flex min-w-0 flex-col gap-3">
-        <Langkah no={1} judul="Ceritain acaranya" ket="Poin-poin atau kronologi — makin detail, makin mantap naskahnya.">
+        <Langkah no={1} judul="Ceritain acaranya" ket="Tulis poin-poin atau kronologinya. Makin detail, makin bagus hasilnya.">
           <KotakCerita
             label="Poin-poin penting / kronologi kegiatan"
             value={form.poinPenting}
             onChange={ubah("poinPenting")}
             saran={SARAN_POIN}
-            placeholder={"Spill aja poin-poinnya, mis.:\n- Dibuka jam 09.00 oleh Kepala Dinas\n- Dihadiri ±200 pengunjung\n- Ada pertunjukan tari tradisional"}
+            placeholder={"Contoh:\n- Dibuka jam 09.00 oleh Kepala Dinas\n- Dihadiri ±200 pengunjung\n- Ada pertunjukan tari tradisional"}
           />
-          <Tips>💡 AI nulis persis dari yang kamu isi — pastiin fakta & kutipannya bener ya.</Tips>
+          <Tips>AI menulis persis dari isianmu — pastikan fakta dan kutipannya benar ya.</Tips>
         </Langkah>
 
-        <Langkah no={2} judul="Detail acara" opsional ket="Biar naskahnya lebih lengkap & nggak ngarang.">
-          <InputIkon ikon="🎪" label="Jenis acara" value={form.jenisAcara} onChange={ubah("jenisAcara")} placeholder="Ketik atau pilih di bawah">
+        <Langkah no={2} judul="Detail acara" opsional ket="Biar naskahnya lengkap.">
+          <Isian ikon={Tag} label="Jenis acara" value={form.jenisAcara} onChange={ubah("jenisAcara")} placeholder="Ketik atau pilih di bawah">
             <ChipSaran label="Saran jenis acara" opsi={JENIS_ACARA} value={form.jenisAcara} onChange={ubah("jenisAcara")} />
-          </InputIkon>
-          <InputIkon ikon="✨" label="Nama acara" value={form.namaAcara} onChange={ubah("namaAcara")} placeholder="mis. Jogja Cultural Week 2026" />
+          </Isian>
+          <Isian ikon={Ticket} label="Nama acara" value={form.namaAcara} onChange={ubah("namaAcara")} placeholder="mis. Jogja Cultural Week 2026" />
           <div className="grid grid-cols-2 gap-3">
-            <InputIkon ikon="📍" label="Lokasi" value={form.lokasi} onChange={ubah("lokasi")} placeholder="mis. Malioboro" />
-            <InputIkon ikon="📅" label="Tanggal" type="date" value={form.tanggal} onChange={ubah("tanggal")} />
+            <Isian ikon={MapPin} label="Lokasi" value={form.lokasi} onChange={ubah("lokasi")} placeholder="mis. Malioboro" />
+            <Isian ikon={CalendarDays} label="Tanggal" type="date" value={form.tanggal} onChange={ubah("tanggal")} />
           </div>
-          <InputIkon
-            ikon="🎙️"
+          <Isian
+            ikon={Mic}
             label="Narasumber / pihak terlibat"
             value={form.narasumber}
             onChange={ubah("narasumber")}
@@ -151,26 +152,26 @@ export default function SlideNaskah() {
           />
         </Langkah>
 
-        <Langkah no={3} judul="Pilih vibe-nya" ket="Mau dibawain gaya apa?">
-          <KartuVibe label="Gaya naskah" opsi={GAYA_OPSI} value={form.gaya} onChange={ubah("gaya")} />
-          <SubJudul>Panjang</SubJudul>
+        <Langkah no={3} judul="Pilih gaya tulisan" ket="Mau dibawakan seperti apa?">
+          <KartuGaya label="Gaya naskah" opsi={GAYA_OPSI} value={form.gaya} onChange={ubah("gaya")} />
+          <SubJudul>Panjang naskah</SubJudul>
           <Segmen label="Panjang naskah" opsi={PANJANG_OPSI} value={form.panjang} onChange={ubah("panjang")} />
-          <InputIkon ikon="🚀" label="Buat dipost di mana? (opsional)" value={form.platformTujuan} onChange={ubah("platformTujuan")} placeholder="Ketik atau pilih di bawah">
+          <Isian ikon={Megaphone} label="Mau dipost di mana? (opsional)" value={form.platformTujuan} onChange={ubah("platformTujuan")} placeholder="Ketik atau pilih di bawah">
             <ChipSaran label="Saran tujuan publikasi" opsi={PLATFORM} value={form.platformTujuan} onChange={ubah("platformTujuan")} />
-          </InputIkon>
+          </Isian>
         </Langkah>
 
         {error && <Galat>{error}</Galat>}
-        <TombolBikin onClick={() => void buat()} siap={siap} memuat={membuat} teks="Bikin naskahnya" teksBelumSiap="✍️ Ceritain acaranya dulu ya" />
+        <TombolBikin onClick={() => void buat()} siap={siap} memuat={membuat} teks="Bikin naskah" teksBelumSiap="Isi ceritanya dulu ya" />
       </div>
 
       <div ref={hasilRef} className="flex min-w-0 scroll-mt-4 flex-col gap-4">
         {membuat ? (
-          <LoadingAi pesan="naskah" />
+          <SedangMenulis pesan="naskah" />
         ) : hasilTerakhir ? (
           <KartuHasil hasil={hasilTerakhir} label={labelGaya} memuat={membuat} onUlang={() => void buat()} />
         ) : (
-          <PratinjauKosong judul="Naskahmu muncul di sini" ket="Isi ceritanya, pilih vibe, lalu tekan Bikin naskahnya ✨" />
+          <PratinjauKosong judul="Naskahmu muncul di sini" ket="Isi ceritanya, pilih gaya, lalu tekan Bikin naskah." />
         )}
         <RiwayatList
           riwayat={riwayat}
@@ -179,7 +180,7 @@ export default function SlideNaskah() {
           superAdmin={superAdmin}
           onHapus={() => void muatRiwayat()}
           onPakai={pakai}
-          kosongTeks="Belum ada naskah. Bikin yang pertama!"
+          kosongTeks="Belum ada naskah. Yuk bikin yang pertama."
         />
       </div>
     </div>

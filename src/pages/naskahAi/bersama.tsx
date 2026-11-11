@@ -1,14 +1,14 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { Check, ChevronDown, Copy, History, RotateCcw, Share2, Sparkles, Trash2, WandSparkles } from "lucide-react";
+import { Check, ChevronDown, Copy, RotateCcw, Share2, Trash2, type LucideIcon } from "lucide-react";
 import Loading from "../../components/Loading";
 import { superAdminHapusNaskahAi } from "../../lib/naskahAi";
 import { hitungKata, hitungPoin, judulRiwayat, pecahPertanyaan, tambahPoin, tanpaMarkdown } from "../../lib/naskahAiTeks";
 import type { NaskahAi } from "../../types/database";
 
-// Komponen "studio" Naskah AI yang dipakai mode Naskah & Wawancara: langkah bernomor,
-// kotak cerita besar, kartu pilihan, tombol bikin, kartu hasil, dan riwayat.
+// Komponen Naskah AI (mode Naskah & Wawancara) dengan bahasa visual aplikasi:
+// kartu putih, maroon, ilustrasi stiker dari /public, tanpa gradasi/animasi hiasan.
 
 /* ---------- Kerangka ---------- */
 
@@ -26,15 +26,13 @@ export function Langkah({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-3xl bg-white p-4 shadow-[0_12px_32px_-20px_rgba(31,41,55,0.45)] ring-1 ring-black/[0.04]">
-      <header className="mb-3 flex items-start gap-3">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#ff6a88] to-[#8b5cf6] text-sm font-black text-white shadow-sm">
-          {no}
-        </span>
+    <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <header className="mb-3 flex items-start gap-2.5">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-masuk text-xs font-bold text-white">{no}</span>
         <div className="min-w-0">
-          <h2 className="flex flex-wrap items-center gap-2 text-[15px] font-extrabold tracking-tight text-brand-text">
+          <h2 className="text-sm font-bold text-brand-text">
             {judul}
-            {opsional && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">opsional</span>}
+            {opsional && <span className="ml-1.5 text-xs font-normal text-gray-400">(opsional)</span>}
           </h2>
           {ket && <p className="text-xs text-gray-500">{ket}</p>}
         </div>
@@ -45,24 +43,27 @@ export function Langkah({
 }
 
 export function SubJudul({ children }: { children: ReactNode }) {
-  return <p className="-mb-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">{children}</p>;
+  return <p className="-mb-1.5 text-xs font-medium text-gray-600">{children}</p>;
 }
 
 export function Tips({ children }: { children: ReactNode }) {
-  return <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-900">{children}</p>;
+  return <p className="rounded-xl bg-lnd-sky px-3 py-2 text-xs text-brand-masuk-dark">{children}</p>;
 }
 
 export function Galat({ children }: { children: ReactNode }) {
   return (
-    <p role="alert" className="muncul-ai rounded-2xl bg-red-50 px-3 py-2.5 text-sm text-red-700">
-      😵 {children}
+    <p role="alert" className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700">
+      {children}
     </p>
   );
 }
 
+const kelasIsian =
+  "rounded-xl border border-gray-200 bg-gray-50 text-sm text-brand-text placeholder:text-gray-400 transition focus:border-brand-masuk focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-masuk/15";
+
 /* ---------- Isian ---------- */
 
-/** Kotak cerita besar + chip cepat yang menambah poin "- …" di baris baru. */
+/** Kotak cerita + tombol cepat yang menambah poin "- …" di baris baru. */
 export function KotakCerita({
   label,
   value,
@@ -102,7 +103,7 @@ export function KotakCerita({
         onChange={(e) => onChange(e.target.value)}
         rows={6}
         placeholder={placeholder}
-        className="min-h-[150px] w-full resize-y rounded-2xl bg-linear-to-br from-violet-50 via-white to-pink-50 p-3.5 text-[15px] leading-relaxed text-brand-text outline-none ring-1 ring-violet-100 transition placeholder:text-gray-400 focus:ring-2 focus:ring-violet-400"
+        className={`min-h-[140px] w-full resize-y p-3 leading-relaxed ${kelasIsian}`}
       />
       <div className="flex flex-wrap items-center gap-1.5">
         {saran.map((s) => (
@@ -110,12 +111,12 @@ export function KotakCerita({
             key={s}
             type="button"
             onClick={() => tambah(s)}
-            className="rounded-full bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-700 ring-1 ring-violet-100 transition hover:bg-violet-100 active:scale-95"
+            className="rounded-full bg-lnd-sky px-3 py-1.5 text-xs font-semibold text-brand-masuk transition active:scale-95"
           >
-            ＋ {s}
+            + {s}
           </button>
         ))}
-        <span className="ml-auto text-[11px] font-medium text-gray-400" aria-live="polite">
+        <span className="ml-auto text-[11px] text-gray-400" aria-live="polite">
           {hitungPoin(value)} poin · {hitungKata(value)} kata
         </span>
       </div>
@@ -123,9 +124,9 @@ export function KotakCerita({
   );
 }
 
-/** Input berikon dengan latar lembut (bukan kotak bergaris ala formulir). */
-export function InputIkon({
-  ikon,
+/** Input berlabel dengan ikon garis di depannya. */
+export function Isian({
+  ikon: Ikon,
   label,
   value,
   onChange,
@@ -133,32 +134,30 @@ export function InputIkon({
   type = "text",
   children,
 }: {
-  ikon: string;
+  ikon: LucideIcon;
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   type?: "text" | "date";
-  /** saran di bawah input (mis. ChipSaran) */
+  /** saran di bawah input (ChipSaran) */
   children?: ReactNode;
 }) {
   const id = useId();
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <label htmlFor={id} className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+      <label htmlFor={id} className="text-xs font-medium text-gray-600">
         {label}
       </label>
-      <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 ring-1 ring-transparent transition focus-within:bg-white focus-within:ring-2 focus-within:ring-violet-400">
-        <span aria-hidden="true" className="text-base">
-          {ikon}
-        </span>
+      <div className="relative">
+        <Ikon size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
         <input
           id={id}
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="min-h-[44px] w-full min-w-0 bg-transparent text-sm text-brand-text outline-none placeholder:text-gray-400"
+          className={`min-h-[44px] w-full min-w-0 py-2 pl-9 pr-3 ${kelasIsian}`}
         />
       </div>
       {children}
@@ -166,7 +165,7 @@ export function InputIkon({
   );
 }
 
-/** Chip saran yang mengisi input; ketuk lagi untuk mengosongkan. */
+/** Saran yang mengisi input; ketuk lagi untuk mengosongkan. */
 export function ChipSaran({ label, opsi, value, onChange }: { label: string; opsi: string[]; value: string; onChange: (v: string) => void }) {
   return (
     <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
@@ -178,8 +177,8 @@ export function ChipSaran({ label, opsi, value, onChange }: { label: string; ops
             type="button"
             aria-pressed={aktif}
             onClick={() => onChange(aktif ? "" : o)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition active:scale-95 ${
-              aktif ? "bg-brand-text text-white" : "bg-white text-gray-600 ring-1 ring-gray-200 hover:ring-gray-300"
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition active:scale-95 ${
+              aktif ? "border-brand-masuk bg-brand-masuk text-white" : "border-gray-200 bg-white text-gray-600"
             }`}
           >
             {o}
@@ -190,17 +189,18 @@ export function ChipSaran({ label, opsi, value, onChange }: { label: string; ops
   );
 }
 
-export interface OpsiVibe {
+export interface OpsiGaya {
   value: string;
-  emoji: string;
+  /** ilustrasi dari /public */
+  gambar: string;
   judul: string;
   ket: string;
 }
 
-/** Kartu pilihan gaya (pengganti dropdown). */
-export function KartuVibe({ label, opsi, value, onChange }: { label: string; opsi: OpsiVibe[]; value: string; onChange: (v: string) => void }) {
+/** Kartu pilihan berilustrasi — sama seperti pilihan Di Kantor / Dinas Luar di halaman Absen. */
+export function KartuGaya({ label, opsi, value, onChange }: { label: string; opsi: OpsiGaya[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div role="group" aria-label={label} className="grid grid-cols-2 gap-2">
+    <div role="group" aria-label={label} className="grid grid-cols-2 gap-2.5">
       {opsi.map((o) => {
         const aktif = value === o.value;
         return (
@@ -209,22 +209,15 @@ export function KartuVibe({ label, opsi, value, onChange }: { label: string; ops
             type="button"
             aria-pressed={aktif}
             onClick={() => onChange(o.value)}
-            className={`relative flex flex-col items-start gap-0.5 rounded-2xl p-3 text-left transition active:scale-[0.97] ${
-              aktif
-                ? "bg-linear-to-br from-[#2a1140] via-[#4a1748] to-[#8e1e3c] text-white shadow-lg shadow-violet-500/25"
-                : "bg-gray-50 text-brand-text ring-1 ring-gray-100 hover:bg-gray-100"
+            className={`flex min-h-[72px] items-center gap-2.5 rounded-2xl border-2 p-3 text-left transition active:scale-[0.98] ${
+              aktif ? "border-brand-masuk bg-brand-masuk/10" : "border-gray-200 bg-white"
             }`}
           >
-            <span className="mb-1 text-2xl" aria-hidden="true">
-              {o.emoji}
+            <img src={o.gambar} alt="" className="h-11 w-11 shrink-0 object-contain" />
+            <span className="min-w-0">
+              <span className={`block text-sm font-semibold ${aktif ? "text-brand-masuk" : "text-brand-text"}`}>{o.judul}</span>
+              <span className="block text-[11px] leading-snug text-gray-500">{o.ket}</span>
             </span>
-            <span className="text-sm font-extrabold tracking-tight">{o.judul}</span>
-            <span className={`text-[11px] leading-snug ${aktif ? "text-white/70" : "text-gray-500"}`}>{o.ket}</span>
-            {aktif && (
-              <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-brand-masuk" aria-hidden="true">
-                <Check size={12} strokeWidth={3.5} />
-              </span>
-            )}
           </button>
         );
       })}
@@ -232,7 +225,7 @@ export function KartuVibe({ label, opsi, value, onChange }: { label: string; ops
   );
 }
 
-/** Pilihan bersebelahan (panjang naskah, jumlah pertanyaan). */
+/** Pilihan bersebelahan bergaya tab di halaman Tugas. */
 export function Segmen<T extends string | number>({
   label,
   opsi,
@@ -245,7 +238,12 @@ export function Segmen<T extends string | number>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div role="group" aria-label={label} className="grid gap-1 rounded-2xl bg-gray-100 p-1" style={{ gridTemplateColumns: `repeat(${opsi.length}, minmax(0, 1fr))` }}>
+    <div
+      role="group"
+      aria-label={label}
+      className="grid gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1"
+      style={{ gridTemplateColumns: `repeat(${opsi.length}, minmax(0, 1fr))` }}
+    >
       {opsi.map((o) => {
         const aktif = o.value === value;
         return (
@@ -254,10 +252,10 @@ export function Segmen<T extends string | number>({
             type="button"
             aria-pressed={aktif}
             onClick={() => onChange(o.value)}
-            className={`flex min-h-[44px] flex-col items-center justify-center rounded-xl px-2 py-1.5 transition ${aktif ? "bg-white text-brand-text shadow-sm" : "text-gray-500 hover:text-brand-text"}`}
+            className={`flex min-h-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 transition ${aktif ? "bg-brand-masuk text-white" : "text-gray-600"}`}
           >
-            <span className="text-sm font-extrabold">{o.judul}</span>
-            {o.ket && <span className="text-[10px] font-medium text-gray-400">{o.ket}</span>}
+            <span className="text-sm font-semibold">{o.judul}</span>
+            {o.ket && <span className={`text-[10px] ${aktif ? "text-white/80" : "text-gray-400"}`}>{o.ket}</span>}
           </button>
         );
       })}
@@ -267,7 +265,7 @@ export function Segmen<T extends string | number>({
 
 /* ---------- Tombol & hasil ---------- */
 
-/** Tombol utama yang menempel di bawah layar selama form digulir. */
+/** Tombol utama, menempel di bawah layar selama form digulir. */
 export function TombolBikin({
   onClick,
   siap,
@@ -287,17 +285,15 @@ export function TombolBikin({
         type="button"
         onClick={onClick}
         disabled={!siap || memuat}
-        className={`tombol-ai flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl px-4 text-[15px] font-extrabold tracking-tight text-white transition active:scale-[0.98] ${siap ? "" : "tombol-ai-mati"}`}
+        className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-brand-masuk px-4 text-sm font-semibold text-white shadow-md transition active:scale-[0.98] disabled:bg-gray-300 disabled:text-gray-600 disabled:shadow-none"
       >
         {memuat ? (
           <>
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
-            Lagi diracik AI…
+            Sedang menulis…
           </>
         ) : siap ? (
-          <>
-            <Sparkles size={18} aria-hidden="true" /> {teks}
-          </>
+          teks
         ) : (
           teksBelumSiap
         )}
@@ -306,74 +302,46 @@ export function TombolBikin({
   );
 }
 
-const PESAN_NASKAH = [
-  "Membaca poin-poin kegiatan…",
-  "Menyusun kronologi acara…",
-  "Merangkai kalimat…",
-  "Menghaluskan gaya bahasa…",
-  "Sentuhan terakhir…",
-];
+const PESAN_NASKAH = ["Membaca poin-poin kegiatan…", "Menyusun kronologi acara…", "Merangkai kalimat…", "Merapikan gaya bahasa…", "Hampir selesai…"];
+const PESAN_PERTANYAAN = ["Memahami topik wawancara…", "Mencari sudut pandang menarik…", "Menyusun pertanyaan pembuka…", "Menajamkan pertanyaan lanjutan…", "Hampir selesai…"];
 
-const PESAN_PERTANYAAN = [
-  "Memahami topik wawancara…",
-  "Mencari sudut pandang menarik…",
-  "Menyusun pertanyaan pembuka…",
-  "Menajamkan pertanyaan lanjutan…",
-  "Sentuhan terakhir…",
-];
-
-/** Kartu "AI lagi mikir": maskot robot, pesan bergantian, dan baris kerangka berkilau. */
-export function LoadingAi({ pesan = "naskah" }: { pesan?: "naskah" | "pertanyaan" }) {
+/** Saat AI menulis: ilustrasi, langkah yang sedang dikerjakan, dan bilah progres. */
+export function SedangMenulis({ pesan = "naskah" }: { pesan?: "naskah" | "pertanyaan" }) {
   const daftar = pesan === "pertanyaan" ? PESAN_PERTANYAAN : PESAN_NASKAH;
   const [i, setI] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % daftar.length), 1700);
+    const t = setInterval(() => setI((v) => Math.min(v + 1, daftar.length - 1)), 2600);
     return () => clearInterval(t);
   }, [daftar.length]);
 
   return (
-    <div className="naskah-hero muncul-ai flex flex-col items-center gap-3 rounded-3xl p-6 text-center text-white" aria-live="polite">
-      <span className="naskah-blob" style={{ width: 180, height: 180, left: -60, top: -70, background: "#c0334f" }} aria-hidden="true" />
-      <span className="naskah-blob" style={{ width: 200, height: 200, right: -80, bottom: -90, background: "#7c3aed", animationDelay: "-5s" }} aria-hidden="true" />
-      <span className="robot-ai-wrap" aria-hidden="true">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <line x1="32" y1="8" x2="32" y2="2" stroke="#f0abfc" strokeWidth="2" strokeLinecap="round" />
-          <circle className="robot-ai-antena" cx="32" cy="2" r="3" fill="#f0abfc" />
-          <rect x="12" y="10" width="40" height="34" rx="10" fill="rgba(255,255,255,0.12)" stroke="#f0abfc" strokeWidth="2" />
-          <circle className="robot-ai-mata" cx="24" cy="26" r="3.5" fill="#fff" />
-          <circle className="robot-ai-mata" cx="40" cy="26" r="3.5" fill="#fff" />
-          <circle className="titik-ai" cx="26" cy="36" r="2" fill="#f0abfc" style={{ animationDelay: "0s" }} />
-          <circle className="titik-ai" cx="32" cy="36" r="2" fill="#f0abfc" style={{ animationDelay: "0.15s" }} />
-          <circle className="titik-ai" cx="38" cy="36" r="2" fill="#f0abfc" style={{ animationDelay: "0.3s" }} />
-        </svg>
-      </span>
-      <p className="text-sm font-bold">{daftar[i]}</p>
-      <div className="flex w-full max-w-xs flex-col gap-2" aria-hidden="true">
-        {["w-full", "w-11/12", "w-4/5", "w-2/3"].map((w) => (
-          <span key={w} className={`h-2.5 animate-pulse rounded-full bg-white/15 ${w}`} />
-        ))}
+    <div className="anim-buka flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm" aria-live="polite">
+      <img src="/naskah-ai/naskah.png" alt="" className="h-16 w-16 shrink-0 rounded-full object-cover" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-brand-text">{daftar[i]}</p>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-lnd-sky" aria-hidden="true">
+          <div className="progres-naskah h-full rounded-full bg-brand-masuk" />
+        </div>
+        <p className="mt-1.5 text-[11px] text-gray-400">Biasanya ±10 detik · RAFAEL AI</p>
       </div>
-      <p className="text-[11px] text-white/50">✨ Powered by RAFAEL AI</p>
     </div>
   );
 }
 
-/** Tempat hasil sebelum ada hasil (desktop, kolom kanan). */
+/** Tempat hasil sebelum ada hasil (kolom kanan di desktop). */
 export function PratinjauKosong({ judul, ket }: { judul: string; ket: string }) {
   return (
-    <div className="hidden flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-violet-200 bg-linear-to-br from-violet-50/70 to-pink-50/70 p-8 text-center lg:flex">
-      <span className="stiker-ai flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm" aria-hidden="true">
-        <WandSparkles className="text-violet-500" size={26} />
-      </span>
-      <p className="text-sm font-extrabold text-brand-text">{judul}</p>
+    <div className="hidden flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 bg-white/60 p-8 text-center lg:flex">
+      <img src="/naskah-ai/naskah.png" alt="" className="h-20 w-20 rounded-full object-cover opacity-90" />
+      <p className="text-sm font-semibold text-brand-text">{judul}</p>
       <p className="text-xs text-gray-500">{ket}</p>
     </div>
   );
 }
 
-function Pil({ children }: { children: ReactNode }) {
-  return <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700">{children}</span>;
+function Label({ children }: { children: ReactNode }) {
+  return <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600">{children}</span>;
 }
 
 function useSalin() {
@@ -390,7 +358,7 @@ function useSalin() {
   return { disalin, salin };
 }
 
-/** Hasil AI dalam bingkai gradasi: salin, bagikan, bikin ulang. Pertanyaan tampil per kartu. */
+/** Hasil AI: salin, bagikan, bikin ulang. Pertanyaan wawancara tampil bernomor, bisa disalin satu-satu. */
 export function KartuHasil({
   hasil,
   label,
@@ -407,78 +375,69 @@ export function KartuHasil({
   const bisaBagikan = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   return (
-    <div className="bingkai-ai muncul-ai">
-      <div className="flex flex-col gap-3 rounded-[1.65rem] bg-white p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-violet-500">✨ Udah jadi!</p>
-            <h3 className="text-lg font-black tracking-tight text-brand-text">
-              {hasil.tipe === "pertanyaan" ? (pecah ? `${pecah.daftar.length} pertanyaan siap` : "Pertanyaan siap") : "Naskah kamu"}
-            </h3>
-          </div>
-          <div className="flex flex-wrap justify-end gap-1">
-            {label && <Pil>{label}</Pil>}
-            <Pil>±{hitungKata(hasil.hasil)} kata</Pil>
-          </div>
+    <div className="anim-buka flex flex-col gap-3 rounded-2xl border-t-4 border-brand-masuk bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-base font-bold text-brand-text">
+          {hasil.tipe === "pertanyaan" ? (pecah ? `${pecah.daftar.length} pertanyaan siap dipakai` : "Pertanyaan siap dipakai") : "Naskah sudah jadi"}
+        </h3>
+        <div className="flex flex-wrap justify-end gap-1">
+          {label && <Label>{label}</Label>}
+          <Label>±{hitungKata(hasil.hasil)} kata</Label>
         </div>
+      </div>
 
-        {pecah ? (
-          <div className="flex flex-col gap-2">
-            {pecah.pembuka && <p className="text-xs text-gray-500">{pecah.pembuka}</p>}
-            <ol className="flex flex-col gap-2">
-              {pecah.daftar.map((p, i) => (
-                <li key={i} className="muncul-ai flex items-start gap-3 rounded-2xl bg-gray-50 p-3" style={{ animationDelay: `${i * 70}ms` }}>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#ff6a88] to-[#8b5cf6] text-xs font-black text-white">
-                    {i + 1}
-                  </span>
-                  <p className="min-w-0 flex-1 break-words text-sm leading-relaxed text-brand-text">{p}</p>
-                  <button
-                    type="button"
-                    onClick={() => void salin(p, `q${i}`)}
-                    aria-label={`Salin pertanyaan ${i + 1}`}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-violet-600"
-                  >
-                    {disalin === `q${i}` ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
-                  </button>
-                </li>
-              ))}
-            </ol>
-            {pecah.penutup && <p className="text-xs text-gray-500">{pecah.penutup}</p>}
-          </div>
-        ) : (
-          <div className="whitespace-pre-wrap break-words rounded-2xl bg-linear-to-br from-gray-50 to-violet-50/50 p-4 text-[15px] leading-relaxed text-brand-text">
-            {tanpaMarkdown(hasil.hasil)}
-          </div>
+      {pecah ? (
+        <div className="flex flex-col gap-2">
+          {pecah.pembuka && <p className="text-xs text-gray-500">{pecah.pembuka}</p>}
+          <ol className="flex flex-col divide-y divide-gray-100 rounded-xl bg-gray-50">
+            {pecah.daftar.map((p, i) => (
+              <li key={i} className="flex items-start gap-3 p-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-masuk text-[11px] font-bold text-white">{i + 1}</span>
+                <p className="min-w-0 flex-1 break-words text-sm leading-relaxed text-brand-text">{p}</p>
+                <button
+                  type="button"
+                  onClick={() => void salin(p, `q${i}`)}
+                  aria-label={`Salin pertanyaan ${i + 1}`}
+                  className="-m-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition hover:bg-white hover:text-brand-masuk"
+                >
+                  {disalin === `q${i}` ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+                </button>
+              </li>
+            ))}
+          </ol>
+          {pecah.penutup && <p className="text-xs text-gray-500">{pecah.penutup}</p>}
+        </div>
+      ) : (
+        <div className="whitespace-pre-wrap break-words rounded-xl bg-gray-50 p-3.5 text-sm leading-relaxed text-brand-text">{tanpaMarkdown(hasil.hasil)}</div>
+      )}
+
+      <p className="text-[11px] text-gray-400">Cek lagi fakta & ejaannya sebelum dipublikasikan.</p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void salin(hasil.hasil, "semua")}
+          className="flex min-h-[40px] items-center gap-1.5 rounded-xl bg-brand-masuk px-4 text-xs font-semibold text-white transition active:scale-95"
+        >
+          {disalin === "semua" ? <Check size={14} /> : <Copy size={14} />}
+          {disalin === "semua" ? "Tersalin" : "Salin"}
+        </button>
+        {bisaBagikan && (
+          <button
+            type="button"
+            onClick={() => void navigator.share({ title: hasil.nama_acara || "Naskah", text: hasil.hasil }).catch(() => {})}
+            className="flex min-h-[40px] items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 text-xs font-semibold text-brand-text transition active:scale-95"
+          >
+            <Share2 size={14} /> Bagikan
+          </button>
         )}
-
-        <p className="text-[11px] text-gray-400">👀 Cek lagi faktanya sebelum dipublikasikan ya.</p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => void salin(hasil.hasil, "semua")}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-full bg-brand-text px-4 text-xs font-bold text-white transition active:scale-95"
-          >
-            {disalin === "semua" ? <Check size={14} /> : <Copy size={14} />}
-            {disalin === "semua" ? "Tersalin!" : "Salin semua"}
-          </button>
-          {bisaBagikan && (
-            <button
-              type="button"
-              onClick={() => void navigator.share({ title: hasil.nama_acara || "Naskah AI", text: hasil.hasil }).catch(() => {})}
-              className="flex min-h-[40px] items-center gap-1.5 rounded-full bg-gray-100 px-4 text-xs font-bold text-brand-text transition active:scale-95"
-            >
-              <Share2 size={14} /> Bagikan
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onUlang}
-            disabled={memuat}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-full px-3 text-xs font-bold text-violet-700 ring-1 ring-violet-200 transition active:scale-95 disabled:opacity-50"
-          >
-            <RotateCcw size={14} /> Bikin ulang
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onUlang}
+          disabled={memuat}
+          className="flex min-h-[40px] items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 text-xs font-semibold text-brand-text transition active:scale-95 disabled:opacity-50"
+        >
+          <RotateCcw size={14} /> Bikin ulang
+        </button>
       </div>
     </div>
   );
@@ -531,50 +490,46 @@ export function RiwayatList({
 
   return (
     <section className="flex flex-col gap-2" aria-label="Riwayat">
-      <h2 className="flex items-center gap-2 px-1 text-sm font-extrabold tracking-tight text-brand-text">
-        <History size={16} className="text-violet-500" aria-hidden="true" /> Riwayat
-        {riwayat.length > 0 && <span className="rounded-full bg-gray-200/70 px-2 py-0.5 text-[10px] font-bold text-gray-600">{riwayat.length}</span>}
+      <h2 className="px-1 text-sm font-semibold text-brand-text">
+        Riwayat {riwayat.length > 0 && <span className="font-normal text-gray-400">({riwayat.length})</span>}
       </h2>
       {error && <Galat>{error}</Galat>}
       {errorHapus && <Galat>{errorHapus}</Galat>}
       {loading ? (
         <Loading teks="Memuat riwayat..." />
       ) : riwayat.length === 0 ? (
-        <p className="rounded-3xl border-2 border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">🪄 {kosongTeks}</p>
+        <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">{kosongTeks}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {tampil.map((r) => {
             const judul = judulRiwayat(r);
             return (
-              <details key={r.id} className="group rounded-2xl bg-white shadow-[0_8px_24px_-18px_rgba(31,41,55,0.5)] ring-1 ring-black/[0.04] open:ring-violet-200">
+              <details key={r.id} className="group rounded-2xl bg-white shadow-sm">
                 <summary className="flex cursor-pointer list-none items-center gap-3 p-3 marker:content-none">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-violet-100 to-pink-100 text-lg" aria-hidden="true">
-                    {r.tipe === "pertanyaan" ? "🎤" : "📝"}
-                  </span>
+                  <img src="/naskah-ai/naskah.png" alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-brand-text">{judul}</span>
+                    <span className="block truncate text-sm font-semibold text-brand-text">{judul}</span>
                     <span className="block truncate text-[11px] text-gray-400">
                       {r.profiles?.nama && `${r.profiles.nama} · `}
                       {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: localeId })}
                     </span>
-                    <span className="block truncate text-xs text-gray-500 group-open:hidden">{tanpaMarkdown(r.hasil)}</span>
                   </span>
                   <ChevronDown size={18} className="shrink-0 text-gray-400 transition group-open:rotate-180" aria-hidden="true" />
                 </summary>
                 <div className="flex flex-col gap-2 px-3 pb-3">
-                  <p className="whitespace-pre-wrap break-words rounded-2xl bg-gray-50 p-3 text-xs leading-relaxed text-gray-700">{tanpaMarkdown(r.hasil)}</p>
+                  <p className="whitespace-pre-wrap break-words rounded-xl bg-gray-50 p-3 text-xs leading-relaxed text-gray-700">{tanpaMarkdown(r.hasil)}</p>
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
                       onClick={() => void salin(r.hasil, r.id)}
-                      className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-gray-100 px-3 text-xs font-bold text-brand-text"
+                      className="flex min-h-[36px] items-center gap-1.5 rounded-xl border border-gray-300 px-3 text-xs font-semibold text-brand-text"
                     >
-                      {disalin === r.id ? <Check size={13} /> : <Copy size={13} />} {disalin === r.id ? "Tersalin!" : "Salin"}
+                      {disalin === r.id ? <Check size={13} /> : <Copy size={13} />} {disalin === r.id ? "Tersalin" : "Salin"}
                     </button>
                     <button
                       type="button"
                       onClick={() => onPakai(r)}
-                      className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-violet-50 px-3 text-xs font-bold text-violet-700"
+                      className="flex min-h-[36px] items-center gap-1.5 rounded-xl bg-lnd-sky px-3 text-xs font-semibold text-brand-masuk"
                     >
                       <RotateCcw size={13} /> Pakai isiannya lagi
                     </button>
@@ -583,7 +538,7 @@ export function RiwayatList({
                         type="button"
                         onClick={() => void hapus(r.id, judul)}
                         disabled={menghapusId === r.id}
-                        className="ml-auto flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-bold text-red-600 ring-1 ring-red-200 disabled:opacity-60"
+                        className="ml-auto flex min-h-[36px] items-center gap-1.5 rounded-xl border border-red-200 px-3 text-xs font-semibold text-red-600 disabled:opacity-60"
                       >
                         <Trash2 size={13} /> {menghapusId === r.id ? "Menghapus…" : "Hapus"}
                       </button>
@@ -594,11 +549,7 @@ export function RiwayatList({
             );
           })}
           {riwayat.length > RIWAYAT_AWAL && (
-            <button
-              type="button"
-              onClick={() => setSemua(!semua)}
-              className="min-h-[40px] rounded-full text-xs font-bold text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-50"
-            >
+            <button type="button" onClick={() => setSemua(!semua)} className="min-h-[40px] rounded-xl text-xs font-semibold text-brand-masuk">
               {semua ? "Tampilkan lebih sedikit" : `Lihat semua (${riwayat.length})`}
             </button>
           )}
