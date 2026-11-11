@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { batasPilihan, hariKerja, pilihTanggal, tambahHari, type PilihanRentang } from "../lib/izinAturan";
 
@@ -10,25 +10,42 @@ const keDate = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 /** Penanda hari: sudah ada izin lain, atau sudah absen (masuk kerja). */
 export type TandaHari = "izin" | "masuk";
 
+/** Teks aksesibilitas; bawaannya untuk memilih tanggal izin. */
+const TEKS_IZIN = {
+  grup: "Pilih tanggal izin",
+  mulai: "mulai izin",
+  selesai: "selesai izin",
+  libur: "akhir pekan, tidak dihitung",
+};
+
 /**
  * Kalender pilih rentang tanggal (seperti memilih tanggal tiket): ketuk tanggal
  * mulai, lalu tanggal selesai. Sabtu/Minggu tampil pudar karena tidak dihitung izin.
+ * Bawaannya untuk izin; `batas`, `teks`, dan `legenda` bisa diganti untuk halaman lain.
  */
 export default function KalenderRentang({
   pilihan,
   onPilih,
   hariIni,
-  tanda,
+  tanda = {},
+  batas = (p) => batasPilihan(hariIni, p),
+  teks: teksKustom,
+  legenda,
 }: {
   pilihan: PilihanRentang;
   onPilih: (p: PilihanRentang) => void;
   hariIni: string;
-  tanda: Record<string, TandaHari>;
+  tanda?: Record<string, TandaHari>;
+  batas?: (p: PilihanRentang) => { min: string; max: string };
+  teks?: Partial<typeof TEKS_IZIN>;
+  /** Keterangan di bawah kalender; bawaannya penanda izin/absen. */
+  legenda?: ReactNode;
 }) {
+  const teks = { ...TEKS_IZIN, ...teksKustom };
   const [bulan, setBulan] = useState((pilihan.mulai ?? hariIni).slice(0, 7));
   const [arah, setArah] = useState<string | null>(null);
-  const { min, max } = batasPilihan(hariIni, pilihan);
-  const batasLuar = batasPilihan(hariIni, { mulai: null, selesai: null });
+  const { min, max } = batas(pilihan);
+  const batasLuar = batas({ mulai: null, selesai: null });
 
   const awal = `${bulan}-01`;
   const geser = (n: number) => setBulan(geserBulanYmd(awal, n).slice(0, 7));
@@ -73,7 +90,7 @@ export default function KalenderRentang({
           </span>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-y-1" role="group" aria-label="Pilih tanggal izin">
+      <div className="grid grid-cols-7 gap-y-1" role="group" aria-label={teks.grup}>
         {sel.map((d, i) => {
           if (!d) return <span key={`k${i}`} />;
           const mulai = pilihan.mulai === d;
@@ -86,9 +103,9 @@ export default function KalenderRentang({
           const label = [
             fmtLengkap.format(keDate(d)),
             d === hariIni && "hari ini",
-            mulai && "mulai izin",
-            selesai && pilihan.selesai && "selesai izin",
-            libur && "akhir pekan, tidak dihitung",
+            mulai && teks.mulai,
+            selesai && pilihan.selesai && teks.selesai,
+            libur && teks.libur,
             t === "masuk" && "sudah absen",
             t === "izin" && "sudah ada izin",
           ]
@@ -129,13 +146,17 @@ export default function KalenderRentang({
         })}
       </div>
       <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray-400">
-        <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" /> sudah ada izin
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true" /> sudah absen
-        </span>
-        <span>Sabtu–Minggu tidak dihitung</span>
+        {legenda ?? (
+          <>
+            <span className="flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden="true" /> sudah ada izin
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden="true" /> sudah absen
+            </span>
+            <span>Sabtu–Minggu tidak dihitung</span>
+          </>
+        )}
       </p>
     </div>
   );
