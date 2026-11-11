@@ -109,12 +109,26 @@ export default function Panduan() {
       </Bagian>
 
       <Bagian judul="🤒 Tidak Masuk Karena Sakit/Izin">
-        <p className="text-sm text-gray-600">
+        <Langkah no={1}>
           Di Beranda ada tombol bulat <strong>"Izin/Sakit"</strong> di antara Absen Masuk dan Absen
-          Pulang. Pilih tanggal kamu tidak masuk, isi alasannya, lalu boleh unggah foto bukti
-          (mis. foto surat dokter) langsung dari HP — tidak perlu lewat Google Drive. Foto
+          Pulang. Di kalendernya, ketuk <strong>tanggal mulai</strong> lalu <strong>tanggal selesai</strong>{" "}
+          (atau pilih cepat 1/2/3/5 hari) — semua hari kerja di antaranya otomatis tercatat izin,
+          termasuk hari-hari ke depan. Tidak perlu izin lagi besok dan seterusnya. Sabtu & Minggu tidak
+          dihitung.
+        </Langkah>
+        <Langkah no={2}>
+          Isi alasannya, lalu boleh unggah foto bukti (mis. foto surat dokter) langsung dari HP. Foto
           dikecilkan otomatis dan hanya bisa dilihat kamu sendiri serta admin.
-        </p>
+        </Langkah>
+        <Langkah no={3}>
+          Salah tanggal atau izinnya kebanyakan? Buka lagi tombol <strong>Izin/Sakit</strong> → pilih{" "}
+          <strong>Ubah</strong> untuk mengganti rentang/keterangan, atau <strong>Batalkan</strong>.
+        </Langkah>
+        <Langkah no={4}>
+          Sudah sembuh lebih cepat? Langsung <strong>Absen Masuk</strong> seperti biasa — izin hari itu
+          otomatis hilang dan statusmu jadi hadir. Izin di hari berikutnya tetap ada; hapus lewat Ubah
+          kalau tidak perlu lagi.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="📋 Tugas dari Admin">

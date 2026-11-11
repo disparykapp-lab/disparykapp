@@ -144,6 +144,11 @@ npm run dev
    35. `0042_tugas_tanya_realtime.sql` — tanya-jawab tugas tampil langsung lewat websocket
        (Supabase Realtime): `tugas_tanya` masuk publikasi `supabase_realtime`, RLS 0041 tetap
        berlaku. Sebelum dijalankan, pesan baru tetap sampai lewat cek berkala tiap 15 detik.
+   36. `0043_izin_rentang.sql` — izin/sakit beberapa hari sekaligus: tabel `izin_pegawai`
+       (satu baris per pengajuan) + `absensi.izin_id`; RPC `simpan_izin` (buat/ubah rentang, maks.
+       30 hari, ±60 hari dari hari ini, hanya Senin–Jumat yang dicatat) dan `batal_izin`; trigger
+       `lepas_izin_saat_absen` (absen masuk di hari izin → hari itu hadir/telat). Sebelum
+       dijalankan, izin tetap bisa untuk 1 hari (hari ini atau sebelumnya) seperti dulu.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

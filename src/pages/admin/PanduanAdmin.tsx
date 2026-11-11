@@ -210,6 +210,12 @@ export default function PanduanAdmin() {
           fotonya (tersimpan privat di Supabase Storage, bucket bukti_izin). Keterangan lama yang
           masih berupa link tampil sebagai "🔗 Buka link bukti".
         </Langkah>
+        <Langkah no={7}>
+          Pegawai bisa mengajukan izin beberapa hari sekaligus (mis. 3 hari sakit): tiap hari kerjanya
+          tercatat sebagai entri Izin/Sakit tersendiri, termasuk hari-hari mendatang — jadi admin bisa
+          melihat siapa yang akan izin. Rekap dan peringkat hanya menghitung sampai hari ini. Kalau
+          pegawai ternyata masuk di hari izin, entri hari itu otomatis berubah jadi Hadir/Telat.
+        </Langkah>
       </Bagian>
 
       <Bagian judul="👑 Super Admin">

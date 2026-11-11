@@ -6,6 +6,7 @@ import HeaderHalaman from "../components/HeaderHalaman";
 import InputBukti from "../components/InputBukti";
 import { ambilPosisi, type Posisi } from "../lib/geolocation";
 import {
+  ambilAbsensiHariIni,
   kirimKlarifikasiAbsensi,
   panggilAbsenMasuk,
   panggilAbsenPulang,
@@ -41,6 +42,19 @@ export default function Absen() {
   const [posisi, setPosisi] = useState<Posisi | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasil, setHasil] = useState<{ jam: string; status: string; jarak: number } | null>(null);
+  // hari ini tercatat izin (0043): absen masuk mengganti izin hari ini jadi hadir/telat
+  const [izinHariIni, setIzinHariIni] = useState(false);
+
+  useEffect(() => {
+    if (jenis !== "masuk" || !profile) return;
+    let batal = false;
+    ambilAbsensiHariIni(profile.id)
+      .then((a) => !batal && setIzinHariIni(a?.status === "izin" && !a.masuk_at))
+      .catch(() => {});
+    return () => {
+      batal = true;
+    };
+  }, [jenis, profile]);
 
   useEffect(() => {
     if (langkah !== "sukses") return;
@@ -128,6 +142,12 @@ export default function Absen() {
 
       {langkah === "mode" && (
         <div className="flex flex-col gap-5">
+          {izinHariIni && (
+            <p role="note" className="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
+              Hari ini kamu tercatat <strong>izin</strong>. Kalau absen masuk sekarang, izin hari ini dihapus dan
+              statusmu jadi hadir. Izin di hari lain tetap berlaku — ubah lewat tombol Izin/Sakit di Beranda.
+            </p>
+          )}
           <p className="text-sm text-gray-600">Kamu sedang di mana sekarang?</p>
 
           <div className="grid grid-cols-2 gap-3">
