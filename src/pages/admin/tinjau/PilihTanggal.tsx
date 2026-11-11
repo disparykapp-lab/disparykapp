@@ -134,7 +134,8 @@ export default function PilihTanggal({
         </button>
       </div>
 
-      <div className="mt-1 touch-pan-y overflow-hidden" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {/* overflow-hidden memotong animasi geser; p-1 (dibalas -m-1) supaya garis "hari ini" & bayangan tidak ikut terpotong */}
+      <div className="-mx-1 -mb-1 touch-pan-y overflow-hidden p-1" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         <div key={senin} className={`grid grid-cols-7 ${arah ? `anim-geser-${arah}` : ""}`} role="group" aria-label="Pilih hari">
           {hari.map((d, i) => {
             const mati = d < min || d > max;
@@ -145,7 +146,7 @@ export default function PilihTanggal({
             return (
               <div
                 key={d}
-                className={`flex justify-center ${berpita ? "bg-brand-masuk/10" : ""} ${berpita && d === dari ? "rounded-l-2xl" : ""} ${berpita && d === sampai ? "rounded-r-2xl" : ""}`}
+                className={`flex justify-center px-0.5 ${berpita ? "bg-brand-masuk/10" : ""} ${berpita && d === dari ? "rounded-l-2xl" : ""} ${berpita && d === sampai ? "rounded-r-2xl" : ""}`}
               >
                 <button
                   type="button"

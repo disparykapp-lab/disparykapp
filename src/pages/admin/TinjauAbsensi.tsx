@@ -222,10 +222,6 @@ export default function TinjauAbsensi() {
               );
             })}
           </div>
-          <p className="-mt-1 text-[11px] text-gray-400">
-            Garis kartu: <b className="text-gray-700">hitam</b> belum absen · <b className="text-amber-600">kuning</b> telat ·{" "}
-            <b className="text-red-600">merah</b> izin/sakit · tanpa garis hadir. Ketuk kotak untuk menyaring.
-          </p>
         </div>
       </div>
 
