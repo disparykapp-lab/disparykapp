@@ -12,49 +12,47 @@ export default function PanduanAdmin() {
 
       <Bagian judul="👥 Kelola Pegawai">
         <Langkah no={1}>
-          Buka Kelola → Pegawai, tekan "+ Tambah" untuk mendaftarkan email Google pegawai baru.
+          Buka Kelola → Pegawai, tekan <strong>"+ Tambah"</strong>. Di lembar yang muncul, isi
+          nama, email Google, pilih divisi (chip, ketuk lagi untuk batal), dan jabatan
+          (opsional), lalu "Daftarkan pegawai". Pegawai bisa langsung "Masuk dengan Google".
         </Langkah>
         <Langkah no={2}>
-          Isi nama, email Google, divisi, dan jabatan (opsional), lalu simpan. Pegawai bisa
-          langsung "Masuk dengan Google" setelah ini — tidak perlu langkah lain.
+          Kotak di atas menghitung Semua · Online · Admin · Magang · Nonaktif — ketuk salah satu
+          untuk menampilkan itu saja (ketuk lagi untuk kembali). Chip divisi dan tombol 🔍
+          (cari nama/email/jabatan) menyaring langsung. Yang online tampil paling atas dengan
+          titik hijau di fotonya; akun nonaktif tampil pudar bergaris putus di paling bawah.
         </Langkah>
         <Langkah no={3}>
-          Tiap pegawai bisa diubah divisi dan perannya (Pegawai/Admin) langsung dari daftar.
+          Ketuk kartu pegawai untuk membuka profilnya di depan layar. Ketuk fotonya untuk melihat
+          foto profil ukuran penuh. Geser kiri/kanan (atau Sebelumnya/Berikutnya, atau panah
+          keyboard) untuk pindah ke pegawai lain tanpa menutup.
         </Langkah>
         <Langkah no={4}>
-          Daftar pegawai dikelompokkan otomatis per divisi (accordion, tekan untuk buka/tutup),
-          dan ada kolom pencarian di atas untuk mencari nama/email/jabatan dengan cepat.
+          Di profil: ubah <strong>nama & jabatan</strong> (tekan Simpan), pilih{" "}
+          <strong>divisi</strong> lewat chip, <strong>peran</strong> Pegawai/Admin, saklar{" "}
+          <strong>Wajib absen</strong>, dan saklar <strong>Akun aktif</strong> — divisi, peran, dan
+          saklar langsung tersimpan (muncul "Tersimpan"). Akunmu sendiri tidak bisa diturunkan
+          perannya, dinonaktifkan, atau dihapus.
         </Langkah>
         <Langkah no={5}>
-          Tombol "Aktifkan/Nonaktifkan" untuk menonaktifkan sementara (pegawai nonaktif tidak
-          bisa absen atau login, tapi datanya tetap tersimpan).
+          Pegawai yang tidak wajib absen tetap boleh absen, tapi hari tanpa absennya tidak dihitung
+          "Tidak Absen" di Rekap dan dia tidak ikut Peringkat Kerajinan. Akun nonaktif tidak bisa
+          login/absen, tapi datanya tetap tersimpan.
         </Langkah>
         <Langkah no={6}>
-          Tekan kartu pegawai untuk buka detail profilnya: foto, tanggal lahir, dan asal
-          sekolah/kampus (diisi pegawai sendiri lewat Profil Saya, jadi di sini hanya tampil,
-          tidak bisa diedit admin).
+          Tanggal lahir dan asal sekolah/kampus diisi pegawai sendiri lewat Profil Saya, jadi di
+          sini hanya tampil.
         </Langkah>
         <Langkah no={7}>
-          Di bagian yang sama, admin bisa atur <strong>Masa Magang</strong> (tanggal mulai &amp;
-          selesai) untuk pegawai yang berstatus magang/PKL. Setelah disimpan, pegawai itu akan
-          melihat progress bar persentase magangnya sendiri di Beranda &amp; Profil Saya.
+          <strong>Masa Magang:</strong> tekan "Atur masa magang"/"Ubah tanggal", lalu ketuk tanggal
+          mulai dan tanggal selesai di kalender (seperti kalender izin) atau pakai chip 3 bulan /
+          6 bulan / 1 tahun, lalu Simpan. Pegawai itu melihat progress bar magangnya di Beranda
+          &amp; Profil Saya, dan kartu di daftar menampilkan persentasenya.
         </Langkah>
         <Langkah no={8}>
-          Tombol "Hapus" menghapus pegawai <strong>permanen</strong> beserta seluruh riwayat
-          absensinya — gunakan hanya kalau memang perlu, kalau ragu pakai "Nonaktifkan" saja.
-        </Langkah>
-        <Langkah no={9}>
-          Tiap pegawai punya pilihan <strong>"Wajib absen / Tidak wajib absen"</strong> di
-          daftar. Pegawai yang tidak wajib absen tetap boleh absen, tapi hari tanpa absennya tidak
-          dihitung "Tidak Absen" di Rekap dan dia tidak ikut Peringkat Kerajinan (ditandai badge
-          abu-abu "Tidak wajib absen"). Default semua pegawai: wajib absen.
-        </Langkah>
-        <Langkah no={10}>
-          Pegawai yang sedang membuka aplikasi ditandai titik hijau di foto profilnya dan badge{" "}
-          <strong>"Online"</strong> di samping nama; judul tiap divisi juga menampilkan berapa
-          anggotanya yang online. Status ini real-time dan langsung hilang saat pegawai menutup
-          aplikasi. Jumlah seluruh pengguna online (semua peran) juga tampil di Beranda dan
-          halaman Kelola.
+          "Hapus pegawai" di bagian bawah profil meminta konfirmasi dulu, lalu menghapus pegawai{" "}
+          <strong>permanen</strong> beserta seluruh riwayat absensinya — kalau ragu, cukup matikan
+          "Akun aktif".
         </Langkah>
         <Catatan>
           Menghapus akun di Supabase Auth (dashboard Supabase) <strong>tidak</strong> otomatis

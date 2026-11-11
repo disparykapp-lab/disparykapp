@@ -11,8 +11,8 @@ import {
   rentangCepat,
   seninDari,
 } from "../../../lib/tinjauAbsenAturan";
-import { Lembar } from "./bersama";
-import { useModal } from "./util";
+import Lembar from "../../../components/Lembar";
+import { useModal } from "../../../lib/useModal";
 
 const NAMA_HARI = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 const fmtBulan = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric", timeZone: "UTC" });

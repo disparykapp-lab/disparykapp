@@ -1,7 +1,8 @@
 import { Flag } from "lucide-react";
 import type { BarisAbsensi } from "../../../lib/rekap";
 import type { Kategori, KartuTinjau } from "../../../lib/tinjauAbsenAturan";
-import { GAYA_KATEGORI, inisial, jam } from "./util";
+import { inisial } from "../../../lib/inisial";
+import { GAYA_KATEGORI, jam } from "./util";
 
 /** Foto kecil kotak: foto absen, atau foto profil / inisial kalau tidak ada. */
 export function FotoKecil({
