@@ -372,3 +372,106 @@ button:disabled {
 .pratinjau-docx table { border-collapse: collapse; min-width: 100%; }
 .pratinjau-docx td { border: 1px solid #d1d5db; padding: 0.35em 0.5em; vertical-align: top; }
 .pratinjau-docx td > :last-child { margin-bottom: 0; }
+
+/* ---------- Naskah AI: "studio" ala anak muda ---------- */
+
+.naskah-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #170b26;
+}
+/* blob gradasi yang bergerak pelan + tekstur grain */
+.naskah-blob {
+  position: absolute;
+  z-index: -2;
+  border-radius: 9999px;
+  filter: blur(42px);
+  opacity: 0.8;
+  animation: blob-ai 11s ease-in-out infinite alternate;
+}
+.naskah-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@keyframes blob-ai {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(28px, 18px) scale(1.18);
+  }
+}
+
+@keyframes stiker-ai {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--putar, -8deg));
+  }
+  50% {
+    transform: translateY(-7px) rotate(calc(var(--putar, -8deg) * -1));
+  }
+}
+.stiker-ai {
+  animation: stiker-ai 4.5s ease-in-out infinite;
+}
+
+.teks-gradasi-ai {
+  background: linear-gradient(90deg, #ffb199, #ff6a88 45%, #c084fc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes aliran-ai {
+  to {
+    background-position: 250% 0;
+  }
+}
+.tombol-ai {
+  background: linear-gradient(110deg, #8e1e3c, #e0457b, #8b5cf6, #e0457b, #8e1e3c);
+  background-size: 250% 100%;
+  animation: aliran-ai 5s linear infinite;
+  box-shadow: 0 12px 30px -10px rgba(139, 92, 246, 0.6);
+}
+/* belum bisa ditekan (isian wajib kosong) — saat memuat tetap berwarna */
+.tombol-ai.tombol-ai-mati {
+  animation: none;
+  background: #e5e7eb;
+  color: #6b7280;
+  box-shadow: none;
+}
+
+.bingkai-ai {
+  padding: 2px;
+  border-radius: 1.75rem;
+  background: linear-gradient(135deg, #ff6a88, #c084fc 50%, #8e1e3c);
+}
+
+@keyframes muncul-ai {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.muncul-ai {
+  animation: muncul-ai 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .naskah-blob,
+  .stiker-ai,
+  .tombol-ai,
+  .muncul-ai {
+    animation: none;
+  }
+}
