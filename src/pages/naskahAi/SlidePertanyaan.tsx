@@ -1,15 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { buatPertanyaanWawancara, ambilRiwayatNaskahAi, type FormPertanyaanWawancara } from "../../lib/naskahAi";
 import type { NaskahAi } from "../../types/database";
-import { Field, LoadingAi, RiwayatList } from "./bersama";
+import {
+  ChipSaran,
+  Galat,
+  InputIkon,
+  KartuHasil,
+  KartuVibe,
+  KotakCerita,
+  Langkah,
+  LoadingAi,
+  PratinjauKosong,
+  RiwayatList,
+  Segmen,
+  SubJudul,
+  TombolBikin,
+  type OpsiVibe,
+  type RiwayatBaris,
+} from "./bersama";
 
-const GAYA_OPSI = [
-  { value: "formal", label: "Formal (pejabat/narasumber resmi)" },
-  { value: "santai", label: "Santai (untuk media sosial)" },
+const GAYA_OPSI: OpsiVibe[] = [
+  { value: "formal", emoji: "👔", judul: "Formal", ket: "Pejabat / narasumber resmi" },
+  { value: "santai", emoji: "😎", judul: "Santai", ket: "Buat konten sosmed" },
 ];
 
-const JUMLAH_OPSI = [3, 5, 8];
+const JUMLAH_OPSI = [3, 5, 8].map((j) => ({ value: j, judul: String(j), ket: "pertanyaan" }));
+const JENIS_ACARA = ["Festival", "Peresmian", "Kunjungan Kerja", "Workshop", "Pameran", "Lomba"];
+const SARAN_POIN = ["Latar belakang", "Target", "Tantangan", "Dampak", "Rencana ke depan"];
 
 const FORM_KOSONG: FormPertanyaanWawancara = {
   jenisAcara: "",
@@ -29,9 +47,9 @@ export default function SlidePertanyaan() {
   const [membuat, setMembuat] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasilTerakhir, setHasilTerakhir] = useState<NaskahAi | null>(null);
-  const [disalin, setDisalin] = useState(false);
+  const hasilRef = useRef<HTMLDivElement>(null);
 
-  const [riwayat, setRiwayat] = useState<(NaskahAi & { profiles: { nama: string } | null })[]>([]);
+  const [riwayat, setRiwayat] = useState<RiwayatBaris[]>([]);
   const [loadingRiwayat, setLoadingRiwayat] = useState(true);
   const [errorRiwayat, setErrorRiwayat] = useState<string | null>(null);
 
@@ -51,13 +69,19 @@ export default function SlidePertanyaan() {
     void muatRiwayat();
   }, []);
 
+  const ubah =
+    <K extends keyof FormPertanyaanWawancara>(k: K) =>
+    (v: FormPertanyaanWawancara[K]) =>
+      setForm((f) => ({ ...f, [k]: v }));
+
   async function buat() {
     setError(null);
     setMembuat(true);
+    requestAnimationFrame(() => hasilRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
     try {
       const baris = await buatPertanyaanWawancara(form);
       setHasilTerakhir(baris);
-      setDisalin(false);
+      requestAnimationFrame(() => hasilRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
       await muatRiwayat();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Gagal membuat pertanyaan.");
@@ -66,138 +90,82 @@ export default function SlidePertanyaan() {
     }
   }
 
-  async function salin() {
-    if (!hasilTerakhir) return;
-    try {
-      await navigator.clipboard.writeText(hasilTerakhir.hasil);
-      setDisalin(true);
-      setTimeout(() => setDisalin(false), 2000);
-    } catch {
-      // clipboard API bisa ditolak browser/izin — abaikan, teks masih bisa diseleksi manual
-    }
+  function pakai(r: RiwayatBaris) {
+    setForm({
+      jenisAcara: r.jenis_acara ?? "",
+      namaAcara: r.nama_acara ?? "",
+      lokasi: r.lokasi ?? "",
+      tanggal: r.tanggal ?? "",
+      narasumber: r.narasumber ?? "",
+      poinPenting: r.poin_penting,
+      gaya: GAYA_OPSI.some((g) => g.value === r.gaya) ? r.gaya : FORM_KOSONG.gaya,
+      jumlahPertanyaan: JUMLAH_OPSI.find((j) => j.value === r.jumlah_pertanyaan)?.value ?? FORM_KOSONG.jumlahPertanyaan,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  const siap = form.poinPenting.trim().length >= 5;
+  const labelGaya = GAYA_OPSI.find((g) => g.value === hasilTerakhir?.gaya)?.judul;
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-xl bg-blue-50 p-3 text-xs text-blue-900">
-        Isi topik dan narasumbernya — AI akan menyusun daftar pertanyaan wawancara siap pakai
-        saat liputan.
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-xl bg-white p-3 shadow-sm">
-        <Field label="Jenis acara">
-          <input
-            value={form.jenisAcara}
-            onChange={(e) => setForm((f) => ({ ...f, jenisAcara: e.target.value }))}
-            placeholder="mis. Festival Budaya, Peresmian, Kunjungan Kerja"
-            className="rounded-lg border border-gray-300 p-2 text-sm"
-          />
-        </Field>
-        <Field label="Nama acara">
-          <input
-            value={form.namaAcara}
-            onChange={(e) => setForm((f) => ({ ...f, namaAcara: e.target.value }))}
-            className="rounded-lg border border-gray-300 p-2 text-sm"
-          />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Lokasi">
-            <input
-              value={form.lokasi}
-              onChange={(e) => setForm((f) => ({ ...f, lokasi: e.target.value }))}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
-          </Field>
-          <Field label="Tanggal">
-            <input
-              type="date"
-              value={form.tanggal}
-              onChange={(e) => setForm((f) => ({ ...f, tanggal: e.target.value }))}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            />
-          </Field>
-        </div>
-        <Field label="Narasumber yang diwawancara">
-          <input
-            value={form.narasumber}
-            onChange={(e) => setForm((f) => ({ ...f, narasumber: e.target.value }))}
-            placeholder="mis. Kepala Dinas Pariwisata Kota Yogyakarta"
-            className="rounded-lg border border-gray-300 p-2 text-sm"
-          />
-        </Field>
-        <Field label="Topik / poin yang ingin digali *">
-          <textarea
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start lg:gap-5">
+      <div className="flex min-w-0 flex-col gap-3">
+        <Langkah no={1} judul="Mau ngulik apa?" ket="Topik atau poin yang ingin digali dari narasumber.">
+          <KotakCerita
+            label="Topik / poin yang ingin digali"
             value={form.poinPenting}
-            onChange={(e) => setForm((f) => ({ ...f, poinPenting: e.target.value }))}
-            rows={5}
-            placeholder={"Tulis poin demi poin, mis.:\n- Latar belakang acara ini diadakan\n- Target jumlah pengunjung\n- Rencana ke depan"}
-            className="rounded-lg border border-gray-300 p-2 text-sm"
+            onChange={ubah("poinPenting")}
+            saran={SARAN_POIN}
+            placeholder={"Spill topiknya, mis.:\n- Latar belakang acara ini diadakan\n- Target jumlah pengunjung\n- Rencana ke depan"}
           />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Gaya wawancara">
-            <select
-              value={form.gaya}
-              onChange={(e) => setForm((f) => ({ ...f, gaya: e.target.value }))}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            >
-              {GAYA_OPSI.map((g) => (
-                <option key={g.value} value={g.value}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Jumlah pertanyaan">
-            <select
-              value={form.jumlahPertanyaan}
-              onChange={(e) => setForm((f) => ({ ...f, jumlahPertanyaan: Number(e.target.value) }))}
-              className="rounded-lg border border-gray-300 p-2 text-sm"
-            >
-              {JUMLAH_OPSI.map((j) => (
-                <option key={j} value={j}>
-                  {j} pertanyaan
-                </option>
-              ))}
-            </select>
-          </Field>
-        </div>
+        </Langkah>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <Langkah no={2} judul="Siapa & acara apa?" opsional ket="Biar pertanyaannya pas sama narasumbernya.">
+          <InputIkon
+            ikon="🎙️"
+            label="Narasumber yang diwawancara"
+            value={form.narasumber}
+            onChange={ubah("narasumber")}
+            placeholder="mis. Kepala Dinas Pariwisata Kota Yogyakarta"
+          />
+          <InputIkon ikon="🎪" label="Jenis acara" value={form.jenisAcara} onChange={ubah("jenisAcara")} placeholder="Ketik atau pilih di bawah">
+            <ChipSaran label="Saran jenis acara" opsi={JENIS_ACARA} value={form.jenisAcara} onChange={ubah("jenisAcara")} />
+          </InputIkon>
+          <InputIkon ikon="✨" label="Nama acara" value={form.namaAcara} onChange={ubah("namaAcara")} placeholder="mis. Jogja Cultural Week 2026" />
+          <div className="grid grid-cols-2 gap-3">
+            <InputIkon ikon="📍" label="Lokasi" value={form.lokasi} onChange={ubah("lokasi")} placeholder="mis. Malioboro" />
+            <InputIkon ikon="📅" label="Tanggal" type="date" value={form.tanggal} onChange={ubah("tanggal")} />
+          </div>
+        </Langkah>
 
-        <button
-          onClick={() => void buat()}
-          disabled={membuat || form.poinPenting.trim().length < 5}
-          className="min-h-[48px] rounded-xl bg-brand-masuk text-sm font-semibold text-white disabled:opacity-60"
-        >
-          {membuat ? "Membuat pertanyaan..." : "🎤 Buat Pertanyaan"}
-        </button>
-        <p className="text-center text-[11px] text-gray-400">Powered by RAFAEL AI</p>
+        <Langkah no={3} judul="Pilih vibe-nya" ket="Gaya bertanya ke narasumber.">
+          <KartuVibe label="Gaya wawancara" opsi={GAYA_OPSI} value={form.gaya} onChange={ubah("gaya")} />
+          <SubJudul>Jumlah pertanyaan</SubJudul>
+          <Segmen label="Jumlah pertanyaan" opsi={JUMLAH_OPSI} value={form.jumlahPertanyaan} onChange={ubah("jumlahPertanyaan")} />
+        </Langkah>
+
+        {error && <Galat>{error}</Galat>}
+        <TombolBikin onClick={() => void buat()} siap={siap} memuat={membuat} teks="Bikin pertanyaannya" teksBelumSiap="🎤 Isi topiknya dulu ya" />
       </div>
 
-      {membuat && <LoadingAi pesan="pertanyaan" />}
-
-      {!membuat && hasilTerakhir && (
-        <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-brand-text">Hasil</p>
-            <button onClick={() => void salin()} className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-brand-text">
-              {disalin ? "Tersalin ✓" : "Salin"}
-            </button>
-          </div>
-          <p className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-sm text-brand-text">{hasilTerakhir.hasil}</p>
-          <p className="text-right text-[11px] text-gray-400">✨ Powered by RAFAEL AI</p>
-        </div>
-      )}
-
-      <RiwayatList
-        riwayat={riwayat}
-        loading={loadingRiwayat}
-        error={errorRiwayat}
-        superAdmin={superAdmin}
-        onHapus={() => void muatRiwayat()}
-        kosongTeks="Belum ada pertanyaan dibuat."
-      />
+      <div ref={hasilRef} className="flex min-w-0 scroll-mt-4 flex-col gap-4">
+        {membuat ? (
+          <LoadingAi pesan="pertanyaan" />
+        ) : hasilTerakhir ? (
+          <KartuHasil hasil={hasilTerakhir} label={labelGaya} memuat={membuat} onUlang={() => void buat()} />
+        ) : (
+          <PratinjauKosong judul="Pertanyaanmu muncul di sini" ket="Isi topiknya, pilih vibe, lalu tekan Bikin pertanyaannya 🎤" />
+        )}
+        <RiwayatList
+          riwayat={riwayat}
+          loading={loadingRiwayat}
+          error={errorRiwayat}
+          superAdmin={superAdmin}
+          onHapus={() => void muatRiwayat()}
+          onPakai={pakai}
+          kosongTeks="Belum ada pertanyaan. Bikin yang pertama!"
+        />
+      </div>
     </div>
   );
 }
