@@ -159,6 +159,12 @@ export default function Beranda() {
                   <BarisStatus label="Status" nilai={LABEL_STATUS_ABSEN[absensi.status] ?? absensi.status} />
                 )}
               </div>
+              {absensi?.status === "izin" && !absensi.masuk_at && (
+                <p className="mt-3 rounded-lg bg-amber-50 p-2 text-xs text-amber-800">
+                  Hari ini kamu tercatat izin. Ternyata masuk kerja? Tekan <strong>Absen Masuk</strong> — izin hari ini
+                  otomatis jadi hadir.
+                </p>
+              )}
             </div>
             {absensi && <FotoAbsenHariIni absensi={absensi} />}
           </section>
