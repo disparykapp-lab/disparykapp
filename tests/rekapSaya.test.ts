@@ -1,7 +1,7 @@
 // Jalankan: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { geserBulanYm, hitungRekapSaya, jenisBaris, rentangBulanYm, susunBulan, type ProfilRekap } from "../src/lib/rekapSayaAturan.ts";
+import { geserBulanYm, hitungRekapSaya, jenisBaris, rentangBulanYm, susunBulan, susunRentang, type ProfilRekap } from "../src/lib/rekapSayaAturan.ts";
 
 const HARI_INI = "2026-11-12"; // Kamis
 const PROFIL: ProfilRekap = { aktif: true, wajib_absen: true, created_at: "2026-01-05T02:00:00Z", tanggal_mulai_magang: null, tanggal_selesai_magang: null };
@@ -76,4 +76,21 @@ test("bulan depan: semua 'nanti' kecuali izin terjadwal; tidak ada yang dihitung
   assert.equal(hari[0].jenis, "izin");
   assert.ok(hari.slice(1).every((h) => h.jenis === "nanti"));
   assert.equal(hitungRekapSaya(hari, HARI_INI).hariWajib, 0);
+});
+
+test("susunRentang: lintas bulan, terbalik ditukar, ringkasan hanya hari dalam rentang", () => {
+  const rows = [
+    B("2026-10-30", "hadir", "07:55", "16:00"), // Jumat
+    B("2026-11-02", "telat", "08:40", "16:00"), // Senin
+    B("2026-11-06", "hadir", "07:50", "16:00"), // di luar rentang
+  ];
+  const hari = susunRentang("2026-11-03", "2026-10-29", rows, PROFIL, HARI_INI);
+  assert.equal(hari[0].tanggal, "2026-10-29");
+  assert.equal(hari.at(-1)?.tanggal, "2026-11-03");
+  assert.equal(hari.length, 6);
+  const r = hitungRekapSaya(hari, HARI_INI);
+  // 29 Okt (Kamis) & 3 Nov (Selasa) tanpa absen = tidak absen; 31 Okt & 1 Nov libur
+  assert.deepEqual(r.hitung, { hadir: 1, telat: 1, dinas: 0, izin: 0, tidak: 2 });
+  assert.equal(r.persen, 50);
+  assert.equal(susunRentang("2026-11-12", "2026-11-12", [], PROFIL, HARI_INI).length, 1);
 });

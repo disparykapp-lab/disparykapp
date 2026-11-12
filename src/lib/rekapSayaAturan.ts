@@ -69,6 +69,16 @@ export function susunBulan<R extends BarisRekap>(ym: string, rows: R[], profil: 
   return hasil;
 }
 
+/** Hari-hari dari `dari` sampai `sampai` (boleh lintas bulan), urut naik. Urutan terbalik ditukar. */
+export function susunRentang<R extends BarisRekap>(dari: string, sampai: string, rows: R[], profil: ProfilRekap, hariIni: string): HariRekap<R>[] {
+  if (dari > sampai) [dari, sampai] = [sampai, dari];
+  const hasil: HariRekap<R>[] = [];
+  for (let ym = dari.slice(0, 7); ym <= sampai.slice(0, 7); ym = geserBulanYm(ym, 1)) {
+    for (const h of susunBulan(ym, rows, profil, hariIni)) if (h.tanggal >= dari && h.tanggal <= sampai) hasil.push(h);
+  }
+  return hasil;
+}
+
 export interface RingkasanSaya {
   hitung: Record<JenisRekap, number>;
   /** hari kerja yang seharusnya diisi (hadir+telat+dinas+izin+tidak) */

@@ -83,6 +83,12 @@ export default function Panduan() {
           atau lupa absen) beserta foto bukti — hari tanpa absen yang diberi keterangan dicatat
           sebagai izin. Tekan <strong>"Ekspor Excel"</strong> untuk mengunduh rekap bulan itu.
         </p>
+        <p className="mt-2 text-sm text-gray-600">
+          Mau rekap dari tanggal tertentu sampai tanggal tertentu? <strong>Tahan</strong> tanggal
+          awal di kalender, lalu <strong>ketuk</strong> tanggal akhirnya (boleh geser ke bulan lain
+          dulu). Persentase, ringkasan, riwayat, dan Ekspor Excel langsung mengikuti rentang itu.
+          Tekan <strong>"Hapus rentang"</strong> untuk kembali ke rekap per bulan.
+        </p>
       </Bagian>
 
       <Bagian judul="🟢 Pengguna Online">

@@ -13,10 +13,11 @@ import {
   hitungRekapSaya,
   rentangBulanYm,
   susunBulan,
+  susunRentang,
   type HariRekap,
   type JenisRekap,
 } from "../../lib/rekapSayaAturan";
-import KalenderRekap from "./KalenderRekap";
+import KalenderRekap, { type RentangRekap } from "./KalenderRekap";
 import DetailHari from "./DetailHari";
 import { GAYA_HARI, jamWIB } from "./gaya";
 
@@ -26,6 +27,14 @@ const fmtBulan = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeri
 const fmtHari = new Intl.DateTimeFormat("id-ID", { weekday: "short", timeZone: "UTC" });
 const fmtTgl = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const keDate = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
+const fmtTglPendek = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", timeZone: "UTC" });
+
+/** Label rentang sependek mungkin supaya muat di judul: tahun hanya ditulis kalau bukan tahun ini. */
+function teksRentang(dari: string, sampai: string, hariIni: string): string {
+  const tahunIni = dari.slice(0, 4) === hariIni.slice(0, 4) && sampai.slice(0, 4) === hariIni.slice(0, 4);
+  const f = (d: string) => (tahunIni ? fmtTglPendek : fmtTgl).format(keDate(d));
+  return dari === sampai ? f(dari) : `${f(dari)} – ${f(sampai)}`;
+}
 
 /** Kotak ringkasan = legenda warna kalender = tombol saring. */
 const GAYA_KOTAK: Record<JenisRekap, { diam: string; aktif: string }> = {
@@ -49,6 +58,12 @@ export default function RekapSaya() {
   const [dibuka, setDibuka] = useState<string | null>(null);
   const [mengekspor, setMengekspor] = useState(false);
   const nomor = useRef(0);
+  // Rentang pilihan sendiri (tahan tanggal di kalender). Selama belum lengkap, rekap tetap per bulan.
+  const [rentang, setRentang] = useState<RentangRekap>({ mulai: null, selesai: null });
+  const [rowsRentang, setRowsRentang] = useState<BarisAbsensi[]>([]);
+  const [dimuatRentang, setDimuatRentang] = useState<string | null>(null);
+  const nomorRentang = useRef(0);
+  const kunciRentang = rentang.mulai && rentang.selesai ? `${rentang.mulai}_${rentang.selesai}` : null;
 
   const muat = useCallback(async () => {
     if (!profile) return;
@@ -71,17 +86,51 @@ export default function RekapSaya() {
     void muat();
   }, [muat]);
 
-  const loading = dimuat !== ym;
+  const muatRentang = useCallback(async () => {
+    if (!profile || !rentang.mulai || !rentang.selesai) return;
+    const ke = ++nomorRentang.current;
+    const kunci = `${rentang.mulai}_${rentang.selesai}`;
+    let data: BarisAbsensi[] = [];
+    let galat: string | null = null;
+    try {
+      data = await ambilAbsensiSaya(profile.id, rentang.mulai, rentang.selesai);
+    } catch (e) {
+      galat = e instanceof Error ? e.message : "Gagal memuat rekap.";
+    }
+    if (ke !== nomorRentang.current) return;
+    setRowsRentang(data);
+    setError(galat);
+    setDimuatRentang(kunci);
+  }, [profile, rentang.mulai, rentang.selesai]);
+
+  useEffect(() => {
+    void muatRentang();
+  }, [muatRentang]);
+
+  async function muatSemua() {
+    await Promise.all([muat(), muatRentang()]);
+  }
+
   const hari = useMemo(() => (profile ? susunBulan(ym, rows, profile, hariIni) : []), [ym, rows, profile, hariIni]);
-  const ring = useMemo(() => hitungRekapSaya(hari, hariIni), [hari, hariIni]);
+  // Ringkasan & riwayat: rentang pilihan kalau lengkap, selain itu bulan yang tampil.
+  const hariRentang = useMemo(
+    () => (profile && rentang.mulai && rentang.selesai ? susunRentang(rentang.mulai, rentang.selesai, rowsRentang, profile, hariIni) : null),
+    [profile, rentang.mulai, rentang.selesai, rowsRentang, hariIni]
+  );
+  const hariRekap = useMemo(
+    () => (kunciRentang ? (dimuatRentang === kunciRentang ? (hariRentang ?? []) : []) : hari),
+    [kunciRentang, dimuatRentang, hariRentang, hari]
+  );
+  const loading = kunciRentang ? dimuatRentang !== kunciRentang : dimuat !== ym;
+  const ring = useMemo(() => hitungRekapSaya(hariRekap, hariIni), [hariRekap, hariIni]);
   const daftar = useMemo(
-    () => hari.filter((h) => (h.row || h.jenis === "tidak") && (!sorot || h.jenis === sorot)).reverse() as HariRekap<BarisAbsensi>[],
-    [hari, sorot]
+    () => hariRekap.filter((h) => (h.row || h.jenis === "tidak") && (!sorot || h.jenis === sorot)).reverse() as HariRekap<BarisAbsensi>[],
+    [hariRekap, sorot]
   );
 
   const minYm = geserBulanYm(bulanIni, -BULAN_KE_BELAKANG);
   const maxYm = geserBulanYm(bulanIni, BULAN_KE_DEPAN);
-  const namaBulan = fmtBulan.format(keDate(`${ym}-01`));
+  const namaBulan = kunciRentang && rentang.mulai && rentang.selesai ? teksRentang(rentang.mulai, rentang.selesai, hariIni) : fmtBulan.format(keDate(`${ym}-01`));
   const masuk = ring.hitung.hadir + ring.hitung.telat + ring.hitung.dinas;
 
   function gantiBulan(baru: string) {
@@ -92,13 +141,15 @@ export default function RekapSaya() {
   async function ekspor() {
     setMengekspor(true);
     try {
-      const { dari, sampai } = rentangBulanYm(ym);
+      const { dari, sampai } =
+        rentang.mulai && rentang.selesai ? { dari: rentang.mulai, sampai: rentang.selesai } : rentangBulanYm(ym);
+      const dataEkspor = rentang.mulai && rentang.selesai ? rowsRentang : rows;
       await unduhExcelRekap({
-        namaFile: `rekap-${profile?.nama ?? "saya"}-${ym}`,
+        namaFile: rentang.mulai && rentang.selesai ? `rekap-${profile?.nama ?? "saya"}-${dari}_sd_${sampai}` : `rekap-${profile?.nama ?? "saya"}-${ym}`,
         judul: "Rekap Absensi — Dinas Pariwisata Kota Yogyakarta",
         periode: `${fmtTgl.format(keDate(dari))} – ${fmtTgl.format(keDate(sampai))}`,
         sertakanNama: false,
-        rows: [...rows].sort((a, b) => a.tanggal.localeCompare(b.tanggal)),
+        rows: [...dataEkspor].sort((a, b) => a.tanggal.localeCompare(b.tanggal)),
         ringkasan: {
           hadir: ring.hitung.hadir,
           telat: ring.hitung.telat,
@@ -176,6 +227,11 @@ export default function RekapSaya() {
               setSorot(null);
               setDibuka(t);
             }}
+            rentang={rentang}
+            onRentang={(rg) => {
+              setRentang(rg);
+              setDibuka(null);
+            }}
           />
         </div>
 
@@ -199,7 +255,7 @@ export default function RekapSaya() {
             <Loading teks="Memuat rekap..." />
           ) : daftar.length === 0 ? (
             <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-400 shadow-sm">
-              {sorot ? `Tidak ada hari "${KOTAK_REKAP.find((k) => k.id === sorot)?.label}" di bulan ini.` : "Belum ada data absen di bulan ini."}
+              {sorot ? `Tidak ada hari "${KOTAK_REKAP.find((k) => k.id === sorot)?.label}" di ${kunciRentang ? "rentang" : "bulan"} ini.` : `Belum ada data absen di ${kunciRentang ? "rentang" : "bulan"} ini.`}
             </p>
           ) : (
             <div className="flex flex-col gap-2.5 px-0.5">
@@ -220,7 +276,7 @@ export default function RekapSaya() {
           onSebelum={posisi > 0 ? () => setDibuka(daftar[posisi - 1].tanggal) : null}
           onBerikut={posisi < daftar.length - 1 ? () => setDibuka(daftar[posisi + 1].tanggal) : null}
           onTutup={tutup}
-          onUbah={muat}
+          onUbah={muatSemua}
         />
       )}
     </div>
