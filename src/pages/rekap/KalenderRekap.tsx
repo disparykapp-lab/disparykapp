@@ -20,6 +20,8 @@ export interface RentangRekap {
  * Kalender satu bulan: tiap tanggal diwarnai sesuai kehadiran; geser untuk ganti bulan.
  * Tahan sebuah tanggal untuk memulai rentang, lalu ketuk tanggal akhir (boleh di bulan lain).
  */
+const TANPA_RENTANG: RentangRekap = { mulai: null, selesai: null };
+
 export default function KalenderRekap({
   ym,
   hari,
@@ -30,8 +32,9 @@ export default function KalenderRekap({
   onGeser,
   onKeBulanIni,
   onPilih,
-  rentang,
+  rentang = TANPA_RENTANG,
   onRentang,
+  bacaSaja = false,
 }: {
   ym: string;
   hari: HariRekap[];
@@ -42,8 +45,10 @@ export default function KalenderRekap({
   onGeser: (n: 1 | -1) => void;
   onKeBulanIni: (() => void) | null;
   onPilih: (tanggal: string) => void;
-  rentang: RentangRekap;
-  onRentang: (r: RentangRekap) => void;
+  rentang?: RentangRekap;
+  onRentang?: (r: RentangRekap) => void;
+  /** true = tanpa pilih rentang (mis. dilihat admin) */
+  bacaSaja?: boolean;
 }) {
   const [arah, setArah] = useState<"kanan" | "kiri" | null>(null);
   const sentuh = useRef<{ x: number; y: number } | null>(null);
@@ -56,13 +61,14 @@ export default function KalenderRekap({
       : [rentang.mulai, rentang.mulai];
 
   function mulaiTahan(e: PointerEvent, tanggal: string) {
+    if (bacaSaja || !onRentang) return;
     const x = e.clientX;
     const y = e.clientY;
     const t = window.setTimeout(() => {
       tahan.current = null;
       baruDitahan.current = true;
       navigator.vibrate?.(15);
-      onRentang({ mulai: tanggal, selesai: null });
+      onRentang?.({ mulai: tanggal, selesai: null });
     }, LAMA_TAHAN_MS);
     tahan.current = { t, x, y };
   }
@@ -81,7 +87,7 @@ export default function KalenderRekap({
     }
     if (memilihAkhir && rentang.mulai) {
       const [a, b] = [rentang.mulai, tanggal].sort();
-      onRentang({ mulai: a, selesai: b });
+      onRentang?.({ mulai: a, selesai: b });
       return;
     }
     if (bisaDetail) onPilih(tanggal);
@@ -126,7 +132,7 @@ export default function KalenderRekap({
             {fmtBulan.format(keDate(`${ym}-01`))}
           </p>
           {(rentang.mulai || rentang.selesai) && (
-            <button type="button" onClick={() => onRentang({ mulai: null, selesai: null })} className="rounded-full border border-brand-masuk/30 px-2 py-0.5 text-[11px] font-semibold text-brand-masuk">
+            <button type="button" onClick={() => onRentang?.({ mulai: null, selesai: null })} className="rounded-full border border-brand-masuk/30 px-2 py-0.5 text-[11px] font-semibold text-brand-masuk">
               Hapus rentang
             </button>
           )}
@@ -206,7 +212,9 @@ export default function KalenderRekap({
       <p className={`mt-2 text-[11px] ${memilihAkhir ? "font-semibold text-brand-masuk" : "text-gray-400"}`} aria-live="polite">
         {memilihAkhir
           ? "Ketuk tanggal akhir rentang (boleh geser ke bulan lain)"
-          : "Ketuk tanggal berwarna untuk melihat detail · tahan tanggal untuk pilih rentang · geser untuk ganti bulan"}
+          : bacaSaja
+            ? "Ketuk tanggal berwarna untuk melihat detail · geser untuk ganti bulan"
+            : "Ketuk tanggal berwarna untuk melihat detail · tahan tanggal untuk pilih rentang · geser untuk ganti bulan"}
       </p>
     </section>
   );

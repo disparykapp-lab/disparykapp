@@ -1,13 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import type { BarisAbsensi } from "../lib/rekap";
-import { jumlahHariKerja } from "../lib/tanggal";
-import { hitungPeringkat, type EntriPeringkat as Entri, type PegawaiGrafik } from "../lib/peringkat";
+import { useEffect, useState } from "react";
+import type { EntriPeringkat as Entri } from "../lib/peringkat";
 
 interface Props {
-  rows: BarisAbsensi[];
-  pegawai: PegawaiGrafik[];
-  dari: Date;
-  sampai: Date;
+  /** peringkat yang sudah dihitung, terajin dulu */
+  daftar: Entri[];
   /** jumlah pegawai yang tidak wajib absen (tidak diikutkan peringkat) */
   dikecualikan?: number;
 }
@@ -55,26 +51,17 @@ function Avatar({ e, ukuran }: { e: Entri; ukuran: string }) {
  * Peringkat kerajinan pegawai untuk rentang tanggal yang sedang dilihat —
  * cuma podium 3 teratas, tidak ada daftar lengkap pegawai lain.
  */
-export default function GrafikKerajinan({ rows, pegawai, dari, sampai, dikecualikan = 0 }: Props) {
-  const hariKerja = useMemo(() => jumlahHariKerja(dari, sampai), [dari, sampai]);
-
-  const daftar = useMemo(
-    () => hitungPeringkat(rows, pegawai, dari, sampai),
-    [rows, pegawai, dari, sampai]
-  );
-
-  if (hariKerja === 0) {
+export default function GrafikKerajinan({ daftar, dikecualikan = 0 }: Props) {
+  if (daftar.length === 0) {
     return (
       <section className="rounded-2xl bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-brand-text">🏅 Peringkat Kerajinan</h2>
         <p className="mt-2 text-xs text-gray-400">
-          Rentang ini belum punya hari kerja (Senin–Jumat) yang bisa dinilai.
+          Periode ini belum punya hari kerja (Senin–Jumat) yang bisa dinilai.
         </p>
       </section>
     );
   }
-
-  if (daftar.length === 0) return null;
 
   const podium = daftar.length >= 3 ? [daftar[1], daftar[0], daftar[2]] : [];
   const tinggiPodium = [64, 88, 48];

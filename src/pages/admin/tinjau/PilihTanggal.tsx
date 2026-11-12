@@ -1,7 +1,6 @@
-import { useId, useRef, useState, type TouchEvent } from "react";
+import { useRef, useState, type TouchEvent } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import KalenderRentang from "../../../components/KalenderRentang";
-import { rentangAkhir, tambahHari, type PilihanRentang } from "../../../lib/izinAturan";
+import { tambahHari } from "../../../lib/izinAturan";
 import {
   MAKS_HARI_TINJAU,
   PILIHAN_CEPAT,
@@ -11,8 +10,9 @@ import {
   rentangCepat,
   seninDari,
 } from "../../../lib/tinjauAbsenAturan";
-import Lembar from "../../../components/Lembar";
-import { useModal } from "../../../lib/useModal";
+import LembarRentang from "../../../components/LembarRentang";
+
+const ubahCepat = (r: { mulai: string; selesai: string }) => ({ dari: r.mulai, sampai: r.selesai });
 
 const NAMA_HARI = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 const fmtBulan = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -174,10 +174,13 @@ export default function PilihTanggal({
       </div>
 
       {kalender && (
-        <SheetKalender
+        <LembarRentang
           dari={dari}
           sampai={sampai}
           hariIni={hariIni}
+          cepat={PILIHAN_CEPAT.map((c) => ({ id: c.id, label: c.label, ...ubahCepat(rentangCepat(c.id, hariIni)) }))}
+          batas={(x) => batasTinjau(hariIni, x)}
+          maksHari={MAKS_HARI_TINJAU}
           onTutup={() => setKalender(false)}
           onTerapkan={(d, s) => {
             setKalender(false);
@@ -186,93 +189,5 @@ export default function PilihTanggal({
         />
       )}
     </section>
-  );
-}
-
-function SheetKalender({
-  dari,
-  sampai,
-  hariIni,
-  onTutup,
-  onTerapkan,
-}: {
-  dari: string;
-  sampai: string;
-  hariIni: string;
-  onTutup: () => void;
-  onTerapkan: (dari: string, sampai: string) => void;
-}) {
-  const idJudul = useId();
-  const [pilihan, setPilihan] = useState<PilihanRentang>({ mulai: dari, selesai: sampai });
-  // kalender dipasang ulang saat memilih chip, supaya bulannya ikut pindah
-  const [kunci, setKunci] = useState(0);
-  useModal(onTutup);
-
-  const akhir = rentangAkhir(pilihan);
-  const ringkas = akhir ? labelRentang(akhir.mulai, akhir.selesai, hariIni) : null;
-
-  return (
-    <Lembar
-      idJudul={idJudul}
-      onTutup={onTutup}
-      judul={
-        <>
-          <CalendarDays size={20} className="text-brand-masuk" aria-hidden="true" /> Pilih tanggal
-        </>
-      }
-    >
-      <p className="-mt-1 text-xs text-gray-500">Ketuk tanggal awal lalu tanggal akhir. Paling panjang {MAKS_HARI_TINJAU} hari.</p>
-
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5 [mask-image:linear-gradient(to_right,#000_calc(100%-24px),transparent)] [scrollbar-width:none]" role="group" aria-label="Pilihan cepat">
-        {PILIHAN_CEPAT.map((c) => {
-          const r = rentangCepat(c.id, hariIni);
-          const aktif = !!akhir && akhir.mulai === r.mulai && akhir.selesai === r.selesai;
-          return (
-            <button
-              key={c.id}
-              type="button"
-              aria-pressed={aktif}
-              onClick={() => {
-                setPilihan(r);
-                setKunci((k) => k + 1);
-              }}
-              className={`min-h-[36px] shrink-0 rounded-full border px-3 text-xs font-semibold transition ${
-                aktif ? "border-brand-masuk bg-brand-masuk text-white" : "border-gray-300 text-brand-text"
-              }`}
-            >
-              {c.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <KalenderRentang
-        key={kunci}
-        pilihan={pilihan}
-        onPilih={setPilihan}
-        hariIni={hariIni}
-        batas={(p) => batasTinjau(hariIni, p)}
-        teks={{ grup: "Pilih tanggal absensi", mulai: "tanggal awal", selesai: "tanggal akhir", libur: "akhir pekan" }}
-        legenda={<span>Sabtu–Minggu tampil pudar · lingkaran tipis = hari ini</span>}
-      />
-
-      {ringkas && (
-        <div className="rounded-xl bg-gray-50 p-3">
-          <p className="text-sm font-bold text-brand-text">{ringkas.judul}</p>
-          <p className="text-[11px] text-gray-500">
-            {!pilihan.selesai ? "Sekarang ketuk tanggal akhir — atau langsung Tampilkan untuk satu hari." : ringkas.ket || "Satu hari"}
-          </p>
-        </div>
-      )}
-
-      <button
-        type="button"
-        disabled={!akhir}
-        onClick={() => akhir && onTerapkan(akhir.mulai, akhir.selesai)}
-        className="min-h-[48px] rounded-xl bg-brand-masuk text-sm font-bold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-50"
-      >
-        Tampilkan
-      </button>
-    </Lembar>
   );
 }
