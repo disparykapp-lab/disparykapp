@@ -248,20 +248,35 @@ export default function PanduanAdmin() {
       </Bagian>
 
       <Bagian judul="📊 Rekap Semua Pegawai">
-        <Langkah no={1}>Buka menu Rekap — pilih sendiri tanggal mulai &amp; akhir lalu tekan "Terapkan" (atau pakai tombol cepat "Minggu ini"/"Bulan ini"). Sebagai admin kamu juga bisa memfilter per Divisi atau per Pegawai (bukan cuma diri sendiri).</Langkah>
-        <Langkah no={2}>Pilih "Semua Pegawai" untuk lihat ringkasan semua orang sekaligus.</Langkah>
+        <Langkah no={1}>
+          Buka menu Rekap. Defaultnya <strong>bulan ini</strong>; tekan ‹ › (atau geser kartunya)
+          untuk bulan sebelum/berikutnya, pakai chip Minggu ini · Bulan ini · Bulan lalu · Tahun ini,
+          atau "Pilih tanggal" untuk rentang bebas di kalender (paling panjang 366 hari). Chip divisi
+          dan tombol 🔍 menyaring pegawai.
+        </Langkah>
+        <Langkah no={2}>
+          Kartu <strong>Kehadiran tim</strong> menunjukkan persentase hari kerja yang diisi masuk
+          (hadir/telat/dinas luar), jumlah pegawai, dan total jam kerja. Kotak Hadir · Telat · Dinas
+          Luar · Izin/Sakit · Tidak absen menghitung hari-orang; ketuk salah satu untuk melihat{" "}
+          <strong>siapa yang paling sering</strong> (mis. paling sering telat).
+        </Langkah>
         <Langkah no={3}>
-          Di mode "Semua Pegawai" muncul grafik <strong>🏅 Peringkat Kerajinan</strong> untuk
-          rentang tanggal yang dipilih — cuma podium <strong>3 pegawai terajin</strong>, pegawai
-          lain tidak ditampilkan. Skornya: hadir tepat waktu &amp; dinas luar = 1 poin, telat/izin
-          = ½ poin, tidak absen = 0, dibagi jumlah hari kerja (Senin–Jumat sampai hari ini). Filter
-          divisi ikut berlaku.
+          <strong>🏅 Podium</strong> menampilkan 3 pegawai terajin, lalu daftar{" "}
+          <strong>peringkat semua pegawai</strong> dengan bilah warna (hijau hadir, biru dinas luar,
+          kuning telat, merah izin, hitam tidak absen). Skor: hadir tepat waktu &amp; dinas luar = 1
+          poin, telat/izin = ½, tidak absen = 0, dibagi hari kerja yang wajib diisi pegawai itu (hari
+          sebelum ia terdaftar atau di luar masa magang tidak dihitung). Pegawai yang tidak wajib absen
+          tampil di bawah tanpa skor.
         </Langkah>
         <Langkah no={4}>
-          Tombol "Ekspor Excel" mengunduh file .xlsx rapi (judul, periode, ringkasan, tabel
-          berwarna) siap dipakai untuk laporan ke atasan. Di mode "Semua Pegawai" ada juga tombol{" "}
-          <strong>"Unduh Peringkat Terajin"</strong> yang mengunduh gambar PNG berisi 10 pegawai
-          terajin di rentang tanggal itu (siap dibagikan), bukan lagi tombol Cetak.
+          Ketuk pegawai untuk membuka kalender kehadirannya di depan layar (warna sama dengan yang
+          dilihat pegawai di Rekap-nya); ketuk tanggal untuk jam, keterangan, bukti, dan tanda tinjau.
+          Ada tombol Excel untuk pegawai itu saja.
+        </Langkah>
+        <Langkah no={5}>
+          Tombol <strong>Excel</strong> mengunduh file .xlsx semua pegawai yang tampil (siap untuk
+          laporan), tombol <strong>Peringkat</strong> mengunduh gambar PNG 10 pegawai terajin. Tombol
+          "Rekap saya" di kanan atas membuka kalender kehadiranmu sendiri (untuk menambah keterangan).
         </Langkah>
       </Bagian>
 

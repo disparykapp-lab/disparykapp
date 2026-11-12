@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Flag, MessageSquareText } from "lucide-react";
 import HeaderHalaman from "../../components/HeaderHalaman";
 import Loading from "../../components/Loading";
@@ -46,7 +46,7 @@ const GAYA_KOTAK: Record<JenisRekap, { diam: string; aktif: string }> = {
 };
 
 /** Rekap absensi milik sendiri (role pegawai): kalender berwarna per bulan + riwayat. */
-export default function RekapSaya() {
+export default function RekapSaya({ aksi }: { aksi?: ReactNode }) {
   const { profile } = useAuth();
   const [hariIni] = useState(tanggalHariIniWIB);
   const bulanIni = hariIni.slice(0, 7);
@@ -170,7 +170,7 @@ export default function RekapSaya() {
 
   return (
     <div className="flex flex-col gap-4">
-      <HeaderHalaman judul="Rekap Absensi" kembaliKe="/beranda" />
+      <HeaderHalaman judul="Rekap Absensi" kembaliKe="/beranda" aksi={aksi} />
 
       {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
