@@ -28,3 +28,16 @@ export async function ambilAbsensiRentang(opts: {
 }
 
 export { hitungRingkasan, type Ringkasan } from "./ringkasanAbsen";
+
+/** Absensi milik satu pegawai di rentang tanggal "YYYY-MM-DD" (Rekap pegawai). */
+export async function ambilAbsensiSaya(userId: string, dari: string, sampai: string): Promise<BarisAbsensi[]> {
+  const { data, error } = await supabase
+    .from("absensi")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("tanggal", dari)
+    .lte("tanggal", sampai)
+    .order("tanggal", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data as BarisAbsensi[]) ?? [];
+}

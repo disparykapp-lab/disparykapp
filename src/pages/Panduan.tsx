@@ -72,9 +72,16 @@ export default function Panduan() {
 
       <Bagian judul="📊 Rekap Absensi Saya">
         <p className="text-sm text-gray-600">
-          Buka menu Rekap, pilih tanggal mulai &amp; akhir lalu tekan "Terapkan" untuk melihat
-          riwayat absensimu. Tekan <strong>"Ekspor Excel"</strong> untuk mengunduh rekap itu
-          sebagai file Excel.
+          Buka menu Rekap untuk melihat <strong>persentase kehadiranmu</strong> bulan ini dan
+          kalender berwarna: hijau hadir, biru dinas luar, garis kuning telat, garis merah
+          izin/sakit, garis hitam tidak absen. Geser kalender (atau tekan panah) untuk ganti bulan,
+          dan ketuk kotak ringkasan untuk menampilkan satu jenis saja.
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          Ketuk tanggal atau kartu riwayat untuk melihat detailnya: jam masuk-pulang dan lama kerja.
+          Di situ kamu juga bisa <strong>menambah/mengubah keterangan</strong> (mis. alasan telat
+          atau lupa absen) beserta foto bukti — hari tanpa absen yang diberi keterangan dicatat
+          sebagai izin. Tekan <strong>"Ekspor Excel"</strong> untuk mengunduh rekap bulan itu.
         </p>
       </Bagian>
 

@@ -12,6 +12,7 @@ import InputBukti from "../components/InputBukti";
 import GrafikKerajinan from "../components/GrafikKerajinan";
 import { hitungPeringkat, unduhGambarPeringkat } from "../lib/peringkat";
 import type { Divisi, Profile } from "../types/database";
+import RekapSaya from "./rekap/RekapSaya";
 
 /** "yyyy-MM-dd" -> Date tengah malam waktu lokal (bukan UTC) supaya tanggal tidak meleset. */
 function ambilTanggal(ymd: string): Date {
@@ -19,7 +20,13 @@ function ambilTanggal(ymd: string): Date {
   return new Date(tahun, bulan - 1, tgl);
 }
 
+/** Pegawai: kalender kehadiran pribadi; admin: rekap semua pegawai (tabel, grafik, peringkat). */
 export default function Rekap() {
+  const { profile } = useAuth();
+  return profile?.role === "admin" ? <RekapAdmin /> : <RekapSaya />;
+}
+
+function RekapAdmin() {
   const { profile } = useAuth();
   const isAdmin = profile?.role === "admin";
 

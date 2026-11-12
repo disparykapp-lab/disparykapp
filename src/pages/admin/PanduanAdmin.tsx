@@ -209,7 +209,7 @@ export default function PanduanAdmin() {
         <Langkah no={6}>
           Kalau pegawai sudah mengirim keterangan (mis. alasan sakit/telat) beserta foto bukti
           (mis. surat dokter) — lewat tombol bulat "Izin/Sakit" di Beranda, kolom keterangan
-          opsional saat absen, atau tombol "+Keterangan" di Rekap mereka — keterangan itu muncul
+          opsional saat absen, atau detail tanggal di Rekap mereka — keterangan itu muncul
           di kotak "Keterangan dari pegawai" pada detail entri ini, lengkap dengan foto buktinya
           (tersimpan privat di Supabase Storage, bucket bukti_izin) — ketuk fotonya untuk ukuran penuh. Keterangan lama yang
           masih berupa link tampil sebagai "🔗 Buka link bukti".
