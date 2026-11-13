@@ -1,7 +1,10 @@
 // Aturan file twibbon — tanpa dependensi supaya bisa diuji langsung (npm test).
 
-/** Bingkai bawaan aplikasi, dipakai kalau admin belum mengganti. */
-export const TWIBBON_BAWAAN = "/twibbon.png";
+/**
+ * Contoh twibbon (bingkai lama aplikasi) — hanya untuk diunduh/dipakai admin sebagai
+ * template. Bawaannya kamera absen TANPA twibbon sampai admin memasang satu.
+ */
+export const TWIBBON_CONTOH = "/twibbon.png";
 
 /**
  * Ketentuan ukuran twibbon. Kamera absen memakai area pratinjau 3:4 potret dan
@@ -14,7 +17,7 @@ export const KETENTUAN_TWIBBON = {
   lebarMin: 600,
   tinggiMin: 800,
   rasio: 3 / 4,
-  /** Selisih rasio yang masih diterima (bawaan 1000 × 1350 ≈ 1,2%). */
+  /** Selisih rasio yang masih diterima (contoh 1000 × 1350 ≈ 1,2%). */
   toleransiRasio: 0.03,
   ukuranMaksByte: 2 * 1024 * 1024,
   tipe: "image/png",

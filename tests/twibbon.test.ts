@@ -17,7 +17,7 @@ const png = (lebar: number, tinggi: number, ukuranByte = 500 * 1024) => ({ tipe:
 test("ukuran twibbon yang benar lolos", () => {
   assert.deepEqual(cekFileTwibbon(png(1080, 1440)), []);
   assert.deepEqual(cekFileTwibbon(png(600, 800)), []);
-  assert.deepEqual(cekFileTwibbon(png(1000, 1350)), [], "ukuran twibbon bawaan");
+  assert.deepEqual(cekFileTwibbon(png(1000, 1350)), [], "ukuran contoh twibbon (public/twibbon.png)");
   assert.deepEqual(cekFileTwibbon(png(3000, 4000)), [], "besar tetap boleh, nanti dikecilkan");
 });
 

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Ban } from "lucide-react";
 import type { FaceLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { ambilUrlTwibbon } from "../lib/twibbon";
-import { TWIBBON_BAWAAN } from "../lib/twibbonMeta";
 import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, pakaiWajah, terapkanWarna, type TingkatEfek } from "../lib/efekKamera";
 import { susunWajah } from "../lib/wajah/geometri";
 import { STIKER, urlStiker } from "../lib/wajah/stiker";
@@ -154,9 +153,13 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
     // Preload bingkai twibbon dari awal (paralel sama izin kamera) supaya
     // pas tombol "Ambil Foto" ditekan, gambarnya sudah pasti siap dipakai.
     // Twibbon pilihan admin ada di Storage (beda origin) — dimuat dengan CORS
-    // supaya kanvas tetap bisa diekspor. Gagal dimuat = pakai bingkai bawaan.
+    // supaya kanvas tetap bisa diekspor. Belum dipasang / gagal dimuat = tanpa bingkai.
     let batal = false;
-    function muat(url: string) {
+    function muat(url: string | null) {
+      if (!url) {
+        setBingkaiSiap(true);
+        return;
+      }
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
@@ -166,14 +169,12 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
         setBingkaiSiap(true);
       };
       img.onerror = () => {
-        if (batal) return;
-        if (url !== TWIBBON_BAWAAN) muat(TWIBBON_BAWAAN);
-        else setBingkaiSiap(true); // foto tetap bisa diambil tanpa bingkai
+        if (!batal) setBingkaiSiap(true); // foto tetap bisa diambil tanpa bingkai
       };
       img.src = url;
     }
     void ambilUrlTwibbon()
-      .catch(() => TWIBBON_BAWAAN)
+      .catch(() => null)
       .then(muat);
     return () => {
       batal = true;

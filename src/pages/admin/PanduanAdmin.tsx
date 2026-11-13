@@ -153,7 +153,8 @@ export default function PanduanAdmin() {
       <Bagian judul="📸 Twibbon Foto Absen">
         <Langkah no={1}>
           Buka Kelola → Twibbon Foto Absen. Bingkai ini tampil di kamera absen dan ikut tersimpan
-          di foto absen semua pegawai.
+          di foto absen semua pegawai. <strong>Bawaannya tanpa twibbon</strong> — kamera polos sampai
+          admin memasang satu.
         </Langkah>
         <Langkah no={2}>
           Siapkan gambar sesuai ketentuan: <strong>PNG transparan, rasio 3:4 potret</strong>{" "}
@@ -165,11 +166,13 @@ export default function PanduanAdmin() {
           Pakai". Berlaku mulai pegawai membuka kamera absen berikutnya.
         </Langkah>
         <Langkah no={4}>
-          Tekan "Kembalikan ke Twibbon Bawaan" kalau ingin memakai bingkai asli aplikasi lagi.
+          Tekan "Hapus Twibbon (tanpa bingkai)" kalau sudah tidak ingin memakai bingkai — kamera
+          absen kembali polos. Mau memakai bingkai Hari Batik lama? Tekan "Pakai Contoh Twibbon",
+          cek pratinjaunya, lalu "Simpan &amp; Pakai".
         </Langkah>
         <Catatan>
           Ukuran twibbon media sosial (1080 × 1080 atau 1080 × 1350) ditolak karena bingkainya
-          akan gepeng. Unduh twibbon bawaan di halaman itu sebagai contoh/template desain.
+          akan gepeng. Unduh contoh twibbon di halaman itu sebagai template desain.
         </Catatan>
       </Bagian>
 
