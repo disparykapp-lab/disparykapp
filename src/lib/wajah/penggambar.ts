@@ -1,7 +1,7 @@
 // Penggambar efek wajah (WebGL2): satu shader untuk warp (wajah tirus & mata besar),
 // penghalusan kulit saja (bilateral, tepi tetap tajam), bibir & pipi merona, lalu
 // warna global dengan rumus yang sama seperti filter CSS di efekKamera.ts.
-import type { Efek } from "../efekKamera";
+import { gammaCerah, type Efek } from "../efekKamera";
 import { ALIS_A, ALIS_B, BIBIR_DALAM, BIBIR_LUAR, MATA_A, MATA_B, OVAL, ambil, kendaliMata, kendaliRamping, type Titik, type Wajah } from "./geometri";
 
 const MAKS_GESER = 6;
@@ -37,7 +37,7 @@ uniform vec2 uSkalaC[${MAKS_SKALA}];
 uniform float uSkalaR[${MAKS_SKALA}];
 uniform float uSkalaS[${MAKS_SKALA}];
 uniform float uKulit, uRadius, uCerahKulit, uBibir, uRona;
-uniform float uTerang, uKontras, uJenuh, uHangat;
+uniform float uGamma, uKontras, uJenuh, uHangat;
 const vec2 CAKRAM[16] = vec2[16](${CAKRAM.map(([x, y]) => `vec2(${x.toFixed(4)}, ${y.toFixed(4)})`).join(", ")});
 
 vec3 ambil(vec2 p) {
@@ -71,30 +71,51 @@ void main() {
   vec3 c = ambil(p);
 
   if (uAdaWajah) {
-    // peluang "warna kulit" (YCbCr) supaya kacamata, rambut, & mata tidak ikut dihaluskan
-    float cb = 128.0 + (-0.168736 * c.r - 0.331264 * c.g + 0.5 * c.b) * 255.0;
-    float cr = 128.0 + (0.5 * c.r - 0.418688 * c.g - 0.081312 * c.b) * 255.0;
-    float kulit = smoothstep(68.0, 82.0, cb) * (1.0 - smoothstep(128.0, 142.0, cb)) * smoothstep(126.0, 138.0, cr) * (1.0 - smoothstep(172.0, 186.0, cr));
-    float mk = m.r * mix(1.0, kulit, 0.75);
-    if (mk > 0.01 && uKulit > 0.0) {
-      vec3 jumlah = c;
-      float bobot = 1.0;
+    // rata-rata lokal (bebas noise) — dipakai untuk menilai "warna kulit" & sebagai pemandu bilateral
+    vec3 sampel[16];
+    vec3 rata = c;
+    if (m.r > 0.01) {
       for (int i = 0; i < 16; i++) {
-        vec3 s = ambil(p + CAKRAM[i] * uRadius);
-        vec3 dc = s - c;
-        float w = exp(-dot(dc, dc) / 0.018) * exp(-dot(CAKRAM[i], CAKRAM[i]) * 1.5);
-        jumlah += s * w;
+        sampel[i] = ambil(p + CAKRAM[i] * uRadius);
+        rata += sampel[i];
+      }
+      rata /= 17.0;
+    }
+    // peluang "warna kulit" (YCbCr) dari rata-rata lokal, supaya kacamata, rambut, & mata tidak
+    // ikut dihaluskan — dan piksel noise tidak salah digolongkan (jadi bintik)
+    float cb = 128.0 + (-0.168736 * rata.r - 0.331264 * rata.g + 0.5 * rata.b) * 255.0;
+    float cr = 128.0 + (0.5 * rata.r - 0.418688 * rata.g - 0.081312 * rata.b) * 255.0;
+    float kulit = smoothstep(68.0, 82.0, cb) * (1.0 - smoothstep(128.0, 142.0, cb)) * smoothstep(126.0, 138.0, cr) * (1.0 - smoothstep(172.0, 186.0, cr));
+    float mk = m.r * mix(1.0, kulit, 0.9);
+    if (mk > 0.01 && uKulit > 0.0) {
+      // bilateral berpemandu: bobot dibandingkan dengan rata-rata lokal, jadi bintik & noise
+      // kamera di cahaya redup ikut terhapus; tepi besar tetap tertahan.
+      vec3 d0 = c - rata;
+      float bobot = exp(-dot(d0, d0) / 0.02);
+      vec3 jumlah = c * bobot;
+      for (int i = 0; i < 16; i++) {
+        vec3 dc = sampel[i] - rata;
+        float w = exp(-dot(dc, dc) / 0.02) * exp(-dot(CAKRAM[i], CAKRAM[i]) * 0.8);
+        jumlah += sampel[i] * w;
         bobot += w;
       }
-      c = mix(c, jumlah / bobot, mk * uKulit);
-      c = mix(c, min(c + vec3(0.045, 0.035, 0.03), 1.0), mk * uCerahKulit);
+      // garis tegas (bingkai kacamata, bulu mata, tepi wajah) jauh beda dari sekitarnya → jangan dihaluskan;
+      // yang dihaluskan hanya beda kecil (noise, bintik, pori)
+      float struktur = smoothstep(0.09, 0.18, length(d0));
+      c = mix(c, jumlah / max(bobot, 1e-4), mk * uKulit * (1.0 - struktur));
     }
-    c = mix(c, clamp(c * vec3(1.12, 0.8, 0.86) + vec3(0.06, 0.0, 0.025), 0.0, 1.0), m.g * uBibir);
-    c = mix(c, clamp(c * vec3(1.05, 0.9, 0.93) + vec3(0.03, 0.0, 0.012), 0.0, 1.0), m.b * uRona);
+    // kilau kulit: "screen" dengan dirinya sendiri (mengangkat bayangan kulit) + sedikit hangat
+    c = mix(c, clamp(1.0 - (1.0 - c) * (1.0 - c) + vec3(0.015, 0.006, 0.0), 0.0, 1.0), mk * uCerahKulit * 0.35);
   }
 
-  // warna global — rumus sama dengan efekKamera.terapkanWarna (spesifikasi Filter Effects)
-  c = clamp(c * uTerang, 0.0, 1.0);
+  // cerah: angkat bayangan (gamma) — wajah di ruangan redup ikut terang tanpa membakar bagian terang;
+  // bibir sedikit saja supaya tidak memucat
+  c = pow(c, vec3(mix(uGamma, 1.0, m.g * 0.6)));
+  if (uAdaWajah) {
+    // rona bibir & pipi sesudah pencerahan (tidak luntur): MENAMBAH merah muda, tidak menggelapkan
+    c = mix(c, clamp(c * vec3(1.06, 0.9, 0.95) + vec3(0.08, 0.0, 0.03), 0.0, 1.0), m.g * uBibir);
+    c = mix(c, clamp(c + vec3(0.06, 0.012, 0.024), 0.0, 1.0), m.b * uRona);
+  }
   c = clamp((c - 0.5) * uKontras + 0.5, 0.0, 1.0);
   float s = uJenuh;
   mat3 js = mat3(0.213 + 0.787 * s, 0.213 - 0.213 * s, 0.213 - 0.213 * s,
@@ -146,13 +167,13 @@ export function gambarMasker(ctx: CanvasRenderingContext2D, w: Wajah, lebar: num
   ctx.lineJoin = "round";
   for (const k of [MATA_A, MATA_B]) {
     poligon(ctx, ambil(w, k));
-    ctx.lineWidth = w.jarakMata * 0.16;
+    ctx.lineWidth = w.jarakMata * 0.3;
     ctx.fill();
     ctx.stroke();
   }
   for (const k of [ALIS_A, ALIS_B]) {
     poligon(ctx, ambil(w, k));
-    ctx.lineWidth = w.jarakMata * 0.1;
+    ctx.lineWidth = w.jarakMata * 0.16;
     ctx.fill();
     ctx.stroke();
   }
@@ -224,7 +245,7 @@ export class PenggambarWajah {
     this.maskerCtx = this.masker.getContext("2d")!;
     for (const n of [
       "uVideo", "uMasker", "uUkuran", "uCermin", "uAdaWajah", "uJmlGeser", "uGeserC", "uGeserM", "uGeserR", "uJmlSkala", "uSkalaC", "uSkalaR", "uSkalaS",
-      "uKulit", "uRadius", "uCerahKulit", "uBibir", "uRona", "uTerang", "uKontras", "uJenuh", "uHangat",
+      "uKulit", "uRadius", "uCerahKulit", "uBibir", "uRona", "uGamma", "uKontras", "uJenuh", "uHangat",
     ]) {
       this.u[n] = gl.getUniformLocation(prog, n);
     }
@@ -278,13 +299,13 @@ export class PenggambarWajah {
         gl.uniform1fv(this.u.uSkalaS, skalaMata.map((k) => k.s));
       }
       gl.uniform1f(this.u.uKulit, e.kulit);
-      gl.uniform1f(this.u.uRadius, Math.max(2, wajah.lebar * 0.022));
+      gl.uniform1f(this.u.uRadius, Math.max(2, wajah.lebar * 0.021));
       gl.uniform1f(this.u.uCerahKulit, e.cerahKulit);
       gl.uniform1f(this.u.uBibir, e.bibir);
       gl.uniform1f(this.u.uRona, e.rona);
     }
-    gl.uniform1f(this.u.uTerang, efek.terang);
-    gl.uniform1f(this.u.uKontras, efek.kontras);
+    gl.uniform1f(this.u.uGamma, gammaCerah(e.cerah));
+    gl.uniform1f(this.u.uKontras, e.kontras);
     gl.uniform1f(this.u.uJenuh, efek.jenuh);
     gl.uniform1f(this.u.uHangat, efek.hangat);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
