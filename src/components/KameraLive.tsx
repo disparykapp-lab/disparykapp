@@ -1,6 +1,52 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ambilUrlTwibbon } from "../lib/twibbon";
 import { TWIBBON_BAWAAN } from "../lib/twibbonMeta";
+import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, terapkanWarna, type TingkatEfek } from "../lib/efekKamera";
+
+const KUNCI_EFEK = "disparyk:efek-kamera";
+
+function efekTersimpan(): TingkatEfek {
+  try {
+    const v = localStorage.getItem(KUNCI_EFEK);
+    return adalahTingkat(v) ? v : "asli";
+  } catch {
+    return "asli";
+  }
+}
+
+const filterKanvasDidukung =
+  typeof CanvasRenderingContext2D !== "undefined" && "filter" in CanvasRenderingContext2D.prototype;
+
+/** Lapisan lembut (soft-focus): salinan foto yang diburamkan, ditumpuk tipis di atasnya. */
+function lapisHalus(ctx: CanvasRenderingContext2D, kanvas: HTMLCanvasElement, radius: number, kekuatan: number) {
+  if (radius <= 0 || kekuatan <= 0) return;
+  const salinan = document.createElement("canvas");
+  salinan.width = kanvas.width;
+  salinan.height = kanvas.height;
+  const sctx = salinan.getContext("2d");
+  if (!sctx) return;
+  if (filterKanvasDidukung) {
+    sctx.filter = `blur(${radius}px)`;
+    sctx.drawImage(kanvas, 0, 0);
+  } else {
+    // browser lama tanpa ctx.filter: kecilkan bertahap lalu besarkan lagi (hasilnya buram halus)
+    const target = Math.max(1, Math.round(kanvas.width / Math.max(2, radius * 2)));
+    let sumber: HTMLCanvasElement = kanvas;
+    while (sumber.width / 2 >= target) {
+      const kecil = document.createElement("canvas");
+      kecil.width = Math.max(1, Math.round(sumber.width / 2));
+      kecil.height = Math.max(1, Math.round(sumber.height / 2));
+      kecil.getContext("2d")?.drawImage(sumber, 0, 0, kecil.width, kecil.height);
+      sumber = kecil;
+    }
+    sctx.imageSmoothingQuality = "high";
+    sctx.drawImage(sumber, 0, 0, salinan.width, salinan.height);
+  }
+  ctx.save();
+  ctx.globalAlpha = kekuatan;
+  ctx.drawImage(salinan, 0, 0);
+  ctx.restore();
+}
 
 interface KameraLiveProps {
   nama: string;
@@ -16,6 +62,7 @@ interface KameraLiveProps {
  */
 export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoHalusRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const bingkaiRef = useRef<HTMLImageElement | null>(null);
@@ -25,6 +72,26 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
   const [hasilBlob, setHasilBlob] = useState<Blob | null>(null);
   const [bingkaiUrl, setBingkaiUrl] = useState<string | null>(null);
   const [bingkaiSiap, setBingkaiSiap] = useState(false);
+  const [tingkat, setTingkat] = useState<TingkatEfek>(efekTersimpan);
+  const efek = EFEK[tingkat];
+
+  function pilihEfek(t: TingkatEfek) {
+    setTingkat(t);
+    try {
+      localStorage.setItem(KUNCI_EFEK, t);
+    } catch {
+      // penyimpanan diblokir — pilihan tetap berlaku sampai halaman ditutup
+    }
+  }
+
+  // Lapisan lembut pratinjau memutar aliran kamera yang sama dengan video utama.
+  useEffect(() => {
+    const v = videoHalusRef.current;
+    const stream = streamRef.current;
+    if (!siap || !v || !stream || efek.halus === 0) return;
+    if (v.srcObject !== stream) v.srcObject = stream;
+    void v.play().catch(() => undefined);
+  }, [siap, efek.halus]);
 
   useEffect(() => {
     // Preload bingkai twibbon dari awal (paralel sama izin kamera) supaya
@@ -112,6 +179,18 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     ctx.restore();
 
+    // Efek kecantikan — rumus sama dengan pratinjau, hanya pada foto (bukan bingkai).
+    if (cssWarna(efek) !== "none") {
+      const piksel = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      terapkanWarna(piksel.data, efek);
+      ctx.putImageData(piksel, 0, 0);
+    }
+    if (efek.halus > 0) {
+      const kotak = video.getBoundingClientRect();
+      const skalaTampil = Math.max(kotak.width / video.videoWidth, kotak.height / video.videoHeight);
+      lapisHalus(ctx, canvas, blurKanvas(efek, skalaTampil, skala), efek.halus);
+    }
+
     // Bingkai twibbon (punya lubang transparan di tengah) digambar di atas
     // foto, memenuhi seluruh kanvas — bagian tengah foto tetap kelihatan
     // lewat lubangnya, cuma pinggirnya yang ketutupan bingkai emas.
@@ -132,7 +211,7 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
     );
 
     streamRef.current?.getTracks().forEach((t) => t.stop());
-  }, []);
+  }, [efek]);
 
   const gunakanFoto = useCallback(() => {
     if (hasilBlob && hasilUrl) onFotoSiap(hasilBlob, hasilUrl);
@@ -176,7 +255,18 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
               playsInline
               muted
               className="aspect-[3/4] w-full -scale-x-100 object-cover"
+              style={{ filter: cssWarna(efek) }}
             />
+            {efek.halus > 0 && (
+              <video
+                ref={videoHalusRef}
+                playsInline
+                muted
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 h-full w-full -scale-x-100 object-cover"
+                style={{ filter: cssHalus(efek), opacity: efek.halus }}
+              />
+            )}
             {/* Preview bingkai supaya wajah bisa diposisikan pas sebelum jepret
                 — hasil akhirnya sudah pasti kebingkai juga (digambar di kanvas). */}
             {bingkaiUrl && (
@@ -199,6 +289,30 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
       </div>
 
       <canvas ref={canvasRef} className="hidden" />
+
+      {!hasilUrl && (
+        <div className="flex w-full max-w-sm flex-col gap-1.5">
+          <div className="grid grid-cols-3 gap-1 rounded-full bg-gray-100 p-1" role="radiogroup" aria-label="Efek wajah">
+            {URUTAN_EFEK.map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="radio"
+                aria-checked={tingkat === t}
+                onClick={() => pilihEfek(t)}
+                className={`min-h-[38px] rounded-full text-sm font-semibold transition ${
+                  tingkat === t ? "bg-brand-masuk text-white shadow-sm" : "text-gray-500"
+                }`}
+              >
+                {EFEK[t].label}
+              </button>
+            ))}
+          </div>
+          <p className="text-center text-[11px] text-gray-400">
+            {efek.ket} · bentuk wajah tetap asli
+          </p>
+        </div>
+      )}
 
       {!hasilUrl ? (
         <div className="flex w-full max-w-sm gap-3">
