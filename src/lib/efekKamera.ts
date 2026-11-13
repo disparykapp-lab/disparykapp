@@ -1,10 +1,11 @@
 // Efek kecantikan kamera absen (murni — diuji di tests/efekKamera.test.ts).
-// Pratinjau memakai filter CSS pada <video>; foto yang disimpan memakai rumus
-// yang sama persis (spesifikasi Filter Effects) di kanvas, jadi yang terlihat
-// sebelum dijepret = yang tersimpan. Tidak mengubah bentuk wajah — hanya
-// warna & kehalusan, supaya foto tetap layak untuk verifikasi.
+// Dua jalur: (1) efek wajah ala TikTok lewat titik wajah MediaPipe + WebGL
+// (lib/wajah/*) — kulit saja yang dihaluskan, bibir & pipi merona, wajah tirus,
+// mata besar; (2) cadangan untuk HP yang tidak mampu: filter CSS pada <video>
+// dengan rumus yang sama persis di kanvas. Warna global (terang/kontras/jenuh/
+// hangat) memakai rumus yang sama di kedua jalur.
 
-export type TingkatEfek = "asli" | "natural" | "glowing";
+export type TingkatEfek = "asli" | "natural" | "glowing" | "cantik";
 
 export interface Efek {
   label: string;
@@ -14,18 +15,56 @@ export interface Efek {
   kontras: number;
   jenuh: number;
   hangat: number;
-  /** lapisan lembut (soft-focus) di atas foto: blur (px di layar) & kekuatannya */
+  /** lapisan lembut (soft-focus) di atas foto: blur (px di layar) & kekuatannya — dipakai bila HP tidak mendukung efek wajah */
   blurPx: number;
   halus: number;
+  /** efek berbasis titik wajah (MediaPipe), 0–1: haluskan kulit saja, cerahkan kulit, warna bibir, rona pipi, rampingkan wajah, besarkan mata */
+  wajah: { kulit: number; cerahKulit: number; bibir: number; rona: number; ramping: number; mataBesar: number };
 }
 
+const TANPA_WAJAH = { kulit: 0, cerahKulit: 0, bibir: 0, rona: 0, ramping: 0, mataBesar: 0 };
+
 export const EFEK: Record<TingkatEfek, Efek> = {
-  asli: { label: "Asli", ket: "Tanpa efek", terang: 1, kontras: 1, jenuh: 1, hangat: 0, blurPx: 0, halus: 0 },
-  natural: { label: "Natural", ket: "Sedikit lebih cerah & halus", terang: 1.05, kontras: 0.97, jenuh: 1.06, hangat: 0.05, blurPx: 3, halus: 0.25 },
-  glowing: { label: "Glowing", ket: "Cerah, hangat, kulit halus", terang: 1.1, kontras: 0.94, jenuh: 1.1, hangat: 0.1, blurPx: 4, halus: 0.4 },
+  asli: { label: "Asli", ket: "Tanpa efek", terang: 1, kontras: 1, jenuh: 1, hangat: 0, blurPx: 0, halus: 0, wajah: TANPA_WAJAH },
+  natural: {
+    label: "Natural",
+    ket: "Kulit halus, sedikit lebih cerah",
+    terang: 1.04,
+    kontras: 0.98,
+    jenuh: 1.05,
+    hangat: 0.04,
+    blurPx: 3,
+    halus: 0.25,
+    wajah: { kulit: 0.6, cerahKulit: 0.3, bibir: 0.15, rona: 0.1, ramping: 0, mataBesar: 0 },
+  },
+  glowing: {
+    label: "Glowing",
+    ket: "Kulit mulus, bibir & pipi merona",
+    terang: 1.07,
+    kontras: 0.96,
+    jenuh: 1.08,
+    hangat: 0.08,
+    blurPx: 4,
+    halus: 0.4,
+    wajah: { kulit: 0.8, cerahKulit: 0.5, bibir: 0.4, rona: 0.35, ramping: 0.25, mataBesar: 0.2 },
+  },
+  cantik: {
+    label: "Cantik",
+    ket: "Ala TikTok: wajah tirus, mata besar, kulit mulus",
+    terang: 1.08,
+    kontras: 0.95,
+    jenuh: 1.08,
+    hangat: 0.08,
+    blurPx: 4,
+    halus: 0.4,
+    wajah: { kulit: 0.9, cerahKulit: 0.55, bibir: 0.5, rona: 0.4, ramping: 1, mataBesar: 1 },
+  },
 };
 
-export const URUTAN_EFEK: TingkatEfek[] = ["asli", "natural", "glowing"];
+export const URUTAN_EFEK: TingkatEfek[] = ["asli", "natural", "glowing", "cantik"];
+
+/** Tingkat ini butuh pendeteksi wajah? */
+export const pakaiWajah = (e: Efek) => Object.values(e.wajah).some((v) => v > 0);
 
 export function adalahTingkat(x: unknown): x is TingkatEfek {
   return typeof x === "string" && x in EFEK;

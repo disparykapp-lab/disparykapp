@@ -54,9 +54,12 @@ export default function Panduan() {
           Kamera akan terbuka otomatis dengan bingkai twibbon — posisikan wajah kamu di
           dalam bingkainya, lalu tekan <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan
           "Ambil Ulang".
-          {" "}Mau tampil lebih segar? Pilih efek <strong>Natural</strong> atau{" "}
-          <strong>Glowing</strong> di bawah kamera (kulit sedikit dihaluskan, wajah lebih cerah) —
-          pilihanmu diingat untuk absen berikutnya. Bentuk wajah tidak diubah.
+          {" "}Mau tampil lebih segar? Di bawah kamera ada efek <strong>Natural</strong> (kulit
+          halus), <strong>Glowing</strong> (plus bibir &amp; pipi merona), dan <strong>Cantik</strong>{" "}
+          (ala TikTok: wajah tirus &amp; mata besar), serta stiker seperti kacamata, blangkon, mahkota,
+          dan telinga kucing yang menempel mengikuti wajah. Pertama kali dipakai, efek wajah perlu
+          diunduh sebentar (±15 MB); pilihanmu diingat untuk absen berikutnya. Di HP yang belum
+          mendukung, otomatis memakai efek sederhana.
         </Langkah>
         <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
         <Langkah no={7}>
