@@ -1,7 +1,7 @@
 // Jalankan: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, terapkanWarna, type Efek } from "../src/lib/efekKamera.ts";
+import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, pakaiWajah, terapkanWarna, type Efek } from "../src/lib/efekKamera.ts";
 
 const piksel = (...rgb: number[]) => {
   const d = new Uint8ClampedArray((rgb.length / 3) * 4);
@@ -18,8 +18,8 @@ test("Asli = tanpa filter, piksel tidak berubah", () => {
 });
 
 test("string CSS pratinjau berurutan sama dengan rumus kanvas", () => {
-  assert.equal(cssWarna(EFEK.natural), "brightness(1.05) contrast(0.97) saturate(1.06) sepia(0.05)");
-  assert.equal(cssHalus(EFEK.glowing), "brightness(1.1) contrast(0.94) saturate(1.1) sepia(0.1) blur(4px)");
+  assert.equal(cssWarna(EFEK.natural), "brightness(1.04) contrast(0.98) saturate(1.05) sepia(0.04)");
+  assert.equal(cssHalus(EFEK.glowing), "brightness(1.07) contrast(0.96) saturate(1.08) sepia(0.08) blur(4px)");
 });
 
 test("brightness & contrast mengikuti spesifikasi CSS", () => {
@@ -46,15 +46,15 @@ test("sepia (hangat): biru turun, merah naik", () => {
   assert.ok(d[0] > d[2], `r ${d[0]} > b ${d[2]}`);
 });
 
-test("efek bertingkat: Glowing paling cerah, alpha tetap", () => {
+test("efek bertingkat makin cerah, alpha tetap", () => {
   const rata = (e: Efek) => {
     const d = piksel(90, 80, 70, 160, 140, 120, 30, 30, 30);
     terapkanWarna(d, e);
     assert.ok([d[3], d[7], d[11]].every((a) => a === 255));
     return (d[0] + d[1] + d[2] + d[4] + d[5] + d[6] + d[8] + d[9] + d[10]) / 9;
   };
-  const [a, n, g] = URUTAN_EFEK.map((t) => rata(EFEK[t]));
-  assert.ok(a < n && n < g, `${a} < ${n} < ${g}`);
+  const [a, n, g, c] = URUTAN_EFEK.map((t) => rata(EFEK[t]));
+  assert.ok(a < n && n < g && g <= c, `${a} < ${n} < ${g} ≤ ${c}`);
 });
 
 test("blur kanvas setara blur pratinjau sesuai skala", () => {
@@ -69,7 +69,14 @@ test("pilihan tersimpan divalidasi", () => {
   assert.equal(adalahTingkat(null), false);
 });
 
-test("efek tetap ringan supaya foto layak verifikasi", () => {
+test("tingkat efek wajah naik bertahap; Asli tanpa efek wajah", () => {
+  assert.equal(pakaiWajah(EFEK.asli), false);
+  for (const t of ["natural", "glowing", "cantik"] as const) assert.equal(pakaiWajah(EFEK[t]), true, t);
+  assert.ok(EFEK.cantik.wajah.ramping > EFEK.glowing.wajah.ramping && EFEK.glowing.wajah.ramping > EFEK.natural.wajah.ramping);
+  assert.ok(Object.values(EFEK.cantik.wajah).every((v) => v <= 1));
+});
+
+test("efek warna tetap ringan supaya foto layak verifikasi", () => {
   for (const t of URUTAN_EFEK) {
     const e = EFEK[t];
     assert.ok(e.halus <= 0.45 && e.blurPx <= 5 && e.terang <= 1.12 && e.hangat <= 0.12, t);

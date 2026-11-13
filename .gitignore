@@ -29,3 +29,4 @@ client_secret_*.json
 
 # File sumber aset game resolusi penuh (dioptimalkan ke src/features/game/assets/)
 aset-game-sumber/
+public/mediapipe/wasm/
