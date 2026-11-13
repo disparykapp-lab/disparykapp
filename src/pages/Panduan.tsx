@@ -54,6 +54,9 @@ export default function Panduan() {
           Kamera akan terbuka otomatis dengan bingkai twibbon — posisikan wajah kamu di
           dalam bingkainya, lalu tekan <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan
           "Ambil Ulang".
+          {" "}Mau tampil lebih segar? Pilih efek <strong>Natural</strong> atau{" "}
+          <strong>Glowing</strong> di bawah kamera (kulit sedikit dihaluskan, wajah lebih cerah) —
+          pilihanmu diingat untuk absen berikutnya. Bentuk wajah tidak diubah.
         </Langkah>
         <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
         <Langkah no={7}>
