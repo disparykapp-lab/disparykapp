@@ -18,11 +18,15 @@ export interface Efek {
   /** lapisan lembut (soft-focus) di atas foto: blur (px di layar) & kekuatannya — dipakai bila HP tidak mendukung efek wajah */
   blurPx: number;
   halus: number;
-  /** efek berbasis titik wajah (MediaPipe), 0–1: haluskan kulit saja, cerahkan kulit, warna bibir, rona pipi, rampingkan wajah, besarkan mata */
-  wajah: { kulit: number; cerahKulit: number; bibir: number; rona: number; ramping: number; mataBesar: number };
+  /**
+   * Efek berbasis titik wajah (MediaPipe + WebGL), 0–1: haluskan kulit saja, kilau kulit,
+   * rona bibir, rona pipi, rampingkan wajah, besarkan mata, angkat bayangan (cerah
+   * tanpa membakar bagian terang), dan kontras (≈1).
+   */
+  wajah: { kulit: number; cerahKulit: number; bibir: number; rona: number; ramping: number; mataBesar: number; cerah: number; kontras: number };
 }
 
-const TANPA_WAJAH = { kulit: 0, cerahKulit: 0, bibir: 0, rona: 0, ramping: 0, mataBesar: 0 };
+const TANPA_WAJAH = { kulit: 0, cerahKulit: 0, bibir: 0, rona: 0, ramping: 0, mataBesar: 0, cerah: 0, kontras: 1 };
 
 export const EFEK: Record<TingkatEfek, Efek> = {
   asli: { label: "Asli", ket: "Tanpa efek", terang: 1, kontras: 1, jenuh: 1, hangat: 0, blurPx: 0, halus: 0, wajah: TANPA_WAJAH },
@@ -35,36 +39,42 @@ export const EFEK: Record<TingkatEfek, Efek> = {
     hangat: 0.04,
     blurPx: 3,
     halus: 0.25,
-    wajah: { kulit: 0.6, cerahKulit: 0.3, bibir: 0.15, rona: 0.1, ramping: 0, mataBesar: 0 },
+    wajah: { kulit: 0.6, cerahKulit: 0.5, bibir: 0.15, rona: 0.12, ramping: 0, mataBesar: 0, cerah: 0.35, kontras: 1.02 },
   },
   glowing: {
     label: "Glowing",
-    ket: "Kulit mulus, bibir & pipi merona",
+    ket: "Lebih cerah, kulit mulus, bibir & pipi merona",
     terang: 1.07,
     kontras: 0.96,
     jenuh: 1.08,
     hangat: 0.08,
     blurPx: 4,
     halus: 0.4,
-    wajah: { kulit: 0.8, cerahKulit: 0.5, bibir: 0.4, rona: 0.35, ramping: 0.25, mataBesar: 0.2 },
+    wajah: { kulit: 0.75, cerahKulit: 0.7, bibir: 0.3, rona: 0.25, ramping: 0.2, mataBesar: 0.15, cerah: 0.55, kontras: 1.03 },
   },
   cantik: {
     label: "Cantik",
-    ket: "Ala TikTok: wajah tirus, mata besar, kulit mulus",
+    ket: "Ala TikTok: cerah, sedikit tirus, mata lebih besar",
     terang: 1.08,
     kontras: 0.95,
     jenuh: 1.08,
     hangat: 0.08,
     blurPx: 4,
     halus: 0.4,
-    wajah: { kulit: 0.9, cerahKulit: 0.55, bibir: 0.5, rona: 0.4, ramping: 1, mataBesar: 1 },
+    wajah: { kulit: 0.8, cerahKulit: 0.8, bibir: 0.35, rona: 0.3, ramping: 0.45, mataBesar: 0.3, cerah: 0.65, kontras: 1.03 },
   },
 };
 
 export const URUTAN_EFEK: TingkatEfek[] = ["asli", "natural", "glowing", "cantik"];
 
 /** Tingkat ini butuh pendeteksi wajah? */
-export const pakaiWajah = (e: Efek) => Object.values(e.wajah).some((v) => v > 0);
+export const pakaiWajah = (e: Efek) => {
+  const w = e.wajah;
+  return w.kulit > 0 || w.cerahKulit > 0 || w.bibir > 0 || w.rona > 0 || w.ramping > 0 || w.mataBesar > 0 || w.cerah > 0;
+};
+
+/** Gamma pengangkat bayangan untuk efek wajah: 1 = tanpa, makin kecil makin cerah (bagian terang tidak terbakar). */
+export const gammaCerah = (cerah: number) => 1 / (1 + 0.35 * cerah);
 
 export function adalahTingkat(x: unknown): x is TingkatEfek {
   return typeof x === "string" && x in EFEK;

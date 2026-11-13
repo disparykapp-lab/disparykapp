@@ -1,7 +1,7 @@
 // Jalankan: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, pakaiWajah, terapkanWarna, type Efek } from "../src/lib/efekKamera.ts";
+import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, gammaCerah, pakaiWajah, terapkanWarna, type Efek } from "../src/lib/efekKamera.ts";
 
 const piksel = (...rgb: number[]) => {
   const d = new Uint8ClampedArray((rgb.length / 3) * 4);
@@ -73,7 +73,23 @@ test("tingkat efek wajah naik bertahap; Asli tanpa efek wajah", () => {
   assert.equal(pakaiWajah(EFEK.asli), false);
   for (const t of ["natural", "glowing", "cantik"] as const) assert.equal(pakaiWajah(EFEK[t]), true, t);
   assert.ok(EFEK.cantik.wajah.ramping > EFEK.glowing.wajah.ramping && EFEK.glowing.wajah.ramping > EFEK.natural.wajah.ramping);
-  assert.ok(Object.values(EFEK.cantik.wajah).every((v) => v <= 1));
+  const { kontras, ...lain } = EFEK.cantik.wajah;
+  assert.ok(Object.values(lain).every((v) => v <= 1) && kontras >= 1 && kontras <= 1.05);
+});
+
+test("Cantik tetap masuk akal: tirus & mata besar ringan, prioritas cerah", () => {
+  const w = EFEK.cantik.wajah;
+  assert.ok(w.ramping <= 0.45 && w.mataBesar <= 0.35, `ramping ${w.ramping}, mata ${w.mataBesar}`);
+  assert.ok(w.cerah >= 0.5 && w.cerahKulit >= 0.7);
+  assert.equal(pakaiWajah(EFEK.asli), false);
+});
+
+test("gamma cerah mengangkat bayangan tanpa membakar putih", () => {
+  const g = gammaCerah(EFEK.cantik.wajah.cerah);
+  assert.ok(g < 1 && g > 0.7);
+  assert.ok(Math.pow(0.25, g) > 0.29, "bayangan terangkat");
+  assert.equal(Math.pow(1, g), 1, "putih tetap putih");
+  assert.equal(gammaCerah(0), 1);
 });
 
 test("efek warna tetap ringan supaya foto layak verifikasi", () => {
