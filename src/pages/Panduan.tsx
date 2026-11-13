@@ -34,35 +34,44 @@ export default function Panduan() {
       </Bagian>
 
       <Bagian judul="🟢 Cara Absen Masuk">
-        <Langkah no={1}>Di halaman Beranda, tekan ikon "Absen Masuk".</Langkah>
+        <Langkah no={1}>
+          Di halaman Beranda, tekan ikon "Absen Masuk". Tekan <strong>Izinkan</strong> saat browser
+          meminta izin lokasi.
+        </Langkah>
         <Langkah no={2}>
-          Pilih posisi kamu sekarang: <strong>"Di Kantor"</strong> kalau sedang di kantor, atau{" "}
-          <strong>"Dinas Luar"</strong> kalau sedang tugas di luar (wajib isi keterangan singkat,
-          misal "Survei lokasi wisata Kaliurang").
+          Di kartu paling atas langsung terlihat jam sekarang, status <strong>Tepat waktu/Telat</strong>,
+          dan <strong>radar lokasi</strong>: kotak merah = kantor, titik biru = kamu, lingkaran putus-putus
+          = batas radius kantor. Jaraknya diperbarui sendiri; tekan "Perbarui" kalau perlu.
         </Langkah>
         <Langkah no={3}>
-          Tekan "Lanjutkan" — aplikasi akan meminta izin lokasi. Tekan <strong>Izinkan</strong>{" "}
-          saat browser bertanya.
+          Pilih <strong>"Di Kantor"</strong> atau <strong>"Dinas Luar"</strong>. Dinas luar wajib diisi
+          tugasnya (misal "Survei lokasi wisata Kaliurang") — tugas dinas sebelumnya muncul sebagai
+          pilihan cepat "Pakai lagi".
         </Langkah>
         <Langkah no={4}>
-          Ada juga kolom <strong>"Keterangan (opsional)"</strong> — boleh dikosongkan, atau diisi
-          kalau ada yang mau dicatat (mis. "Telat karena macet parah di jalan"). Begitu diisi,
-          muncul tombol <strong>"Unggah foto bukti"</strong> kalau mau melampirkan foto (foto
-          otomatis dikecilkan dulu sebelum diunggah).
+          Mau menambah catatan (mis. alasan telat)? Ketuk <strong>"Tambah keterangan"</strong> —
+          pilih alasan cepat atau ketik sendiri, dan boleh lampirkan foto bukti.
         </Langkah>
         <Langkah no={5}>
-          Kamera akan terbuka otomatis dengan bingkai twibbon — posisikan wajah kamu di
-          dalam bingkainya, lalu tekan <strong>"📸 Ambil Foto"</strong>. Kalau kurang pas, tekan
-          "Ambil Ulang".
-          {" "}Mau tampil lebih segar? Di bawah kamera ada efek <strong>Natural</strong> (kulit
-          halus), <strong>Glowing</strong> (plus bibir &amp; pipi merona), dan <strong>Cantik</strong>{" "}
-          (ala TikTok: wajah tirus &amp; mata besar), serta stiker seperti kacamata, blangkon, mahkota,
-          dan telinga kucing yang menempel mengikuti wajah. Pertama kali dipakai, efek wajah perlu
-          diunduh sebentar (±15 MB); pilihanmu diingat untuk absen berikutnya. Di HP yang belum
-          mendukung, otomatis memakai efek sederhana.
+          Tekan <strong>"Lanjut Foto"</strong>. Tombol ini baru aktif kalau lokasimu sudah pas
+          (di dalam radius & sinyal GPS cukup akurat) — alasannya tertulis di atas tombol, jadi kamu
+          tidak perlu berfoto dulu baru ditolak.
         </Langkah>
-        <Langkah no={6}>Tekan "Gunakan Foto" — tunggu sebentar sampai muncul layar sukses ✅.</Langkah>
+        <Langkah no={6}>
+          Kamera terbuka dengan bingkai twibbon (kalau admin memasangnya) — posisikan wajah, lalu
+          tekan <strong>tombol bulat</strong> di bawah kamera. Kalau kurang pas, tekan "Ulangi".
+          {" "}Mau tampil lebih segar? Di bawahnya ada efek <strong>Natural</strong> (kulit
+          halus), <strong>Glowing</strong> (plus bibir &amp; pipi merona), dan <strong>Cantik</strong>{" "}
+          (ala TikTok: lebih cerah, sedikit tirus &amp; mata lebih besar), serta stiker seperti kacamata,
+          blangkon, mahkota, dan telinga kucing yang menempel mengikuti wajah. Pertama kali dipakai, efek
+          wajah perlu diunduh sebentar (±15 MB); pilihanmu diingat untuk absen berikutnya. Di HP yang
+          belum mendukung, otomatis memakai efek sederhana.
+        </Langkah>
         <Langkah no={7}>
+          Tekan <strong>"Kirim Absen Masuk"</strong>. Setelah berhasil muncul{" "}
+          <strong>tiket bukti absen</strong>: jam, lokasi, dan status — ketuk fotonya untuk memperbesar.
+        </Langkah>
+        <Langkah no={8}>
           Foto absen kamu tampil di kartu <strong>"Status Hari Ini"</strong> di Beranda — tekan
           fotonya untuk memperbesar. Foto hanya bisa kamu lihat <strong>hari itu saja</strong>;
           mulai pukul 00.00 besoknya sudah tidak tampil lagi.
@@ -72,7 +81,10 @@ export default function Panduan() {
       <Bagian judul="🟠 Cara Absen Pulang">
         <p className="text-sm text-gray-600">
           Caranya sama seperti Absen Masuk, tinggal tekan ikon "Absen Pulang" di Beranda. Ikon
-          ini baru aktif setelah kamu absen masuk lebih dulu.
+          ini baru aktif setelah kamu absen masuk lebih dulu. Kalau tadi pagi absen Dinas Luar,
+          pilihan Dinas Luar dan tugasnya sudah terisi otomatis. Pulang sebelum jadwal? Aplikasi
+          mengingatkan untuk menulis alasannya. Tiket bukti absen pulang juga menampilkan total jam
+          kerjamu hari itu.
         </p>
       </Bagian>
 
