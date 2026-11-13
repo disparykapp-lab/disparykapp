@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Ban } from "lucide-react";
+import { Ban, RotateCcw, Send } from "lucide-react";
 import type { FaceLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { ambilUrlTwibbon } from "../lib/twibbon";
 import { EFEK, URUTAN_EFEK, adalahTingkat, blurKanvas, cssHalus, cssWarna, pakaiWajah, terapkanWarna, type TingkatEfek } from "../lib/efekKamera";
@@ -72,6 +72,8 @@ interface KameraLiveProps {
   lng: number;
   onFotoSiap: (blob: Blob, dataUrl: string) => void;
   onBatal: () => void;
+  /** label tombol setelah foto diambil (bawaan "Gunakan Foto") */
+  labelKirim?: string;
 }
 
 type StatusWajah = "mati" | "memuat" | "siap" | "gagal";
@@ -82,7 +84,7 @@ type StatusWajah = "mati" | "memuat" | "siap" | "gagal";
  * Efek wajah ala TikTok & stiker memakai MediaPipe + WebGL bila HP mampu; kalau
  * tidak (atau masih memuat), memakai efek sederhana berbasis filter.
  */
-export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
+export default function KameraLive({ onFotoSiap, onBatal, labelKirim = "Gunakan Foto" }: KameraLiveProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoHalusRef = useRef<HTMLVideoElement>(null);
   const glRef = useRef<HTMLCanvasElement>(null);
@@ -100,6 +102,8 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
   const [hasilBlob, setHasilBlob] = useState<Blob | null>(null);
   const [bingkaiUrl, setBingkaiUrl] = useState<string | null>(null);
   const [bingkaiSiap, setBingkaiSiap] = useState(false);
+  /** kilat putih sekali saat jepret (umpan balik, bukan animasi berulang) */
+  const [kilat, setKilat] = useState(0);
   const [tingkat, setTingkat] = useState<TingkatEfek>(() => bacaSimpanan(KUNCI_EFEK, adalahTingkat, "asli"));
   const [stikerId, setStikerId] = useState<string | null>(() => bacaSimpanan<string | null>(KUNCI_STIKER, adalahStiker, null));
   const efek = EFEK[tingkat];
@@ -341,6 +345,7 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
     setHasilUrl(dataUrl);
+    setKilat((n) => n + 1);
 
     canvas.toBlob(
       (blob) => {
@@ -397,7 +402,8 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
         <div className="w-full rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>
       )}
 
-      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-black">
+      {/* lebar dibatasi tinggi layar supaya tombol jepret tetap terlihat tanpa menggulir */}
+      <div className="relative w-full max-w-[min(24rem,max(15rem,calc((100dvh-16rem)*0.75)))] overflow-hidden rounded-2xl bg-black">
         {!hasilUrl && (
           <>
             <video
@@ -446,10 +452,50 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
             className="aspect-[3/4] w-full object-cover"
           />
         )}
+        {kilat > 0 && <div key={kilat} className="animasi-kilat pointer-events-none absolute inset-0 bg-white" aria-hidden="true" />}
       </div>
 
       <canvas ref={canvasRef} className="hidden" />
 
+      {!hasilUrl ? (
+        <div className="grid w-full max-w-sm grid-cols-[1fr_auto_1fr] items-center">
+          <button
+            type="button"
+            onClick={onBatal}
+            className="justify-self-start rounded-full px-4 py-2 text-sm font-semibold text-gray-500 transition active:scale-95"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={ambilFoto}
+            disabled={!siap || !bingkaiSiap}
+            aria-label="Ambil foto"
+            className="flex h-[78px] w-[78px] items-center justify-center rounded-full bg-white shadow-md ring-4 ring-brand-masuk transition active:scale-90 disabled:opacity-50 disabled:ring-gray-300"
+          >
+            <img src="/icon_kamera.png" alt="" className="h-12 w-12 object-contain" />
+          </button>
+          <span />
+        </div>
+      ) : (
+        <div className="flex w-full max-w-sm gap-3">
+          <button
+            type="button"
+            onClick={ulangi}
+            className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-brand-text transition active:scale-[0.98]"
+          >
+            <RotateCcw size={16} aria-hidden="true" /> Ulangi
+          </button>
+          <button
+            type="button"
+            onClick={gunakanFoto}
+            disabled={!hasilBlob}
+            className="flex min-h-[52px] flex-[1.6] items-center justify-center gap-2 rounded-xl bg-brand-masuk font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+          >
+            {labelKirim} <Send size={16} aria-hidden="true" />
+          </button>
+        </div>
+      )}
       {!hasilUrl && (
         <div className="flex w-full max-w-sm flex-col gap-2">
           <div className="grid grid-cols-4 gap-1 rounded-full bg-gray-100 p-1" role="radiogroup" aria-label="Efek wajah">
@@ -506,39 +552,6 @@ export default function KameraLive({ onFotoSiap, onBatal }: KameraLiveProps) {
         </div>
       )}
 
-      {!hasilUrl ? (
-        <div className="flex w-full max-w-sm gap-3">
-          <button
-            onClick={onBatal}
-            className="min-h-[48px] flex-1 rounded-xl border border-gray-300 bg-white font-semibold text-brand-text"
-          >
-            Batal
-          </button>
-          <button
-            onClick={ambilFoto}
-            disabled={!siap || !bingkaiSiap}
-            className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-xl bg-brand-masuk font-semibold text-white disabled:opacity-50"
-          >
-            <img src="/icon_kamera.png" alt="" className="-ml-1 h-9 w-9 object-contain" />
-            Ambil Foto
-          </button>
-        </div>
-      ) : (
-        <div className="flex w-full max-w-sm gap-3">
-          <button
-            onClick={ulangi}
-            className="min-h-[48px] flex-1 rounded-xl border border-gray-300 bg-white font-semibold text-brand-text"
-          >
-            Ambil Ulang
-          </button>
-          <button
-            onClick={gunakanFoto}
-            className="min-h-[48px] flex-1 rounded-xl bg-brand-masuk font-semibold text-white"
-          >
-            Gunakan Foto
-          </button>
-        </div>
-      )}
     </div>
   );
 }

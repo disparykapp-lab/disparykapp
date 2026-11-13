@@ -6,6 +6,7 @@ import { formatDurasi, jamPada, jamPendek, keadaanHariIni, type KeadaanHariIni }
 import { teksDenganLink } from "../lib/linkify";
 import type { Absensi } from "../types/database";
 import FotoAbsenHariIni from "./FotoAbsenHariIni";
+import SobekanTiket from "./SobekanTiket";
 
 const jamWIB = (iso: string) =>
   new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" });
@@ -58,11 +59,7 @@ export default function StatusHariIni({ absensi, wajibAbsen }: { absensi: Absens
 
       {k.tahap === "izin" ? <PanelIzin absensi={absensi!} /> : <Rute k={k} absensi={absensi} jam={jam} tanggal={tanggal} wajibAbsen={wajibAbsen} />}
 
-      {/* sobekan tiket */}
-      <div className="relative -mx-5 my-4 border-t-2 border-dashed border-gray-100" aria-hidden="true">
-        <span className="absolute -left-3 -top-[13px] h-6 w-6 rounded-full bg-brand-bg shadow-[inset_0_1px_3px_rgba(0,0,0,0.12)]" />
-        <span className="absolute -right-3 -top-[13px] h-6 w-6 rounded-full bg-brand-bg shadow-[inset_0_1px_3px_rgba(0,0,0,0.12)]" />
-      </div>
+      <SobekanTiket />
 
       <div className="flex items-center justify-between gap-3">
         <Pesan k={k} />
