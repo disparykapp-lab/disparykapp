@@ -1,6 +1,5 @@
 import { supabase } from "./supabase";
 import {
-  TWIBBON_BAWAAN,
   cekFileTwibbon,
   cekTransparansi,
   hitungTransparansi,
@@ -12,7 +11,7 @@ import {
 
 const BUCKET = "twibbon";
 
-/** Nama file twibbon yang sedang dipakai; null = bawaan aplikasi. */
+/** Nama file twibbon yang sedang dipakai; null = tanpa twibbon (bawaan). */
 export async function ambilTwibbonPath(): Promise<string | null> {
   const { data, error } = await supabase.from("pengaturan").select("twibbon_path").eq("id", 1).maybeSingle();
   if (error) {
@@ -24,17 +23,18 @@ export async function ambilTwibbonPath(): Promise<string | null> {
   return (data as { twibbon_path: string | null } | null)?.twibbon_path ?? null;
 }
 
-export function urlTwibbon(path: string | null): string {
-  if (!path) return TWIBBON_BAWAAN;
+/** URL publik twibbon; null = tanpa twibbon. */
+export function urlTwibbon(path: string | null): string | null {
+  if (!path) return null;
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-/** URL bingkai untuk kamera absen. Gagal membaca pengaturan = pakai bawaan. */
-export async function ambilUrlTwibbon(): Promise<string> {
+/** URL bingkai untuk kamera absen; null = tanpa bingkai (juga kalau pengaturan gagal dibaca). */
+export async function ambilUrlTwibbon(): Promise<string | null> {
   try {
     return urlTwibbon(await ambilTwibbonPath());
   } catch {
-    return TWIBBON_BAWAAN;
+    return null;
   }
 }
 
@@ -113,8 +113,8 @@ export async function gantiTwibbon(blob: Blob, pathLama: string | null): Promise
   return path;
 }
 
-/** Kembali ke twibbon bawaan aplikasi dan hapus file kustom yang lama. */
-export async function kembalikanTwibbonBawaan(pathLama: string | null): Promise<void> {
+/** Lepas twibbon (kamera absen jadi tanpa bingkai) dan hapus file yang lama. */
+export async function hapusTwibbon(pathLama: string | null): Promise<void> {
   const { error } = await supabase.from("pengaturan").update({ twibbon_path: null }).eq("id", 1);
   if (error) throw new Error(error.message);
   if (pathLama) await supabase.storage.from(BUCKET).remove([pathLama]);

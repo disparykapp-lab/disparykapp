@@ -4,12 +4,12 @@ import Loading from "../../components/Loading";
 import {
   ambilTwibbonPath,
   gantiTwibbon,
-  kembalikanTwibbonBawaan,
+  hapusTwibbon,
   periksaTwibbon,
   urlTwibbon,
   type HasilPeriksaTwibbon,
 } from "../../lib/twibbon";
-import { KETENTUAN_TWIBBON, TWIBBON_BAWAAN, formatUkuranFile } from "../../lib/twibbonMeta";
+import { KETENTUAN_TWIBBON, TWIBBON_CONTOH, formatUkuranFile } from "../../lib/twibbonMeta";
 
 const K = KETENTUAN_TWIBBON;
 
@@ -38,7 +38,22 @@ export default function KelolaTwibbon() {
   async function pilihFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
+    if (file) await periksa(file);
+  }
+
+  /** Pakai contoh twibbon (bingkai lama aplikasi): diperiksa & dipratinjau dulu, lalu Simpan. */
+  async function pakaiContoh() {
+    setError(null);
+    try {
+      const res = await fetch(TWIBBON_CONTOH);
+      if (!res.ok) throw new Error();
+      await periksa(new File([await res.blob()], "twibbon-contoh.png", { type: "image/png" }));
+    } catch {
+      setError("Contoh twibbon tidak bisa dimuat.");
+    }
+  }
+
+  async function periksa(file: File) {
     setError(null);
     setSukses(null);
     setMemeriksa(true);
@@ -67,17 +82,17 @@ export default function KelolaTwibbon() {
     }
   }
 
-  async function kembalikan() {
-    if (!window.confirm("Kembalikan ke twibbon bawaan aplikasi? File twibbon yang sekarang akan dihapus.")) return;
+  async function lepas() {
+    if (!window.confirm("Hapus twibbon? Kamera absen jadi tanpa bingkai, dan file twibbon yang sekarang dihapus.")) return;
     setMenyimpan(true);
     setError(null);
     setSukses(null);
     try {
-      await kembalikanTwibbonBawaan(path);
+      await hapusTwibbon(path);
       setPath(null);
-      setSukses("Twibbon dikembalikan ke bawaan aplikasi.");
+      setSukses("Twibbon dihapus — kamera absen sekarang tanpa bingkai.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengembalikan twibbon.");
+      setError(err instanceof Error ? err.message : "Gagal menghapus twibbon.");
     } finally {
       setMenyimpan(false);
     }
@@ -103,7 +118,7 @@ export default function KelolaTwibbon() {
         </div>
 
         <div className={`mx-auto grid w-full gap-3 ${calon ? "max-w-md grid-cols-2" : "max-w-[220px]"}`}>
-          <Pratinjau src={urlTwibbon(path)} label={path ? "Sekarang (kustom)" : "Sekarang (bawaan)"} />
+          <Pratinjau src={urlTwibbon(path)} label={path ? "Sekarang" : "Sekarang: tanpa twibbon"} />
           {calon && <Pratinjau src={calon.pratinjau} label="Baru" sorot={lolos} />}
         </div>
 
@@ -170,11 +185,11 @@ export default function KelolaTwibbon() {
           {path && !calon && (
             <button
               type="button"
-              onClick={() => void kembalikan()}
+              onClick={() => void lepas()}
               disabled={menyimpan}
               className="min-h-[44px] rounded-xl text-sm font-semibold text-red-600 disabled:opacity-60"
             >
-              Kembalikan ke Twibbon Bawaan
+              Hapus Twibbon (tanpa bingkai)
             </button>
           )}
         </div>
@@ -207,20 +222,31 @@ export default function KelolaTwibbon() {
           </Butir>
         </ul>
 
-        <a
-          href={TWIBBON_BAWAAN}
-          download="twibbon-bawaan.png"
-          className="flex min-h-[44px] items-center justify-center rounded-xl bg-gray-100 text-sm font-semibold text-brand-text"
-        >
-          ⬇️ Unduh Twibbon Bawaan sebagai Contoh
-        </a>
+        <div className="grid grid-cols-2 gap-2">
+          <a
+            href={TWIBBON_CONTOH}
+            download="twibbon-contoh.png"
+            className="flex min-h-[44px] items-center justify-center rounded-xl bg-gray-100 px-2 text-center text-sm font-semibold text-brand-text"
+          >
+            ⬇️ Unduh Contoh
+          </a>
+          <button
+            type="button"
+            onClick={() => void pakaiContoh()}
+            disabled={memeriksa || menyimpan}
+            className="min-h-[44px] rounded-xl bg-gray-100 px-2 text-sm font-semibold text-brand-text disabled:opacity-60"
+          >
+            Pakai Contoh Twibbon
+          </button>
+        </div>
+        <p className="-mt-2 text-center text-[11px] text-gray-400">Contoh = bingkai Hari Batik lama, bisa dijadikan template desain.</p>
       </div>
     </div>
   );
 }
 
 /** Bingkai di atas "foto" contoh (siluet wajah) dengan rasio kamera absen 3:4. */
-function Pratinjau({ src, label, sorot = false }: { src: string; label: string; sorot?: boolean }) {
+function Pratinjau({ src, label, sorot = false }: { src: string | null; label: string; sorot?: boolean }) {
   return (
     <figure className="flex flex-col gap-1">
       <div
@@ -229,7 +255,11 @@ function Pratinjau({ src, label, sorot = false }: { src: string; label: string; 
         }`}
       >
         <Siluet />
-        <img src={src} alt={`Twibbon ${label.toLowerCase()}`} className="absolute inset-0 h-full w-full object-fill" />
+        {src ? (
+          <img src={src} alt={`Twibbon ${label.toLowerCase()}`} className="absolute inset-0 h-full w-full object-fill" />
+        ) : (
+          <span className="absolute inset-x-0 bottom-2 text-center text-[11px] font-semibold text-white/90">Tanpa bingkai</span>
+        )}
       </div>
       <figcaption className="text-center text-xs font-medium text-gray-500">{label}</figcaption>
     </figure>

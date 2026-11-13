@@ -115,7 +115,7 @@ npm run dev
        admin yang bisa melihat. Menggantikan isian link Google Drive.
    28. `0035_twibbon.sql` — twibbon foto absen bisa diganti admin lewat *Kelola → Twibbon
        Foto Absen*. Bucket publik **twibbon** (PNG, maks. 2 MB, hanya admin yang menulis) dan
-       kolom `pengaturan.twibbon_path` (kosong = pakai `public/twibbon.png` bawaan).
+       kolom `pengaturan.twibbon_path` (kosong = kamera absen tanpa twibbon; `public/twibbon.png` hanya contoh/template yang bisa dipasang admin).
    29. `0036_foto_absen_hari_ini.sql` — pegawai bisa melihat foto absen masuk/pulang miliknya
        di Beranda, **hanya pada hari itu** (policy Storage memakai waktu unggah & zona waktu
        kantor). Foto tidak dihapus; admin tetap bisa melihat sampai retensi foto habis.
