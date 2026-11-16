@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { panggilFungsi } from "./panggilFungsi";
 import type { NaskahAi, TipeNaskahAi } from "../types/database";
 
 export interface FormNaskahAi {
@@ -24,32 +25,15 @@ export interface FormPertanyaanWawancara {
   jumlahPertanyaan: number;
 }
 
-async function panggilEdgeFunction(body: Record<string, unknown>): Promise<{ hasil: string; model: string }> {
-  const { data, error } = await supabase.functions.invoke("naskah-ai", { body });
-
-  if (error) {
-    // Edge Function mengembalikan body JSON { error: "..." } untuk status 4xx/5xx,
-    // tapi supabase-js cuma kasih FunctionsHttpError generik — coba ambil pesan aslinya.
-    let pesan = error.message;
-    try {
-      const konteks = (error as { context?: Response }).context;
-      if (konteks) {
-        const isi = await konteks.clone().json();
-        if (isi?.error) pesan = isi.error;
-      }
-    } catch {
-      // abaikan, pakai pesan generik
-    }
-    throw new Error(pesan);
-  }
-
-  return data as { hasil: string; model: string };
+function panggilEdgeFunction(body: Record<string, unknown>): Promise<{ hasil: string; model: string }> {
+  return panggilFungsi("naskah-ai", body);
 }
 
 async function simpanRiwayat(row: Record<string, unknown>): Promise<NaskahAi> {
   const { data: baris, error } = await supabase
     .from("naskah_ai")
-    .insert({ user_id: (await supabase.auth.getUser()).data.user?.id, ...row })
+    // getSession dibaca dari perangkat (sudah diperbarui panggilFungsi), tanpa bolak-balik ke server Auth
+    .insert({ user_id: (await supabase.auth.getSession()).data.session?.user.id, ...row })
     .select("*")
     .single();
 
@@ -135,4 +119,32 @@ export async function ambilRiwayatNaskahAi(
 export async function superAdminHapusNaskahAi(id: string): Promise<void> {
   const { error } = await supabase.rpc("super_admin_hapus_naskah_ai", { p_id: id });
   if (error) throw new Error(error.message);
+}
+
+// Isian form disimpan per tab (sessionStorage): kalau sesi berakhir dan harus masuk
+// lagi lewat Google, ceritanya tidak perlu diketik ulang.
+const AWALAN_DRAF = "disparyk_draf_naskah_ai_";
+
+/** Ambil draf; hanya kolom yang dikenal `kosong` dengan tipe yang sama yang dipakai. */
+export function bacaDrafForm<T extends object>(jenis: TipeNaskahAi, kosong: T): T {
+  try {
+    const mentah = sessionStorage.getItem(AWALAN_DRAF + jenis);
+    if (!mentah) return kosong;
+    const isi = JSON.parse(mentah) as Record<string, unknown>;
+    const hasil = { ...kosong } as Record<string, unknown>;
+    for (const [k, v] of Object.entries(kosong)) {
+      if (typeof isi[k] === typeof v) hasil[k] = isi[k];
+    }
+    return hasil as T;
+  } catch {
+    return kosong;
+  }
+}
+
+export function simpanDrafForm(jenis: TipeNaskahAi, nilai: object) {
+  try {
+    sessionStorage.setItem(AWALAN_DRAF + jenis, JSON.stringify(nilai));
+  } catch {
+    // mode privat / penyimpanan penuh: abaikan
+  }
 }

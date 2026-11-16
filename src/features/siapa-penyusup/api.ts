@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabase";
+import { panggilFungsi } from "../../lib/panggilFungsi";
 import type { ModeRoom, PengaturanRoom, StatusRoom } from "./logika";
 
 export interface PenyusupRoom {
@@ -304,9 +305,8 @@ export async function putarTod(roomId: string, ke = 0): Promise<TruthOrDare | nu
 
 /** Minta 3 pilihan ke Edge Function penyusup-tod (OpenAI, kunci yang sama dengan Naskah AI). */
 export async function buatPilihanTod(roomId: string): Promise<TruthOrDare | null> {
-  const { data, error } = await supabase.functions.invoke("penyusup-tod", { body: { room_id: roomId } });
-  if (error) throw new Error(error.message);
-  return (data as { tod: TruthOrDare | null }).tod;
+  const data = await panggilFungsi<{ tod: TruthOrDare | null }>("penyusup-tod", { room_id: roomId });
+  return data.tod;
 }
 
 /** Pilihan cadangan kalau AI tidak ada/gagal; server yang menentukan sudah boleh atau belum. */

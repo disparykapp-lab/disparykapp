@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import IkonGoogle from "../components/IkonGoogle";
 
 export default function Login() {
-  const { session, profile, loading, penolakan, loginGoogle, daftarGoogle } = useAuth();
+  const { session, profile, loading, penolakan, sesiBerakhir, loginGoogle, daftarGoogle } = useAuth();
   const [membuka, setMembuka] = useState<"masuk" | "daftar" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Dikirim RequireAuth saat halaman di dalam aplikasi butuh login (mis. sesi tadi berakhir).
+  const dari = (useLocation().state as { from?: { pathname?: string; search?: string } } | null)?.from;
+  const kembali = dari?.pathname ? dari.pathname + (dari.search ?? "") : null;
 
   if (!loading && session && profile) {
-    return <Navigate to="/beranda" replace />;
+    return <Navigate to={kembali ?? "/beranda"} replace />;
   }
 
   async function keGoogle(jenis: "masuk" | "daftar") {
@@ -18,7 +21,7 @@ export default function Login() {
     try {
       if (jenis === "daftar") await daftarGoogle();
       // Setelah ditolak, tampilkan pemilih akun supaya tidak otomatis memakai email yang sama.
-      else await loginGoogle({ pilihAkun: penolakan !== null });
+      else await loginGoogle({ pilihAkun: penolakan !== null, kembali });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Halaman Google gagal dibuka.");
       setMembuka(null);
@@ -68,6 +71,16 @@ export default function Login() {
             <p className="mt-2 text-sm text-amber-900">
               Kalau kamu baru mendaftar, tunggu admin menyetujui pendaftaranmu. Sudah lama
               menunggu? Hubungi admin.
+            </p>
+          </div>
+        )}
+
+        {sesiBerakhir && !penolakan && (
+          <div role="status" className="mb-5 rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200">
+            <p className="text-sm font-bold text-amber-900">Sesi login berakhir</p>
+            <p className="mt-1 text-sm text-amber-900">
+              Biasanya karena akun ini keluar di perangkat lain atau lama tidak dibuka. Masuk lagi
+              {kembali ? " — kamu akan kembali ke halaman tadi." : " untuk melanjutkan."}
             </p>
           </div>
         )}
