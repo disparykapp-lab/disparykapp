@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, MapPin, Mic, Tag, Ticket } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { buatPertanyaanWawancara, ambilRiwayatNaskahAi, type FormPertanyaanWawancara } from "../../lib/naskahAi";
+import { buatPertanyaanWawancara, ambilRiwayatNaskahAi, bacaDrafForm, simpanDrafForm, type FormPertanyaanWawancara } from "../../lib/naskahAi";
 import type { NaskahAi } from "../../types/database";
 import {
   ChipSaran,
@@ -44,7 +44,7 @@ const FORM_KOSONG: FormPertanyaanWawancara = {
 export default function SlidePertanyaan() {
   const { superAdmin } = useAuth();
 
-  const [form, setForm] = useState<FormPertanyaanWawancara>(FORM_KOSONG);
+  const [form, setForm] = useState<FormPertanyaanWawancara>(() => bacaDrafForm("pertanyaan", FORM_KOSONG));
   const [membuat, setMembuat] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasilTerakhir, setHasilTerakhir] = useState<NaskahAi | null>(null);
@@ -69,6 +69,10 @@ export default function SlidePertanyaan() {
   useEffect(() => {
     void muatRiwayat();
   }, []);
+
+  useEffect(() => {
+    simpanDrafForm("pertanyaan", form);
+  }, [form]);
 
   const ubah =
     <K extends keyof FormPertanyaanWawancara>(k: K) =>

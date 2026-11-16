@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, MapPin, Megaphone, Mic, Tag, Ticket } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { buatNaskahAi, ambilRiwayatNaskahAi, type FormNaskahAi } from "../../lib/naskahAi";
+import { buatNaskahAi, ambilRiwayatNaskahAi, bacaDrafForm, simpanDrafForm, type FormNaskahAi } from "../../lib/naskahAi";
 import type { NaskahAi } from "../../types/database";
 import {
   ChipSaran,
@@ -54,7 +54,7 @@ const FORM_KOSONG: FormNaskahAi = {
 export default function SlideNaskah() {
   const { superAdmin } = useAuth();
 
-  const [form, setForm] = useState<FormNaskahAi>(FORM_KOSONG);
+  const [form, setForm] = useState<FormNaskahAi>(() => bacaDrafForm("naskah", FORM_KOSONG));
   const [membuat, setMembuat] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasilTerakhir, setHasilTerakhir] = useState<NaskahAi | null>(null);
@@ -79,6 +79,10 @@ export default function SlideNaskah() {
   useEffect(() => {
     void muatRiwayat();
   }, []);
+
+  useEffect(() => {
+    simpanDrafForm("naskah", form);
+  }, [form]);
 
   const ubah =
     <K extends keyof FormNaskahAi>(k: K) =>
