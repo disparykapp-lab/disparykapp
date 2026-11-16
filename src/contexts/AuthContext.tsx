@@ -3,21 +3,26 @@ import type { ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { Divisi, Profile } from "../types/database";
+import { hapusTujuanGoogle, simpanTujuanGoogle } from "../lib/alurGoogle";
+import type { Penolakan } from "../lib/alurGoogle";
 
 interface AuthState {
   session: Session | null;
   profile: Profile | null;
   divisi: Divisi | null;
   loading: boolean;
-  /** true kalau email sudah login Google tapi belum terdaftar di tabel profiles */
+  /** true kalau email sudah login Google tapi ditolak (belum terdaftar / belum aktif) */
   belumTerdaftar: boolean;
+  /** alasan & email yang ditolak, untuk pesan di /login dan /daftar */
+  penolakan: Penolakan | null;
   /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
   bisaKalenderKonten: boolean;
   /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
   bisaNaskahAi: boolean;
   /** true untuk admin yang ditandai super_admin; belum dipakai di tampilan manapun */
   superAdmin: boolean;
-  loginGoogle: () => Promise<void>;
+  /** Melempar Error kalau halaman Google gagal dibuka. `pilihAkun` = selalu tampilkan pemilih akun. */
+  loginGoogle: (opsi?: { pilihAkun?: boolean }) => Promise<void>;
   /** Login Google untuk mengisi form pendaftaran (/daftar); sesi tanpa profil tidak di-logout otomatis */
   daftarGoogle: () => Promise<void>;
   logout: () => Promise<void>;
@@ -52,11 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [divisi, setDivisi] = useState<Divisi | null>(null);
   const [loading, setLoading] = useState(true);
-  const [belumTerdaftar, setBelumTerdaftar] = useState(false);
+  const [penolakan, setPenolakan] = useState<Penolakan | null>(null);
   /** id pengguna yang profilnya sudah dimuat, untuk mengenali event dari pengguna yang sama */
   const userDimuat = useRef<string | null>(null);
 
-  const muatProfile = useCallback(async (userId: string): Promise<boolean> => {
+  const muatProfile = useCallback(async (userId: string, email: string): Promise<boolean> => {
     let { data, error } = await supabase
       .from("profiles")
       .select("*, divisi:divisi_id(*)")
@@ -83,14 +88,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!data && sedangModeDaftar()) {
-      setBelumTerdaftar(false);
+      setPenolakan(null);
       setProfile(null);
       setDivisi(null);
       return false;
     }
 
     if (!data) {
-      setBelumTerdaftar(true);
+      setPenolakan({ alasan: "belum_terdaftar", email });
       setProfile(null);
       setDivisi(null);
       await supabase.auth.signOut();
@@ -99,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (!data.aktif) {
-      setBelumTerdaftar(true);
+      setPenolakan({ alasan: "nonaktif", email });
       setProfile(null);
       setDivisi(null);
       await supabase.auth.signOut();
@@ -108,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const { divisi: divisiTerkait, ...profileSaja } = data as ProfileDenganDivisi;
-    setBelumTerdaftar(false);
+    setPenolakan(null);
     setProfile(profileSaja);
     setDivisi(divisiTerkait);
     return true;
@@ -121,20 +126,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
       setSession(data.session);
       if (data.session?.user) {
-        if (await muatProfile(data.session.user.id)) userDimuat.current = data.session.user.id;
+        const u = data.session.user;
+        if (await muatProfile(u.id, u.email ?? "")) userDimuat.current = u.id;
       }
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       setSession(newSession);
-      const userId = newSession?.user?.id ?? null;
+      const user = newSession?.user ?? null;
+      const userId = user?.id ?? null;
       // Pengguna sama (token diperbarui, kembali ke tab, sinyal dari tab lain): profil
       // tidak berubah, jadi jangan tampilkan layar "memeriksa" yang membuang isi halaman.
       if (userId && userId === userDimuat.current) return;
-      if (userId) {
+      if (user && userId) {
         setLoading(true);
-        userDimuat.current = (await muatProfile(userId)) ? userId : null;
+        userDimuat.current = (await muatProfile(userId, user.email ?? "")) ? userId : null;
         setLoading(false);
       } else {
         userDimuat.current = null;
@@ -148,46 +155,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [muatProfile]);
 
-  const loginGoogle = useCallback(async () => {
+  // Supabase mengembalikan pengguna ke alamat utama; halaman asal dicatat dulu
+  // supaya PengarahGoogle bisa membawanya ke /daftar atau /login lagi.
+  const loginGoogle = useCallback(async (opsi?: { pilihAkun?: boolean }) => {
     setModeDaftar(false);
-    await supabase.auth.signInWithOAuth({
+    simpanTujuanGoogle("/login");
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: window.location.origin,
+        ...(opsi?.pilihAkun ? { queryParams: { prompt: "select_account" } } : {}),
       },
     });
+    if (error) {
+      hapusTujuanGoogle();
+      throw new Error("Halaman Google gagal dibuka. Periksa koneksi lalu coba lagi.");
+    }
   }, []);
 
   const daftarGoogle = useCallback(async () => {
     setModeDaftar(true);
-    await supabase.auth.signInWithOAuth({
+    simpanTujuanGoogle("/daftar");
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: window.location.origin,
         queryParams: { prompt: "select_account" },
       },
     });
+    if (error) {
+      setModeDaftar(false);
+      hapusTujuanGoogle();
+      throw new Error("Halaman Google gagal dibuka. Periksa koneksi lalu coba lagi.");
+    }
   }, []);
 
   const logout = useCallback(async () => {
     setModeDaftar(false);
+    hapusTujuanGoogle();
     userDimuat.current = null;
     await supabase.auth.signOut();
     setProfile(null);
     setDivisi(null);
     setSession(null);
-    setBelumTerdaftar(false);
+    setPenolakan(null);
   }, []);
 
   const refreshProfile = useCallback(async () => {
     if (session?.user) {
-      await muatProfile(session.user.id);
+      await muatProfile(session.user.id, session.user.email ?? "");
     }
   }, [session, muatProfile]);
 
   const bisaKalenderKonten = profile?.role === "admin" || !!divisi?.fitur_kalender_konten;
   const bisaNaskahAi = profile?.role === "admin" || !!divisi?.fitur_naskah_ai;
   const superAdmin = profile?.role === "admin" && profile?.super_admin === true;
+  const belumTerdaftar = penolakan !== null;
 
   const value = useMemo(
     () => ({
@@ -196,6 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       divisi,
       loading,
       belumTerdaftar,
+      penolakan,
       bisaKalenderKonten,
       bisaNaskahAi,
       superAdmin,
@@ -210,6 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       divisi,
       loading,
       belumTerdaftar,
+      penolakan,
       bisaKalenderKonten,
       bisaNaskahAi,
       superAdmin,

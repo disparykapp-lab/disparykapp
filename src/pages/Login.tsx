@@ -1,15 +1,32 @@
-import { Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import IkonGoogle from "../components/IkonGoogle";
 
 export default function Login() {
-  const { session, profile, loading, belumTerdaftar, loginGoogle } = useAuth();
+  const { session, profile, loading, penolakan, loginGoogle, daftarGoogle } = useAuth();
+  const [membuka, setMembuka] = useState<"masuk" | "daftar" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!loading && session && profile) {
     return <Navigate to="/beranda" replace />;
   }
 
+  async function keGoogle(jenis: "masuk" | "daftar") {
+    setMembuka(jenis);
+    setError(null);
+    try {
+      if (jenis === "daftar") await daftarGoogle();
+      // Setelah ditolak, tampilkan pemilih akun supaya tidak otomatis memakai email yang sama.
+      else await loginGoogle({ pilihAkun: penolakan !== null });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Halaman Google gagal dibuka.");
+      setMembuka(null);
+    }
+  }
+
   return (
-    <div className="gradasi-brand flex min-h-screen flex-col items-center justify-center px-6">
+    <div className="gradasi-brand flex min-h-screen flex-col items-center justify-center px-6 py-8">
       <div className="mb-6 flex flex-col items-center text-white">
         <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 p-3 shadow-lg backdrop-blur">
           <img
@@ -24,49 +41,61 @@ export default function Login() {
         </p>
       </div>
 
-      <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl">
-        {belumTerdaftar && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            Akun kamu belum didaftarkan. Hubungi admin.
+      <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-xl sm:p-8">
+        {penolakan?.alasan === "belum_terdaftar" && (
+          <div role="alert" className="mb-5 rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200">
+            <p className="text-sm font-bold text-amber-900">Email ini belum terdaftar</p>
+            <p className="mt-0.5 break-all text-xs font-semibold text-amber-800">{penolakan.email}</p>
+            <p className="mt-2 text-sm text-amber-900">
+              Pegawai atau peserta magang baru? Daftar dulu pakai email ini. Akun aktif setelah
+              disetujui admin.
+            </p>
+            <button
+              type="button"
+              onClick={() => void keGoogle("daftar")}
+              disabled={membuka !== null}
+              className="mt-3 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-brand-masuk px-4 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+            >
+              {membuka === "daftar" ? "Membuka Google…" : "Daftar Akun Baru"}
+            </button>
+          </div>
+        )}
+
+        {penolakan?.alasan === "nonaktif" && (
+          <div role="alert" className="mb-5 rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200">
+            <p className="text-sm font-bold text-amber-900">Akun belum aktif</p>
+            <p className="mt-0.5 break-all text-xs font-semibold text-amber-800">{penolakan.email}</p>
+            <p className="mt-2 text-sm text-amber-900">
+              Kalau kamu baru mendaftar, tunggu admin menyetujui pendaftaranmu. Sudah lama
+              menunggu? Hubungi admin.
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {error}
           </div>
         )}
 
         <button
-          onClick={() => void loginGoogle()}
-          disabled={loading}
+          onClick={() => void keGoogle("masuk")}
+          disabled={loading || membuka !== null}
           className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-base font-semibold text-brand-text shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
         >
-          <GoogleIcon />
-          Masuk dengan Google
+          <IkonGoogle />
+          {membuka === "masuk" ? "Membuka Google…" : penolakan ? "Masuk dengan akun lain" : "Masuk dengan Google"}
         </button>
 
-        <p className="mt-6 text-xs text-gray-400">
-          Hanya email yang sudah didaftarkan admin yang bisa masuk.
-        </p>
+        {penolakan?.alasan !== "belum_terdaftar" && (
+          <p className="mt-6 text-sm text-gray-500">
+            Belum punya akun?{" "}
+            <Link to="/daftar" className="font-semibold text-brand-masuk underline underline-offset-2">
+              Daftar di sini
+            </Link>
+          </p>
+        )}
       </div>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
-      <path
-        fill="#FFC107"
-        d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"
-      />
-      <path
-        fill="#FF3D00"
-        d="m6.3 14.7 6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.1 29.6 4 24 4c-7.4 0-13.8 4.1-17.1 10.1z"
-      />
-      <path
-        fill="#4CAF50"
-        d="M24 44c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5C29.6 34.9 26.9 36 24 36c-5.2 0-9.6-3.3-11.2-8l-6.6 5.1C9.1 39.8 16 44 24 44z"
-      />
-      <path
-        fill="#1976D2"
-        d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.3-4.2 5.7l6.5 5.5C40.9 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"
-      />
-    </svg>
   );
 }

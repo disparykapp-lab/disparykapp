@@ -63,9 +63,11 @@ export default function PanduanAdmin() {
 
       <Bagian judul="📝 Pendaftaran Mandiri (/daftar)">
         <Langkah no={1}>
-          Ada halaman pendaftaran tersembunyi di alamat{" "}
-          <strong>[alamat-aplikasi]/daftar</strong> — tidak ada tombol/tautan ke sana dari halaman
-          login. Bagikan alamat itu langsung ke calon pegawai/peserta magang yang perlu mendaftar.
+          Calon pegawai/peserta magang bisa mendaftar sendiri lewat tombol{" "}
+          <strong>Daftar</strong> di halaman depan, tautan <strong>"Daftar di sini"</strong> di
+          halaman login, atau langsung di alamat <strong>[alamat-aplikasi]/daftar</strong>. Kalau
+          email yang belum terdaftar mencoba masuk, halaman login juga menawarkan tombol{" "}
+          <strong>"Daftar Akun Baru"</strong>.
         </Langkah>
         <Langkah no={2}>
           Pendaftar masuk dengan akun Google, lalu mengisi foto, nama, tanggal lahir, asal

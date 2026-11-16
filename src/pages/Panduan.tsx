@@ -26,10 +26,16 @@ export default function Panduan() {
 
       <Bagian judul="🔑 Cara Masuk (Login)">
         <Langkah no={1}>Buka aplikasi, tekan tombol "Masuk dengan Google".</Langkah>
-        <Langkah no={2}>Pilih akun Google kamu (email harus sudah didaftarkan admin).</Langkah>
+        <Langkah no={2}>Pilih akun Google kamu.</Langkah>
         <Langkah no={3}>
-          Kalau muncul pesan "Akun kamu belum didaftarkan", hubungi admin supaya email kamu
-          ditambahkan lebih dulu.
+          Belum punya akun? Tekan <strong>"Daftar di sini"</strong> (atau tombol Daftar di halaman
+          depan), lanjut dengan Google, lalu isi foto, nama, tanggal lahir, asal sekolah/kampus,
+          masa magang, dan divisi. Akun bisa dipakai setelah disetujui admin.
+        </Langkah>
+        <Langkah no={4}>
+          Muncul pesan <strong>"Email ini belum terdaftar"</strong>? Tekan "Daftar Akun Baru". Pesan{" "}
+          <strong>"Akun belum aktif"</strong> berarti pendaftaranmu masih menunggu persetujuan
+          admin.
         </Langkah>
       </Bagian>
 
