@@ -6,6 +6,7 @@ import Loading from "../../components/Loading";
 import { superAdminHapusNaskahAi } from "../../lib/naskahAi";
 import { hitungKata, hitungPoin, judulRiwayat, pecahPertanyaan, tambahPoin, tanpaMarkdown } from "../../lib/naskahAiTeks";
 import type { NaskahAi } from "../../types/database";
+import LembarBagikan from "./LembarBagikan";
 
 // Komponen Naskah AI (mode Naskah & Wawancara) dengan bahasa visual aplikasi:
 // kartu putih, maroon, ilustrasi stiker dari /public, tanpa gradasi/animasi hiasan.
@@ -371,8 +372,8 @@ export function KartuHasil({
   onUlang: () => void;
 }) {
   const { disalin, salin } = useSalin();
+  const [bagikan, setBagikan] = useState(false);
   const pecah = hasil.tipe === "pertanyaan" ? pecahPertanyaan(hasil.hasil) : null;
-  const bisaBagikan = typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   return (
     <div className="anim-buka flex flex-col gap-3 rounded-2xl border-t-4 border-brand-masuk bg-white p-4 shadow-sm">
@@ -421,15 +422,14 @@ export function KartuHasil({
           {disalin === "semua" ? <Check size={14} /> : <Copy size={14} />}
           {disalin === "semua" ? "Tersalin" : "Salin"}
         </button>
-        {bisaBagikan && (
-          <button
-            type="button"
-            onClick={() => void navigator.share({ title: hasil.nama_acara || "Naskah", text: hasil.hasil }).catch(() => {})}
-            className="flex min-h-[40px] items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 text-xs font-semibold text-brand-text transition active:scale-95"
-          >
-            <Share2 size={14} /> Bagikan
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => setBagikan(true)}
+          aria-haspopup="dialog"
+          className="flex min-h-[40px] items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-4 text-xs font-semibold text-brand-text transition active:scale-95"
+        >
+          <Share2 size={14} /> Bagikan
+        </button>
         <button
           type="button"
           onClick={onUlang}
@@ -439,6 +439,7 @@ export function KartuHasil({
           <RotateCcw size={14} /> Bikin ulang
         </button>
       </div>
+      {bagikan && <LembarBagikan hasil={hasil} onTutup={() => setBagikan(false)} />}
     </div>
   );
 }
@@ -471,6 +472,7 @@ export function RiwayatList({
   const [menghapusId, setMenghapusId] = useState<string | null>(null);
   const [errorHapus, setErrorHapus] = useState<string | null>(null);
   const [semua, setSemua] = useState(false);
+  const [bagikanBaris, setBagikanBaris] = useState<RiwayatBaris | null>(null);
   const { disalin, salin } = useSalin();
   const tampil = semua ? riwayat : riwayat.slice(0, RIWAYAT_AWAL);
 
@@ -528,6 +530,14 @@ export function RiwayatList({
                     </button>
                     <button
                       type="button"
+                      onClick={() => setBagikanBaris(r)}
+                      aria-haspopup="dialog"
+                      className="flex min-h-[36px] items-center gap-1.5 rounded-xl border border-gray-300 px-3 text-xs font-semibold text-brand-text"
+                    >
+                      <Share2 size={13} /> Bagikan
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => onPakai(r)}
                       className="flex min-h-[36px] items-center gap-1.5 rounded-xl bg-lnd-sky px-3 text-xs font-semibold text-brand-masuk"
                     >
@@ -555,6 +565,7 @@ export function RiwayatList({
           )}
         </div>
       )}
+      {bagikanBaris && <LembarBagikan hasil={bagikanBaris} onTutup={() => setBagikanBaris(null)} />}
     </section>
   );
 }
