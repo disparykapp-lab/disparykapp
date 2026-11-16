@@ -5,6 +5,7 @@ import { PresenceProvider } from "./contexts/PresenceContext";
 import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireFiturNaskahAi, RequireSuperAdmin } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Loading from "./components/Loading";
+import PengarahGoogle from "./components/PengarahGoogle";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
 import Beranda from "./pages/Beranda";
@@ -43,6 +44,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <PresenceProvider>
+        <PengarahGoogle />
         <Routes>
           <Route
             path="/"

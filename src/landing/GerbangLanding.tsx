@@ -1,6 +1,8 @@
 import { lazy, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { ambilStatusLanding } from "../lib/landing";
+import { ambilTujuanGoogle } from "../lib/alurGoogle";
+import Loading from "../components/Loading";
 import { drafPratinjau } from "./drafPratinjau";
 
 const LandingPage = lazy(() => import("./LandingPage"));
@@ -33,6 +35,15 @@ export default function GerbangLanding({
     };
   }, []);
 
+  // Baru kembali dari login Google (selalu mendarat di `/`): PengarahGoogle akan
+  // memindahkan ke /daftar, /login, atau /beranda — jangan sempat menampilkan landing.
+  if (halaman === "landing" && !drafPratinjau() && ambilTujuanGoogle()) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <Loading teks="Menyambungkan akun Google…" />
+      </div>
+    );
+  }
   if (aktif === null) return <div className="min-h-screen bg-white" />;
   if (!aktif) return <Navigate to="/login" replace />;
   if (halaman === "destinasi") return <HalamanDestinasi />;

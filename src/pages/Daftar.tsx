@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { Check } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import IkonGoogle from "../components/IkonGoogle";
 import { supabase } from "../lib/supabase";
 import { daftarMandiri, unggahFotoProfil } from "../lib/profil";
+import { kompresGambar } from "../lib/unggah";
 
 interface OpsiDivisi {
   id: string;
@@ -11,7 +14,7 @@ interface OpsiDivisi {
 }
 
 export default function Daftar() {
-  const { session, profile, loading, belumTerdaftar, daftarGoogle, logout } = useAuth();
+  const { session, profile, loading, penolakan, daftarGoogle, logout } = useAuth();
   const inputFotoRef = useRef<HTMLInputElement>(null);
 
   const [daftarDivisi, setDaftarDivisi] = useState<OpsiDivisi[]>([]);
@@ -25,6 +28,7 @@ export default function Daftar() {
   const [previewFoto, setPreviewFoto] = useState<string | null>(null);
 
   const [mengirim, setMengirim] = useState(false);
+  const [membukaGoogle, setMembukaGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [terkirim, setTerkirim] = useState(false);
 
@@ -42,6 +46,17 @@ export default function Daftar() {
       .order("nama")
       .then(({ data }) => setDaftarDivisi((data as OpsiDivisi[] | null) ?? []));
   }, [userId, session]);
+
+  async function keGoogle() {
+    setMembukaGoogle(true);
+    setError(null);
+    try {
+      await daftarGoogle();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Halaman Google gagal dibuka.");
+      setMembukaGoogle(false);
+    }
+  }
 
   function pilihFoto(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -66,7 +81,10 @@ export default function Daftar() {
     setMengirim(true);
     setError(null);
     try {
-      const fotoUrl = await unggahFotoProfil(userId, fileFoto);
+      // Foto kamera HP bisa beberapa MB; kecilkan dulu supaya cepat terunggah.
+      // Kalau gagal dibaca (mis. HEIC), pakai file aslinya.
+      const foto = await kompresGambar(fileFoto, 800, 300_000).catch(() => fileFoto);
+      const fotoUrl = await unggahFotoProfil(userId, foto);
       await daftarMandiri({
         nama: nama.trim(),
         tanggalLahir,
@@ -89,7 +107,9 @@ export default function Daftar() {
     return (
       <Kerangka>
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="text-5xl">✅</div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white" aria-hidden="true">
+            <Check size={30} strokeWidth={3} />
+          </div>
           <h2 className="text-lg font-bold text-brand-text">Pendaftaran terkirim</h2>
           <p className="text-sm text-gray-600">
             Data kamu sudah diterima. Akun akan aktif setelah disetujui admin — setelah itu kamu
@@ -127,18 +147,35 @@ export default function Daftar() {
             Masuk dengan akun Google yang akan kamu pakai untuk aplikasi ini, lalu lengkapi data
             diri.
           </p>
-          {belumTerdaftar && (
-            <div className="rounded-xl bg-yellow-50 p-3 text-sm text-yellow-800">
-              Email itu sudah terdaftar atau masih menunggu persetujuan admin. Tidak perlu
-              mendaftar lagi — hubungi admin kalau belum bisa masuk.
+          {penolakan?.alasan === "nonaktif" && (
+            <div role="alert" className="rounded-2xl bg-amber-50 p-4 text-left ring-1 ring-amber-200">
+              <p className="text-sm font-bold text-amber-900">Email ini sudah mendaftar</p>
+              <p className="mt-0.5 break-all text-xs font-semibold text-amber-800">{penolakan.email}</p>
+              <p className="mt-2 text-sm text-amber-900">
+                Pendaftaranmu sedang menunggu persetujuan admin. Tidak perlu mendaftar lagi —
+                hubungi admin kalau sudah lama belum bisa masuk.
+              </p>
+            </div>
+          )}
+          {error && (
+            <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+              {error}
             </div>
           )}
           <button
-            onClick={() => void daftarGoogle()}
-            className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-4 text-base font-semibold text-brand-text shadow-sm transition hover:bg-gray-50"
+            onClick={() => void keGoogle()}
+            disabled={membukaGoogle}
+            className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 text-base font-semibold text-brand-text shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
           >
-            Lanjut dengan Google
+            <IkonGoogle />
+            {membukaGoogle ? "Membuka Google…" : "Lanjut dengan Google"}
           </button>
+          <p className="text-sm text-gray-500">
+            Sudah punya akun?{" "}
+            <Link to="/login" className="font-semibold text-brand-masuk underline underline-offset-2">
+              Masuk
+            </Link>
+          </p>
         </div>
       </Kerangka>
     );
@@ -150,8 +187,6 @@ export default function Daftar() {
     <Kerangka>
       <div className="flex flex-col gap-4">
         <h2 className="text-center text-lg font-bold text-brand-text">Lengkapi Data Diri</h2>
-
-        {error && <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
         <Field label="Akun Google">
           <input
@@ -251,6 +286,11 @@ export default function Daftar() {
           </select>
         </Field>
 
+        {error && (
+          <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
         <button
           onClick={() => void kirim()}
           disabled={mengirim}
