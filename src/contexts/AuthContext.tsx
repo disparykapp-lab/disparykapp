@@ -21,6 +21,8 @@ interface AuthState {
   bisaKalenderKonten: boolean;
   /** admin selalu true; pegawai biasa hanya true kalau divisinya diberi akses */
   bisaNaskahAi: boolean;
+  /** admin selalu true; pegawai biasa hanya true kalau divisinya dicentang "Inventaris" */
+  bisaInventaris: boolean;
   /** true untuk admin yang ditandai super_admin; belum dipakai di tampilan manapun */
   superAdmin: boolean;
   /**
@@ -222,6 +224,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const bisaKalenderKonten = profile?.role === "admin" || !!divisi?.fitur_kalender_konten;
   const bisaNaskahAi = profile?.role === "admin" || !!divisi?.fitur_naskah_ai;
+  const bisaInventaris = profile?.role === "admin" || !!divisi?.fitur_inventaris;
   const superAdmin = profile?.role === "admin" && profile?.super_admin === true;
   const belumTerdaftar = penolakan !== null;
 
@@ -236,6 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sesiBerakhir,
       bisaKalenderKonten,
       bisaNaskahAi,
+      bisaInventaris,
       superAdmin,
       loginGoogle,
       daftarGoogle,
@@ -252,6 +256,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sesiBerakhir,
       bisaKalenderKonten,
       bisaNaskahAi,
+      bisaInventaris,
       superAdmin,
       loginGoogle,
       daftarGoogle,

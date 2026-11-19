@@ -25,7 +25,66 @@ export interface Divisi {
   aktif: boolean;
   fitur_kalender_konten: boolean;
   fitur_naskah_ai: boolean;
+  fitur_inventaris: boolean;
   created_at: string;
+}
+
+export type JenisMutasi = "masuk" | "keluar";
+
+/** Satu jenis barang inventaris (mis. merchandise). Stok = masuk − keluar, dihitung database. */
+export interface BarangInventaris {
+  id: string;
+  nama: string;
+  kategori: string | null;
+  satuan: string;
+  stok: number;
+  stok_minimum: number;
+  keterangan: string | null;
+  foto_path: string | null;
+  dibuat_oleh: string | null;
+  dibuat_at: string;
+  diubah_at: string;
+  dihapus_at: string | null;
+}
+
+/** Catatan barang masuk / keluar. */
+export interface MutasiInventaris {
+  id: string;
+  urut: number;
+  barang_id: string;
+  jenis: JenisMutasi;
+  jumlah: number;
+  tanggal: string;
+  /** keluar: untuk siapa / acara apa; masuk: dari mana */
+  pihak: string | null;
+  keterangan: string | null;
+  user_id: string | null;
+  dibuat_at: string;
+  diubah_at: string | null;
+  diubah_oleh: string | null;
+}
+
+export type AksiLogInventaris =
+  | "barang_tambah"
+  | "barang_ubah"
+  | "barang_hapus"
+  | "barang_pulihkan"
+  | "mutasi_tambah"
+  | "mutasi_ubah"
+  | "mutasi_hapus";
+
+/** Log CRUD inventaris (diisi trigger database). */
+export interface LogInventaris {
+  id: number;
+  aksi: AksiLogInventaris;
+  barang_id: string | null;
+  mutasi_id: string | null;
+  nama_barang: string;
+  jenis: JenisMutasi | null;
+  sebelum: Record<string, unknown> | null;
+  sesudah: Record<string, unknown> | null;
+  user_id: string | null;
+  dibuat_at: string;
 }
 
 export type TipeNaskahAi = "naskah" | "pertanyaan";
