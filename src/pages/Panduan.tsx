@@ -250,6 +250,35 @@ export default function Panduan() {
         </Langkah>
       </Bagian>
 
+      <Bagian judul="📦 Inventaris Barang">
+        <p className="text-sm text-gray-600">
+          Untuk mendata barang seperti merchandise promosi. Menu ini cuma muncul kalau divisi kamu
+          diizinkan admin memakainya.
+        </p>
+        <Langkah no={1}>
+          Tekan "+ Barang" untuk menambah jenis barang baru: ambil fotonya (kamera/galeri), isi nama,
+          pilih kategori & satuan, isi stok yang ada sekarang, dan keterangan kalau perlu.
+        </Langkah>
+        <Langkah no={2}>
+          Saat barang dibawa keluar (mis. untuk pameran atau tamu), buka barangnya lalu tekan
+          "Barang keluar" — atau tombol panah kecil di kartunya. Isi jumlahnya dengan tombol −/+,
+          pilih tanggal, dan tulis untuk siapa/acara apa. Barang datang? Pakai "Barang masuk".
+        </Langkah>
+        <Langkah no={3}>
+          Stok dihitung otomatis dari catatan masuk & keluar. Barang diberi tanda "Menipis" kalau
+          stoknya sudah di bawah batas yang diatur, dan "Habis" kalau sudah 0.
+        </Langkah>
+        <Langkah no={4}>
+          Salah catat? Buka catatannya di riwayat barang untuk mengubah atau menghapus. Hanya
+          pencatatnya sendiri (atau admin) yang bisa mengubah catatan itu.
+        </Langkah>
+        <Langkah no={5}>
+          Tab "Riwayat" berisi log semua aktivitas: siapa menambah, mengubah, menghapus barang,
+          dan mencatat masuk/keluar — lengkap dengan nilai sebelum & sesudahnya. Barang yang
+          terhapus bisa dipulihkan dari sana.
+        </Langkah>
+      </Bagian>
+
       <Bagian judul="🎨 Game Coret Tebak">
         <p className="text-sm text-gray-600">
           Game tebak gambar untuk 2–10 pemain. Buka lewat tombol <strong>🎮 Game</strong> di pojok

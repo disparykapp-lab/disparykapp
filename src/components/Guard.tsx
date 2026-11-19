@@ -55,6 +55,18 @@ export function RequireFiturKalender() {
   return <Outlet />;
 }
 
+export function RequireFiturInventaris() {
+  const { bisaInventaris, loading } = useAuth();
+
+  if (loading) return <Loading teks="Memeriksa akses..." />;
+
+  if (!bisaInventaris) {
+    return <Navigate to="/beranda" replace />;
+  }
+
+  return <Outlet />;
+}
+
 export function RequireFiturNaskahAi() {
   const { bisaNaskahAi, loading } = useAuth();
 

@@ -153,6 +153,15 @@ npm run dev
        mengunci `wajib_absen`, `tanggal_mulai_magang`, dan `tanggal_selesai_magang` supaya hanya
        admin yang bisa mengubahnya (sejak 0021 kunci ini hilang, sehingga pegawai bisa menandai
        dirinya "tidak wajib absen" lewat API). Aturan super admin dari 0022 tetap sama.
+   38. `0045_inventaris.sql` — Inventaris barang (merchandise promosi): kolom
+       `divisi.fitur_inventaris` (centang di Kelola → Divisi; admin selalu bisa), tabel
+       `inventaris_barang` (stok = masuk − keluar, tidak bisa diisi langsung),
+       `inventaris_mutasi` (catatan masuk/keluar), dan `inventaris_log` (log CRUD otomatis lewat
+       trigger, nilai sebelum → sesudah). Semua penulisan lewat RPC `inventaris_simpan_barang`,
+       `inventaris_hapus_barang` (sembunyikan, bisa dipulihkan), `inventaris_pulihkan_barang`,
+       `inventaris_simpan_mutasi`, `inventaris_hapus_mutasi` — stok tidak boleh minus di tanggal
+       mana pun; catatan hanya bisa diubah pencatat atau admin. Foto di bucket publik
+       `inventaris_foto` (folder per pengunggah, maks. 2 MB JPEG).
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

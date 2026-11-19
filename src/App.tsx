@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { PresenceProvider } from "./contexts/PresenceContext";
-import { RequireAdmin, RequireAuth, RequireFiturKalender, RequireFiturNaskahAi, RequireSuperAdmin } from "./components/Guard";
+import { RequireAdmin, RequireAuth, RequireFiturInventaris, RequireFiturKalender, RequireFiturNaskahAi, RequireSuperAdmin } from "./components/Guard";
 import AppLayout from "./components/AppLayout";
 import Loading from "./components/Loading";
 import PengarahGoogle from "./components/PengarahGoogle";
@@ -38,6 +38,8 @@ const GerbangLanding = lazy(() => import("./landing/GerbangLanding"));
 const GamePage = lazy(() => import("./features/game/GamePage"));
 // Game Siapa Penyusup juga terpisah, dan layar penuh (di luar AppLayout).
 const SiapaPenyusupPage = lazy(() => import("./features/siapa-penyusup/SiapaPenyusupPage"));
+// Inventaris hanya dipakai divisi tertentu — dimuat saat dibuka.
+const Inventaris = lazy(() => import("./pages/Inventaris"));
 
 export default function App() {
   return (
@@ -123,6 +125,17 @@ export default function App() {
 
               <Route element={<RequireFiturNaskahAi />}>
                 <Route path="/naskah-ai" element={<NaskahAi />} />
+              </Route>
+
+              <Route element={<RequireFiturInventaris />}>
+                <Route
+                  path="/inventaris"
+                  element={
+                    <Suspense fallback={<Loading teks="Memuat inventaris..." />}>
+                      <Inventaris />
+                    </Suspense>
+                  }
+                />
               </Route>
 
               <Route element={<RequireAdmin />}>

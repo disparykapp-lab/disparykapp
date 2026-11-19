@@ -21,7 +21,7 @@ const muatPopupGame = () => import("../features/game/PopupGame");
 const PopupGame = lazy(muatPopupGame);
 
 export default function Beranda() {
-  const { profile, bisaKalenderKonten, bisaNaskahAi } = useAuth();
+  const { profile, bisaKalenderKonten, bisaNaskahAi, bisaInventaris } = useAuth();
   const isAdmin = profile?.role === "admin";
   const [absensi, setAbsensi] = useState<Absensi | null>(null);
   const [loading, setLoading] = useState(true);
@@ -196,6 +196,7 @@ export default function Beranda() {
               <IconTile to="/kalender" iconSrc="/icon_kalender_konten.png" label="Kalender Konten" />
             )}
             {bisaNaskahAi && <IconTile to="/naskah-ai" iconSrc="/icon_naskahai.png" label="Naskah AI" />}
+            {bisaInventaris && <IconTile to="/inventaris" iconSrc="/icon_inventaris.png" label="Inventaris" />}
 
             {isAdmin && <IconTile to="/kelola" iconSrc="/icon_setting.png" label="Kelola" />}
             <IconTile to="/panduan" iconSrc="/icon_panduan.png" label="Panduan" />
