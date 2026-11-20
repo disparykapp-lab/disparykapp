@@ -8,6 +8,7 @@ import Loading from "./components/Loading";
 import PengarahGoogle from "./components/PengarahGoogle";
 import Login from "./pages/Login";
 import Daftar from "./pages/Daftar";
+import DaftarAdmin from "./pages/DaftarAdmin";
 import Beranda from "./pages/Beranda";
 import KelolaLanding from "./pages/admin/KelolaLanding";
 import Absen from "./pages/Absen";
@@ -90,6 +91,7 @@ export default function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/daftar" element={<Daftar />} />
+          <Route path="/daftar-admin/:kode" element={<DaftarAdmin />} />
 
           <Route element={<RequireAuth />}>
             <Route

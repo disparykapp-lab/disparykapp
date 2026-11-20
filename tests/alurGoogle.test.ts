@@ -82,3 +82,25 @@ test("bersihkanKembali: hanya jalur aplikasi", () => {
   assert.equal(bersihkanKembali(undefined), null);
   assert.equal(bersihkanKembali(42), null);
 });
+
+const KODE = "0123456789abcdef0123456789abcdef";
+const ADMIN: TujuanTersimpan = { ke: `/daftar-admin/${KODE}`, kembali: null };
+
+test("bacaTujuan: halaman daftar admin diterima hanya dengan kode yang sah", () => {
+  const simpan = (ke: string) => JSON.stringify({ ke, t: SEKARANG, kembali: "/kelola" });
+  assert.deepEqual(bacaTujuan(simpan(`/daftar-admin/${KODE}`), SEKARANG), ADMIN);
+  assert.equal(bacaTujuan(simpan("/daftar-admin/abc"), SEKARANG), null);
+  assert.equal(bacaTujuan(simpan(`/daftar-admin/${KODE}/x`), SEKARANG), null);
+  assert.equal(bacaTujuan(simpan("/daftar-admin/../kelola"), SEKARANG), null);
+});
+
+test("daftar admin: apa pun hasil Google, kembali ke halaman link undangan", () => {
+  for (const keadaan of [k({ adaSesi: true, modeDaftar: true }), k({ adaSesi: true, adaProfil: true }), k(), k({ modeDaftar: true })]) {
+    assert.deepEqual(arahSetelahGoogle(ADMIN, keadaan, "/"), { selesai: true, ke: `/daftar-admin/${KODE}` });
+  }
+  assert.deepEqual(arahSetelahGoogle(ADMIN, k({ adaSesi: true, modeDaftar: true }), `/daftar-admin/${KODE}`), { selesai: true, ke: null });
+});
+
+test("bersihkanKembali menolak halaman daftar admin", () => {
+  assert.equal(bersihkanKembali(`/daftar-admin/${KODE}`), null);
+});
