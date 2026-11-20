@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { Divisi, Profile } from "../types/database";
 import { hapusTujuanGoogle, simpanTujuanGoogle } from "../lib/alurGoogle";
-import type { Penolakan } from "../lib/alurGoogle";
+import type { Penolakan, TujuanGoogle } from "../lib/alurGoogle";
 
 interface AuthState {
   session: Session | null;
@@ -32,6 +32,8 @@ interface AuthState {
   loginGoogle: (opsi?: { pilihAkun?: boolean; kembali?: string | null }) => Promise<void>;
   /** Login Google untuk mengisi form pendaftaran (/daftar); sesi tanpa profil tidak di-logout otomatis */
   daftarGoogle: () => Promise<void>;
+  /** Login Google dari link undangan admin (/daftar-admin/:kode); kembali ke halaman link itu */
+  daftarAdminGoogle: (kode: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -121,6 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const { divisi: divisiTerkait, ...profileSaja } = data as ProfileDenganDivisi;
+    // sudah punya profil aktif → tidak sedang mendaftar lagi
+    setModeDaftar(false);
     setPenolakan(null);
     setSesiBerakhir(false);
     setProfile(profileSaja);
@@ -185,9 +189,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const daftarGoogle = useCallback(async () => {
+  /** Login Google tanpa profil (form pendaftaran); sesi tidak di-logout sebelum formnya selesai. */
+  const keGoogleUntukDaftar = useCallback(async (ke: TujuanGoogle) => {
     setModeDaftar(true);
-    simpanTujuanGoogle("/daftar");
+    simpanTujuanGoogle(ke);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -201,6 +206,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Halaman Google gagal dibuka. Periksa koneksi lalu coba lagi.");
     }
   }, []);
+
+  const daftarGoogle = useCallback(() => keGoogleUntukDaftar("/daftar"), [keGoogleUntukDaftar]);
+  const daftarAdminGoogle = useCallback((kode: string) => keGoogleUntukDaftar(`/daftar-admin/${kode}`), [keGoogleUntukDaftar]);
 
   const logout = useCallback(async () => {
     setModeDaftar(false);
@@ -218,7 +226,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (session?.user) {
-      await muatProfile(session.user.id, session.user.email ?? "");
+      // berhasil = pengguna ini sudah "dimuat" (mis. baru saja mendaftar), supaya
+      // event token berikutnya tidak menampilkan layar memeriksa lagi
+      if (await muatProfile(session.user.id, session.user.email ?? "")) userDimuat.current = session.user.id;
     }
   }, [session, muatProfile]);
 
@@ -243,6 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       superAdmin,
       loginGoogle,
       daftarGoogle,
+      daftarAdminGoogle,
       logout,
       refreshProfile,
     }),
@@ -260,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       superAdmin,
       loginGoogle,
       daftarGoogle,
+      daftarAdminGoogle,
       logout,
       refreshProfile,
     ]

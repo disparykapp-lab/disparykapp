@@ -29,6 +29,20 @@ export interface Divisi {
   created_at: string;
 }
 
+/** Link sekali pakai untuk mendaftar sebagai admin (migrasi 0046). */
+export interface UndanganAdmin {
+  id: string;
+  kode: string;
+  catatan: string | null;
+  dibuat_oleh: string | null;
+  dibuat_at: string;
+  berlaku_sampai: string;
+  dipakai_oleh: string | null;
+  dipakai_email: string | null;
+  dipakai_at: string | null;
+  dibatalkan_at: string | null;
+}
+
 export type JenisMutasi = "masuk" | "keluar";
 
 /** Satu jenis barang inventaris (mis. merchandise). Stok = masuk − keluar, dihitung database. */

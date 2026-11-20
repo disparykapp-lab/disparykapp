@@ -61,6 +61,27 @@ export default function PanduanAdmin() {
         </Catatan>
       </Bagian>
 
+      <Bagian judul="🛡️ Menambah Admin Lewat Link">
+        <Langkah no={1}>
+          Buka Kelola → Pegawai → <strong>+ Tambah</strong>, pilih tab <strong>"Admin (link)"</strong>. Isi
+          catatan untuk siapa (opsional), lalu tekan <strong>Buat link admin</strong>.
+        </Langkah>
+        <Langkah no={2}>
+          Tekan <strong>Bagikan link</strong> untuk mengirimnya lewat WhatsApp/aplikasi lain, atau
+          <strong> Salin</strong>. Calon admin cukup membuka link itu lalu masuk dengan akun Gmail-nya —
+          tidak perlu tanggal lahir, asal sekolah, tanggal magang, foto, atau persetujuan.
+        </Langkah>
+        <Langkah no={3}>
+          Link hanya berlaku <strong>sekali</strong>: begitu satu orang berhasil mendaftar, link langsung
+          mati. Link juga mati setelah 7 hari, kalau dibatalkan, atau kalau pembuatnya sudah bukan admin.
+          Link yang masih berlaku bisa dibagikan lagi atau dibatalkan dari tab yang sama.
+        </Langkah>
+        <Catatan>
+          Email yang sudah terdaftar (mis. pegawai magang) tidak bisa memakai link ini. Untuk
+          menjadikannya admin, buka kartunya di Kelola Pegawai dan ubah Peran ke Admin.
+        </Catatan>
+      </Bagian>
+
       <Bagian judul="📝 Pendaftaran Mandiri (/daftar)">
         <Langkah no={1}>
           Calon pegawai/peserta magang bisa mendaftar sendiri lewat tombol{" "}

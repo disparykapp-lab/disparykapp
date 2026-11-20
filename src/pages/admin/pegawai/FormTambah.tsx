@@ -1,9 +1,10 @@
 import { useId, useState } from "react";
-import { UserPlus } from "lucide-react";
+import { ShieldCheck, UserPlus } from "lucide-react";
 import Lembar from "../../../components/Lembar";
 import { useModal } from "../../../lib/useModal";
 import { cekPegawaiBaru } from "../../../lib/pegawaiAturan";
 import type { Divisi } from "../../../types/database";
+import PanelUndanganAdmin from "./PanelUndanganAdmin";
 
 export interface PegawaiBaru {
   nama: string;
@@ -12,7 +13,7 @@ export interface PegawaiBaru {
   jabatan: string | null;
 }
 
-/** Lembar "Tambah pegawai": daftarkan email Google pegawai. */
+/** Lembar "Tambah": daftarkan email Google pegawai, atau buat link pendaftaran admin. */
 export default function FormTambah({
   divisiList,
   divisiAwal,
@@ -25,6 +26,7 @@ export default function FormTambah({
   onSimpan: (p: PegawaiBaru) => Promise<void>;
 }) {
   const idJudul = useId();
+  const [jenis, setJenis] = useState<"pegawai" | "admin">("pegawai");
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
   const [divisiId, setDivisiId] = useState<string | null>(divisiAwal);
@@ -53,12 +55,42 @@ export default function FormTambah({
       idJudul={idJudul}
       onTutup={onTutup}
       judul={
-        <>
-          <UserPlus size={20} className="text-brand-masuk" aria-hidden="true" /> Tambah pegawai
-        </>
+        jenis === "admin" ? (
+          <>
+            <ShieldCheck size={20} className="text-brand-masuk" aria-hidden="true" /> Tambah admin
+          </>
+        ) : (
+          <>
+            <UserPlus size={20} className="text-brand-masuk" aria-hidden="true" /> Tambah pegawai
+          </>
+        )
       }
     >
-      <p className="-mt-1 text-xs text-gray-500">Daftarkan email Google pegawai — setelah itu dia bisa langsung masuk lewat "Masuk dengan Google".</p>
+      <div role="tablist" aria-label="Yang ditambahkan" className="grid grid-cols-2 gap-1.5 rounded-full bg-gray-100 p-1">
+        {(
+          [
+            ["pegawai", "Pegawai", UserPlus],
+            ["admin", "Admin (link)", ShieldCheck],
+          ] as const
+        ).map(([id, label, Ikon]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={jenis === id}
+            onClick={() => setJenis(id)}
+            className={`flex min-h-[40px] items-center justify-center gap-1.5 rounded-full text-sm font-semibold transition-colors ${jenis === id ? "bg-brand-masuk text-white" : "text-gray-500"}`}
+          >
+            <Ikon size={15} aria-hidden="true" /> {label}
+          </button>
+        ))}
+      </div>
+
+      {jenis === "admin" ? (
+        <PanelUndanganAdmin />
+      ) : (
+        <>
+      <p className="text-xs text-gray-500">Daftarkan email Google pegawai — setelah itu dia bisa langsung masuk lewat "Masuk dengan Google".</p>
       <label className="flex flex-col gap-1">
         <span className="text-xs font-semibold text-gray-600">Nama lengkap</span>
         <input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={100} placeholder="mis. Moch Farid Sahila" className={kelasIsian} />
@@ -100,6 +132,8 @@ export default function FormTambah({
       >
         {menyimpan ? "Mendaftarkan…" : "Daftarkan pegawai"}
       </button>
+        </>
+      )}
     </Lembar>
   );
 }

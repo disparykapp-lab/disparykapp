@@ -162,6 +162,12 @@ npm run dev
        `inventaris_simpan_mutasi`, `inventaris_hapus_mutasi` — stok tidak boleh minus di tanggal
        mana pun; catatan hanya bisa diubah pencatat atau admin. Foto di bucket publik
        `inventaris_foto` (folder per pengunggah, maks. 2 MB JPEG).
+   39. `0046_undangan_admin.sql` — pendaftaran admin lewat link sekali pakai: tabel
+       `undangan_admin` (hanya admin yang bisa melihat), RPC `buat_undangan_admin` /
+       `batal_undangan_admin` (admin), `cek_undangan_admin` (boleh tanpa login, hanya status),
+       dan `daftar_admin` (pendaftar yang sudah login Google → profil admin aktif). Link mati
+       setelah dipakai sekali, dibatalkan, lewat 7 hari, atau saat pembuatnya bukan admin lagi;
+       email yang sudah terdaftar ditolak. Halaman: `/daftar-admin/<kode>`.
 5. **Isi koordinat kantor asli** lewat menu *Kelola → Pengaturan Kantor* di aplikasi (atau `update pengaturan set kantor_lat=..., kantor_lng=... where id=1;`) — absen mode "Di Kantor" tidak akan berfungsi sebelum ini diisi.
 6. **Buat admin pertama:**
    - Login sekali ke aplikasi pakai akun Google admin (supaya baris muncul di `auth.users`).

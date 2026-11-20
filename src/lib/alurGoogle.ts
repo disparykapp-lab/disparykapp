@@ -7,7 +7,12 @@
 // Halaman asal disimpan di sessionStorage sebelum ke Google, lalu dibaca lagi
 // saat kembali.
 
-export type TujuanGoogle = "/login" | "/daftar";
+/** `/daftar-admin/<kode>` = halaman pendaftaran admin lewat link undangan (0046). */
+export type TujuanGoogle = "/login" | "/daftar" | `/daftar-admin/${string}`;
+
+const POLA_DAFTAR_ADMIN = /^\/daftar-admin\/[0-9a-f]{32}$/;
+export const tujuanDaftarAdmin = (ke: unknown): ke is `/daftar-admin/${string}` => typeof ke === "string" && POLA_DAFTAR_ADMIN.test(ke);
+const tujuanSah = (ke: unknown): ke is TujuanGoogle => ke === "/login" || ke === "/daftar" || tujuanDaftarAdmin(ke);
 
 export interface TujuanTersimpan {
   ke: TujuanGoogle;
@@ -26,19 +31,20 @@ export const KUNCI_TUJUAN_GOOGLE = "disparyk_tujuan_google";
 export const BATAS_TUJUAN_MS = 15 * 60 * 1000;
 
 const HALAMAN_PINTU = ["/", "/login", "/daftar"];
+const halamanPintu = (p: string) => HALAMAN_PINTU.includes(p) || p.startsWith("/daftar-admin/");
 
 /** Hanya jalur di dalam aplikasi (bukan halaman pintu) yang boleh jadi tujuan kembali. */
 export function bersihkanKembali(v: unknown): string | null {
   if (typeof v !== "string" || v.length > 300) return null;
   if (!v.startsWith("/") || v.startsWith("//") || v.includes("\\")) return null;
-  return HALAMAN_PINTU.includes(v.split(/[?#]/)[0]) ? null : v;
+  return halamanPintu(v.split(/[?#]/)[0]) ? null : v;
 }
 
 export function bacaTujuan(mentah: string | null, sekarang: number): TujuanTersimpan | null {
   if (!mentah) return null;
   try {
     const v = JSON.parse(mentah) as { ke?: unknown; t?: unknown; kembali?: unknown };
-    if (v.ke !== "/login" && v.ke !== "/daftar") return null;
+    if (!tujuanSah(v.ke)) return null;
     if (typeof v.t !== "number") return null;
     const umur = sekarang - v.t;
     if (umur < 0 || umur >= BATAS_TUJUAN_MS) return null;
@@ -91,10 +97,14 @@ export function arahSetelahGoogle(
 ): { selesai: boolean; ke: string | null } {
   if (!tujuan || k.loading) return { selesai: false, ke: null };
 
+  // Pendaftaran admin: apa pun hasilnya (berhasil, sudah punya akun, ditolak, batal),
+  // halaman link undangan itu sendiri yang menjelaskan langkah berikutnya.
+  if (tujuanDaftarAdmin(tujuan.ke)) return { selesai: true, ke: tujuan.ke === pathname ? null : tujuan.ke };
+
   let target: string;
   if (k.adaSesi && k.adaProfil) {
     // Berhasil masuk. Kalau sudah di dalam aplikasi, biarkan.
-    if (!HALAMAN_PINTU.includes(pathname)) return { selesai: true, ke: null };
+    if (!halamanPintu(pathname)) return { selesai: true, ke: null };
     target = tujuan.kembali ?? "/beranda";
   } else if (k.adaSesi && k.modeDaftar) {
     target = "/daftar";
