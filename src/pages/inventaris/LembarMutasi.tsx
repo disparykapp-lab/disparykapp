@@ -16,7 +16,9 @@ import {
 } from "../../lib/inventarisAturan";
 import { tanggalWIB } from "../../lib/tinjauAbsenAturan";
 import type { BarangInventaris, JenisMutasi, MutasiInventaris } from "../../types/database";
-import { Avatar, FotoBarang, PenghitungJumlah, StripTanggal } from "./bersama";
+import StripTanggal from "../../components/StripTanggal";
+import { tambahHari } from "../../lib/izinAturan";
+import { Avatar, FotoBarang, PenghitungJumlah } from "./bersama";
 import { GAYA_JENIS, KELAS_BARIS_CHIP, kelasChip } from "./gaya";
 
 /** Form catat barang masuk/keluar — juga untuk mengubah / menghapus catatan lama. */
@@ -223,7 +225,12 @@ export default function LembarMutasi({
             <span className="text-sm font-semibold text-brand-text">
               Tanggal <span className="font-normal text-gray-400">· {labelTanggal(form.tanggal, hariIni)}</span>
             </span>
-            <StripTanggal nilai={form.tanggal} hariIni={hariIni} onUbah={(t) => ubah("tanggal", t)} />
+            <StripTanggal
+              nilai={form.tanggal}
+              hariIni={hariIni}
+              min={tambahHari(hariIni, -BATAS_INVENTARIS.hariMundur)}
+              onUbah={(t) => ubah("tanggal", t)}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
