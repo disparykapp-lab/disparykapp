@@ -257,10 +257,13 @@ export default function PanduanAdmin() {
           tetap "Admin" seperti biasa).
         </Langkah>
         <Langkah no={2}>
-          <strong>Koreksi Absensi:</strong> pilih pegawai dan tanggal, lalu atur langsung jam
-          masuk/pulang, mode (Di Kantor/Dinas Luar), status, akurasi GPS, IP, dan keterangan —
-          baik untuk mengubah data yang sudah ada maupun membuat baris baru untuk tanggal yang
-          belum pernah diabsen. Ini menggantikan koreksi manual lewat SQL Editor.
+          <strong>Koreksi Absensi:</strong> cari pegawai, pilih tanggal di strip minggu (ketuk nama
+          bulan untuk lompat jauh), lalu atur langsung jam masuk/pulang sampai detik (tekan ▲/▼,
+          tahan untuk cepat, atau ketik angkanya), lokasi (Di Kantor/Dinas Luar), foto masuk/pulang
+          (dari <strong>Kamera</strong> atau <strong>Galeri</strong>), status, akurasi GPS, IP, dan
+          keterangan — baik untuk mengubah data yang sudah ada maupun membuat baris baru untuk
+          tanggal yang belum pernah diabsen. Foto baru baru diunggah saat <strong>Simpan</strong>
+          ditekan. Ini menggantikan koreksi manual lewat SQL Editor.
         </Langkah>
         <Langkah no={3}>
           <strong>Akses Super Admin:</strong> jadikan atau cabut status super admin untuk akun

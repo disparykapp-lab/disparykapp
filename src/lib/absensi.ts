@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import type { Absensi, ModeAbsen, StatusAbsen } from "../types/database";
+import { pathFotoKoreksi, type JenisSesi } from "./koreksiAbsenAturan";
 
 export function tanggalHariIniWIB(): string {
   const sekarang = new Date();
@@ -121,6 +122,8 @@ export interface ParamSuperAdminAbsensi {
   keluarLng: number | null;
   status: StatusAbsen;
   catatanKlarifikasi: string | null;
+  /** Path foto akhir (0047). Tidak diisi = foto yang sudah ada dibiarkan. */
+  foto?: { masuk: string | null; keluar: string | null };
 }
 
 /** Buat atau timpa satu baris absensi siapa saja — khusus super admin. */
@@ -142,9 +145,43 @@ export async function superAdminSetAbsensi(p: ParamSuperAdminAbsensi): Promise<A
     p_keluar_lng: p.keluarLng,
     p_status: p.status,
     p_catatan_klarifikasi: p.catatanKlarifikasi,
+    ...(p.foto ? { p_ubah_foto: true, p_masuk_foto_path: p.foto.masuk, p_keluar_foto_path: p.foto.keluar } : {}),
   });
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (p.foto && (error.code === "PGRST202" || /could not find the function/i.test(error.message))) {
+      throw new Error("Simpan foto koreksi butuh migrasi 0047_koreksi_foto_absen.sql — jalankan dulu di Supabase SQL Editor.");
+    }
+    throw new Error(error.message);
+  }
   return data as Absensi;
+}
+
+/** Unggah foto koreksi (sudah dikompres) ke folder pegawai yang dikoreksi — khusus super admin (0047). */
+export async function unggahFotoKoreksi(userId: string, tanggal: string, jenis: JenisSesi, blob: Blob): Promise<string> {
+  const path = pathFotoKoreksi(userId, tanggal, jenis, crypto.randomUUID());
+  const { error } = await supabase.storage.from("absensi").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+  if (error) {
+    const ditolak = /row-level security|unauthorized|403/i.test(error.message);
+    throw new Error(
+      ditolak
+        ? "Unggah foto ditolak. Pastikan migrasi 0047_koreksi_foto_absen.sql sudah dijalankan dan akunmu super admin."
+        : "Gagal mengunggah foto. Periksa koneksi internet lalu coba lagi."
+    );
+  }
+  return path;
+}
+
+/** Buang file foto yang batal dipakai (mis. simpan koreksi gagal). Gagal dibuang = dibiarkan, nanti ikut retensi. */
+export async function buangFileFotoAbsen(paths: string[]): Promise<void> {
+  if (!paths.length) return;
+  await supabase.storage.from("absensi").remove(paths);
+}
+
+/** URL sementara (5 menit) foto absen siapa saja — untuk admin. */
+export async function urlFotoAbsenAdmin(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage.from("absensi").createSignedUrl(path, 300);
+  if (error || !data) return null;
+  return data.signedUrl;
 }
 
 /** Hapus satu baris absensi secara permanen — khusus super admin. */
